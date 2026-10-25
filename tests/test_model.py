@@ -1,0 +1,85 @@
+"""Stage 0 smoke and structure tests for model.py.
+
+These check that the data model imports and can be constructed and that its
+enumerations match the committed specification. They assert no predicate semantics.
+"""
+
+import dataclasses
+
+import model
+
+
+def test_evidence_states_are_exactly_the_six_in_the_spec():
+    assert [s.value for s in model.EvidenceState] == [
+        "Present", "Absent", "Unknown", "Incomplete", "Ambiguous", "Contradictory",
+    ]
+
+
+def test_dispositions_match_the_spec():
+    assert {d.value for d in model.Disposition} == {
+        "not_affected", "affected", "fixed", "under_investigation",
+    }
+
+
+def test_provenance_ladder_has_p0_to_p3_in_order():
+    assert [p.name for p in model.ProvenanceLevel] == ["P0", "P1", "P2", "P3"]
+    assert model.ProvenanceLevel.P0 < model.ProvenanceLevel.P3
+
+
+def test_provenance_roles_are_named():
+    assert {r.name for r in model.ProvenanceRole} == {
+        "PROV_SBOM", "PROV_DECL", "PROV_CORR", "PROV_REACH", "PROV_HAZ",
+    }
+
+
+def test_artifact_kinds_match_the_spec():
+    assert {k.value for k in model.ArtifactKind} == {"source", "binary", "container", "other"}
+
+
+def test_can_construct_a_finding():
+    component = model.Component(
+        name="example-lib",
+        version="1.0.0",
+        purl="pkg:generic/example-lib@1.0.0",
+        ecosystem="generic",
+        hashes=[model.Hash(algorithm="SHA-256", value="00")],
+        identifier_variants=[model.IdentifierVariant(kind="purl", value="pkg:generic/example-lib@1.0.0")],
+    )
+    vulnerability = model.Vulnerability(
+        id="CVE-0000-0000",
+        locus=model.VulnerableCodeLocus(symbols=["example.fn"], granularity="symbol"),
+    )
+    document = model.SourceDocument(doc_id="doc-1", integrity=model.Integrity(signature_verified=None))
+    item = model.EvidenceItem(
+        dimension="INV",
+        state=model.EvidenceState.UNKNOWN,
+        source_doc="doc-1",
+        locator="/components",
+    )
+    finding = model.Finding(
+        component=component,
+        vulnerability=vulnerability,
+        disposition=model.Disposition.NOT_AFFECTED,
+        justification=model.Justification(model.JustificationType.COMPONENT_NOT_PRESENT),
+        evidence=[item],
+        scope=model.Scope(product_id="product-1", artifact_kind=model.ArtifactKind.CONTAINER),
+        source_documents={"doc-1": document},
+    )
+    assert finding.evidence[0].source_doc in finding.source_documents
+
+
+def test_provenance_lives_on_source_documents_not_on_items_or_findings():
+    """Structure check: there is no global PROV field, and evidence items refer to
+    their source document by id rather than carrying provenance themselves."""
+    for cls in (model.Finding, model.EvidenceItem, model.SourceDocument):
+        assert not [f.name for f in dataclasses.fields(cls) if f.name.lower().startswith("prov")]
+    doc_fields = {f.name for f in dataclasses.fields(model.SourceDocument)}
+    assert {"producer", "tool_name", "tool_version", "created", "generation_context",
+            "method", "integrity"} <= doc_fields
+    integrity_fields = {f.name for f in dataclasses.fields(model.Integrity)}
+    assert integrity_fields == {
+        "artifact_digest_binding", "signature", "signature_verified",
+        "trust_anchor_id", "signed_coverage",
+    }
+    item_fields = {f.name for f in dataclasses.fields(model.EvidenceItem)}
+    assert {"dimension", "state", "value_or_ref", "source_doc", "locator", "derived_from"} <= item_fields
