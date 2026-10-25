@@ -273,3 +273,99 @@ def test_structurally_invalid_documents_raise_with_a_locator(mutator, locator):
     with pytest.raises(InvalidDocumentError) as caught:
         parse_spdx(_mutated(mutator))
     assert caught.value.locator == locator
+
+
+# ---- G3a ----------------------------------------------------------------------------------
+
+def test_parser_never_verifies_or_establishes_coverage():
+    integrity = parse_spdx(FIXTURE)[0].integrity
+    assert integrity.signature_verified is None
+    assert integrity.established_coverage is None
+    assert integrity.signed_coverage == []
+
+
+# ---- G12: subjects and defined references -------------------------------------------------
+
+SUBJECTS = FIXTURES / "subjects.json"
+
+
+def test_document_ref_is_the_document_spdxid():
+    assert parse_spdx(FIXTURE)[0].document_ref == "SPDXRef-DOCUMENT"
+
+
+def test_subject_from_describes_in_committed_fixture_is_kept_per_declaration():
+    document, components = parse_spdx(FIXTURE)
+    assert [(s.ref, s.declared_via) for s in document.subjects] == [
+        ("SPDXRef-app", "documentDescribes"), ("SPDXRef-app", "DESCRIBES"),
+    ]
+    assert all(s.listed_as_component for s in document.subjects)
+    assert meta(document, "subject_declaration_mismatch") == []
+    assert document.other_defined_refs == {"SPDXRef-file1": "file"}
+
+
+def test_every_declaration_is_kept_with_its_own_mechanism_and_locator():
+    document, components = parse_spdx(SUBJECTS)
+    assert [(s.ref, s.declared_via, s.locator) for s in document.subjects] == [
+        ("SPDXRef-appA", "documentDescribes", "#/packages/0"),
+        ("SPDXRef-appB", "documentDescribes", "#/packages/1"),
+        ("SPDXRef-appA", "DESCRIBES", "#/packages/0"),
+        ("SPDXRef-lib", "DESCRIBED_BY", "#/packages/2"),
+    ]
+    assert len({s.ref for s in document.subjects}) == 3  # distinct subjects = distinct refs
+    names = {c.bom_ref: c for c in components}
+    for subject in document.subjects:
+        assert subject.component is names[subject.ref]
+
+
+def test_file_and_unresolved_declarations_do_not_become_components_or_subjects():
+    document, components = parse_spdx(SUBJECTS)
+    records = {r["ref"]: r for r in meta(document, "subject_declarations")}
+    assert records["SPDXRef-fileA"]["resolved_as"] == "file"
+    assert records["SPDXRef-ghost"]["resolved_as"] == "unresolved"
+    assert "SPDXRef-fileA" not in [c.bom_ref for c in components]
+    assert "SPDXRef-ghost" not in [s.ref for s in document.subjects]
+    assert len(components) == 3
+
+
+def test_mechanism_disagreement_is_reported_and_not_resolved():
+    document, _ = parse_spdx(SUBJECTS)
+    mismatch = meta(document, "subject_declaration_mismatch")
+    assert {"ref": "SPDXRef-lib", "declared_only_via": "relationships"} in mismatch
+    assert {"ref": "SPDXRef-appB", "declared_only_via": "documentDescribes"} in mismatch
+    assert not [m for m in mismatch if m["ref"] == "SPDXRef-appA"]  # declared by both mechanisms
+    assert len(document.subjects) == 4  # none dropped to "resolve" the disagreement
+
+
+def test_files_and_snippets_populate_the_registry_without_adding_inventory():
+    document, components = parse_spdx(SUBJECTS)
+    assert document.other_defined_refs == {"SPDXRef-fileA": "file", "SPDXRef-snip1": "snippet"}
+    assert meta(document, "defined_ref_locators") == {
+        "SPDXRef-fileA": "#/files/0", "SPDXRef-snip1": "#/snippets/0",
+    }
+    assert [c.bom_ref for c in components] == ["SPDXRef-appA", "SPDXRef-appB", "SPDXRef-lib"]
+    assert "SPDXRef-DOCUMENT" not in document.other_defined_refs  # the document node is document_ref
+
+
+def test_relationship_endpoints_resolve_distinctly_and_missing_stays_unresolved():
+    document, components = parse_spdx(SUBJECTS)
+
+    def resolve(ref):  # test-local; models intended registry use, implements no rule
+        if ref == document.document_ref:
+            return "document"
+        if ref in [c.bom_ref for c in components]:
+            return "component"
+        return document.other_defined_refs.get(ref)
+
+    assert resolve("SPDXRef-DOCUMENT") == "document"
+    assert resolve("SPDXRef-appA") == "component"
+    assert resolve("SPDXRef-fileA") == "file"
+    assert resolve("SPDXRef-snip1") == "snippet"
+    assert resolve("SPDXRef-missing") is None
+
+
+def test_duplicate_spdxid_across_sections_is_reported_not_resolved():
+    data = json.loads(SUBJECTS.read_text(encoding="utf-8"))
+    data["files"].append({"SPDXID": "SPDXRef-appA", "fileName": "./dup"})
+    document, _ = parse_spdx(encode(data))
+    assert [c["ref"] for c in meta(document, "defined_ref_conflicts")] == ["SPDXRef-appA"]
+    assert "SPDXRef-appA" not in document.other_defined_refs  # the first (package) definition wins

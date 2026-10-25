@@ -33,9 +33,9 @@ Provenance is recorded **once per source document** (an SBOM file, a reachabilit
 A source document records:
 - `producer`, `producer_class`, `tool_name`, `tool_version`, `created`
 - `generation_context` and `method`
-- `integrity {artifact_digest_binding, signature, signature_verified, trust_anchor_id, signed_coverage}`
+- `integrity {artifact_digest_binding, signature, signature_verified, trust_anchor_id, signed_coverage, established_coverage}`
 
-Here `signed_coverage` is the set of locators the signature actually covers.
+Here `signed_coverage` is the coverage declared by the input: an assertion, not proof that the signature verifies or that the asserted locators were actually signed. `established_coverage` is the locator coverage that a verification result establishes: `None` means not established or unavailable, `[]` means verification established an empty set of covered locators, and otherwise it contains only the locators the verification result establishes as covered.
 
 ### 1.2 Ladder and effective provenance
 
@@ -50,6 +50,12 @@ Here `signed_coverage` is the set of locators the signature actually covers.
 1. An item with no `source_doc` is P0.
 2. Otherwise EP is the level of its source document.
 3. **Signed-coverage cap.** This step applies only to a source document that carries a signature. If the document has no signature, the cap does not apply; the absence of a signature neither lowers EP through this step nor satisfies any requirement of the level table (P2 still requires the document to declare a digest equal to `S.artifact_digest`). For a signed document, the cap applies only when the signed coverage relevant to the calculation is *established* under the verification assumptions (A5) and the item's locator lies outside that established coverage; EP is then capped at `min(level, P1)`. A coverage declaration read from the document itself (for example by a parser reading a signature object) is an unverified claim: it is not cryptographic verification and not proof of what the signature actually covers. A coverage that is unavailable or only claimed is not treated as an empty, verified coverage set, so it does not trigger the cap; it likewise does not establish that any locator lies inside verified coverage, and P3 remains governed solely by its definition in the level table (`signature_verified` for the content in question).
+
+   *Establishing signed coverage (clarifies step 3).* Coverage is **established** only when the document carries a signature, that signature is reported verified under the verification assumptions (A5; `signature_verified` is True), and the verification result states which locators it establishes as covered (`established_coverage`). A coverage declaration read from the document (`signed_coverage`) is a claim and never becomes established coverage by being parsed.
+   - *No signature:* the cap does not apply.
+   - *Signature present, `signature_verified` is None or False:* coverage is not established. The cap does not apply on the basis of declared coverage, and P3 is not granted merely because a signature object exists.
+   - *Signature present, `signature_verified` is True:* coverage is established only for the locators the verification result actually establishes as covered (`established_coverage`; an empty set means no locator is covered). The cap applies to an item whose locator lies outside them, and a locator inside them is the "content in question" for P3.
+   - *Coverage unavailable, ambiguous, or not attributable to a verified signature* (`established_coverage` is None, or the result does not identify which signatures it verified): it is not treated as verified-empty coverage, as complete coverage, or as proof that any locator is covered. The cap does not apply, and P3 is not granted for content whose required coverage is not established.
 4. For a derived item, EP ≤ the minimum EP of its inputs, unless the derivation occurred inside the signed analysis.
 5. Where several documents jointly support one conclusion, the relevant provenance is the **minimum** EP across them.
 
@@ -212,7 +218,7 @@ Under the preconditions above, GEN relative to C is therefore exactly one of `ma
 - **A2.** Normalization is deterministic and versioned.
 - **A3.** V supplies enough identifiers to enumerate variants. This assumption holds only when C is established per §1's VEX-target-component rule; when no subcomponent identifies C, this assumption does not apply and MATCH is extracted as Unknown per that rule.
 - **A4.** Completeness is a self-assertion by the generator.
-- **A5.** Trust anchors are configured externally. The spec consumes only a boolean.
+- **A5.** Trust anchors are configured externally. The spec consumes the verification result `signature_verified` (a boolean) and, when available, the verified locator coverage `established_coverage` that the result establishes.
 - **A6.** S identifies the artifact unambiguously.
 - **A7.** Declared generation method and ecosystem coverage are read from document metadata. They are self-asserted.
 

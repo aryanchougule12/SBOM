@@ -469,3 +469,135 @@ def test_structurally_invalid_documents_raise_with_a_locator(mutator, locator):
         parse_cyclonedx(_mutated(mutator))
     assert caught.value.locator == locator
     assert locator in str(caught.value) or locator == "#"
+
+
+# ---- G3a: parsers declare coverage but never establish it --------------------------------
+
+@pytest.mark.parametrize("name", ["signed_root.json", "signed_component_only.json", "complete_composition.json"])
+def test_parser_never_verifies_or_establishes_coverage(name):
+    integrity = parse_cyclonedx(FIXTURES / name)[0].integrity
+    assert integrity.signature_verified is None
+    assert integrity.established_coverage is None
+
+
+def test_multi_signature_document_keeps_declared_union_and_establishes_nothing():
+    data = load("signed_component_only.json")
+    data["signature"] = {"algorithm": "RS256", "value": "cm9vdA"}
+    document = parse_cyclonedx(encode(data))[0]
+    assert document.integrity.signed_coverage == ["#", "#/components/0"]
+    assert document.integrity.established_coverage is None
+    assert document.integrity.signature_verified is None
+
+
+# ---- G12: subject and defined-reference registry ----------------------------------------
+
+DEFINED = FIXTURES / "defined_refs.json"
+
+
+def test_subject_comes_from_metadata_component_and_is_not_a_listed_component():
+    document, components = parse_cyclonedx(COMPLETE)
+    [subject] = document.subjects
+    assert subject.ref == "app-1"
+    assert subject.locator == "#/metadata/component"
+    assert subject.declared_via == "metadata.component"
+    assert subject.component.name == "example-app"
+    assert subject.listed_as_component is False
+    assert "app-1" not in [c.bom_ref for c in components]
+    assert document.document_ref is None  # CycloneDX has no document node
+
+
+def test_no_metadata_component_means_no_subject():
+    data = load("complete_composition.json")
+    del data["metadata"]["component"]
+    document = parse_cyclonedx(encode(data))[0]
+    assert document.subjects == []
+
+
+def test_subject_listed_in_components_is_flagged():
+    data = load("complete_composition.json")
+    data["components"].append(copy.deepcopy(data["metadata"]["component"]))
+    document, components = parse_cyclonedx(encode(data))
+    [subject] = document.subjects
+    assert subject.listed_as_component is True
+    assert "app-1" in [c.bom_ref for c in components]
+    # bom-ref must be unique in a CycloneDX document, so the repeat is reported, not resolved
+    [conflict] = meta(document, "defined_ref_conflicts")
+    assert conflict["ref"] == "app-1"
+    assert {conflict["kind"], conflict["conflicts_with_kind"]} == {"subject", "listed_component"}
+
+
+def test_defined_refs_cover_every_schema_declared_component_or_service_location():
+    document, components = parse_cyclonedx(DEFINED)
+    assert document.other_defined_refs == {
+        "app-ancestor": "pedigree_component",
+        "subject-nested": "nested_component",
+        "lib-1-variant": "pedigree_component",
+        "svc-1": "service",
+        "svc-1-nested": "nested_service",
+        "tool-1": "tool_component",
+        "tool-1-nested": "nested_component",
+        "tool-svc": "tool_service",
+        "ann-svc": "annotator_service",
+        "form-comp": "formulation_component",
+        "form-svc": "formulation_service",
+        "decl-comp": "declaration_target_component",
+        "decl-svc": "declaration_target_service",
+    }
+    locators = meta(document, "defined_ref_locators")
+    assert set(locators) == set(document.other_defined_refs)
+    assert locators["svc-1-nested"] == "#/services/0/services/0"
+    assert locators["decl-svc"] == "#/declarations/targets/services/0"
+    assert locators["subject-nested"] == "#/metadata/component/components/0"
+
+
+def test_registering_a_ref_does_not_add_inventory():
+    document, components = parse_cyclonedx(DEFINED)
+    assert [c.bom_ref for c in components] == ["lib-1", "lib-1-child"]
+    for ref in document.other_defined_refs:
+        assert ref not in [c.bom_ref for c in components]
+    assert "app-1" not in document.other_defined_refs  # the subject is not double-registered
+    assert "lib-1" not in document.other_defined_refs  # listed components are not re-registered
+
+
+def test_declarations_are_only_registered_for_spec_1_6():
+    data = load("defined_refs.json")
+    data["specVersion"] = "1.5"
+    document = parse_cyclonedx(encode(data))[0]
+    assert "decl-comp" not in document.other_defined_refs
+    assert "decl-svc" not in document.other_defined_refs
+    assert "svc-1" in document.other_defined_refs
+
+
+def test_duplicate_bom_ref_is_reported_not_resolved():
+    data = load("defined_refs.json")
+    data["services"].append({"bom-ref": "lib-1", "name": "clash"})
+    document = parse_cyclonedx(encode(data))[0]
+    conflicts = meta(document, "defined_ref_conflicts")
+    assert [c["ref"] for c in conflicts] == ["lib-1"]
+    assert "lib-1" not in document.other_defined_refs  # first definition (the component) wins
+
+
+def _resolve_endpoint(document, components, ref):
+    """Test-local helper (not part of the product): where does a dependency endpoint
+    name resolve? Models the intended use of the registry without implementing N4."""
+    if any(s.ref == ref for s in document.subjects):
+        return "subject"
+    if ref in [c.bom_ref for c in components]:
+        return "component"
+    if ref in document.other_defined_refs:
+        return document.other_defined_refs[ref]
+    return None
+
+
+def test_dependency_endpoints_resolve_distinctly_and_missing_stays_unresolved():
+    document, components = parse_cyclonedx(DEFINED)
+    nodes = meta(document, "declared_dependency_edges")
+    targets = {edge["to"] if "to" in edge else edge.get("target") for edge in nodes}
+    resolved = {ref: _resolve_endpoint(document, components, ref)
+                for ref in ["app-1", "lib-1", "svc-1", "svc-1-nested", "subject-nested", "truly-missing"]}
+    assert resolved == {
+        "app-1": "subject", "lib-1": "component", "svc-1": "service",
+        "svc-1-nested": "nested_service", "subject-nested": "nested_component",
+        "truly-missing": None,
+    }
+    assert "truly-missing" in targets

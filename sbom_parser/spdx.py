@@ -44,8 +44,39 @@ predicate, aggregation, effective-provenance or verdict logic lives here.
 ``format``, ``spec_version``, ``spdx_id``, ``document_name``, ``document_namespace``,
 ``data_license``, ``creators``, ``created_raw``, ``license_list_version``,
 ``document_describes``, ``component_index``, ``declared_relationships``,
-``composition_records``, ``unextracted_top_level_fields``, ``assertion_status``,
-``locator_convention``.
+``composition_records``, ``defined_ref_locators``, ``defined_ref_conflicts``,
+``subject_declarations``, ``subject_declaration_mismatch``,
+``unextracted_top_level_fields``, ``assertion_status``, ``locator_convention``.
+
+Subject and defined references
+------------------------------
+Checked against the official SPDX 2.3 JSON schema (``spdx/spdx-spec``, tag ``v2.3`` and
+branch ``support/2.3``): ``documentDescribes`` lists the SPDX IDs of packages, files
+and/or snippets the document describes; the 2.3.1 revision marks it deprecated as a
+duplicate of the ``SPDXRef-DOCUMENT DESCRIBES`` relationship; ``DESCRIBES`` and
+``DESCRIBED_BY`` are both relationship types; packages, files and snippets each carry an
+``SPDXID``.
+
+* ``SourceDocument.document_ref`` is the document's own ``SPDXID``. It is the document
+  node, never a package or a target component.
+* ``SourceDocument.subjects`` has one ``DocumentSubject`` for every declaration that
+  resolves to a *listed package*: each ``documentDescribes`` entry, each
+  ``<document> DESCRIBES <x>`` relationship and each ``<x> DESCRIBED_BY <document>``
+  relationship, in that order (document order within each source). Nothing is merged or
+  dropped: a package declared by both mechanisms appears once per declaration, and
+  distinct subjects are the distinct ``ref`` values. ``locator`` is the package
+  locator; ``declared_via`` names the mechanism; ``listed_as_component`` is true.
+* ``declared_metadata["subject_declarations"]`` records every declaration with its own
+  locator and what it resolved to (``package``, ``file``, ``snippet`` or
+  ``unresolved``), so file/snippet or unresolved descriptions are visible rather than
+  silently dropped. ``subject_declaration_mismatch`` lists references declared by only one
+  of the two mechanisms when both are used; the parser reports the disagreement and does
+  not choose between them.
+* ``SourceDocument.other_defined_refs`` registers the ``SPDXID`` of every ``files`` entry
+  (kind ``file``) and ``snippets`` entry (kind ``snippet``), so a relationship endpoint
+  naming them is declared rather than dangling. This does not make them components and
+  asserts nothing about the inventory. An ``SPDXID`` declared more than once is
+  registered once and the extra declaration goes to ``defined_ref_conflicts``.
 
 Completeness
 ------------
@@ -88,7 +119,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from model import Component, Hash, SourceDocument
+from model import Component, DocumentSubject, Hash, SourceDocument
 from sbom_parser._common import (
     ASSERTION_STATUS,
     LOCATOR_CONVENTION,
@@ -185,6 +216,7 @@ def parse_spdx(source: SBOMSource) -> tuple[SourceDocument, list[Component]]:
             }
         )
     declared["declared_relationships"] = canonical_json(relationships)
+    _read_subjects_and_refs(data, document, components, component_index, relationships, declared)
     declared["composition_records"] = "[]"
     declared["unextracted_top_level_fields"] = canonical_json(
         unextracted_keys(data, _HANDLED_TOP_LEVEL)
@@ -221,6 +253,99 @@ def _read_creation_info(
         document.tool_version = version
     if len(people) == 1 and people[0][1]:
         document.producer_class, document.producer = people[0]
+
+
+def _read_subjects_and_refs(
+    data: dict[str, Any],
+    document: SourceDocument,
+    components: list[Component],
+    component_index: list[dict[str, Any]],
+    relationships: list[dict[str, Any]],
+    declared: dict[str, str],
+) -> None:
+    """Fill ``document_ref``, ``subjects`` and ``other_defined_refs`` (no inference).
+
+    Distinct declarations are all kept: one ``DocumentSubject`` per declaration that
+    resolves to a listed package, in declaration order (``documentDescribes`` first,
+    then relationships in document order). Distinct subjects are distinct ``ref`` values.
+    Declarations that resolve to a file or snippet, or to nothing, are not turned into
+    components; they are recorded in ``declared_metadata["subject_declarations"]``.
+    """
+    document_ref = declared["spdx_id"]
+    document.document_ref = document_ref
+
+    known: dict[str, tuple[str, str]] = {document_ref: ("document", ptr())}
+    conflicts: list[dict[str, str]] = []
+    packages: dict[str, tuple[Component, str]] = {}
+
+    def note(ref: str, kind: str, locator: str) -> bool:
+        if ref in known:
+            prev_kind, prev_locator = known[ref]
+            conflicts.append(
+                {"ref": ref, "kind": kind, "locator": locator,
+                 "conflicts_with_kind": prev_kind, "conflicts_with_locator": prev_locator}
+            )
+            return False
+        known[ref] = (kind, locator)
+        return True
+
+    for component, entry in zip(components, component_index):
+        if note(entry["spdx_id"], "package", entry["locator"]):
+            packages[entry["spdx_id"]] = (component, entry["locator"])
+
+    registry: dict[str, str] = {}
+    locators: dict[str, str] = {}
+    for section, kind in (("files", "file"), ("snippets", "snippet")):
+        for index, item in enumerate(get_list(data, section, ptr())):
+            locator = ptr(section, index)
+            ref = require_str(require_object(item, locator, kind), "SPDXID", locator)
+            if note(ref, kind, locator):
+                registry[ref] = kind
+                locators[ref] = locator
+
+    declarations: list[tuple[str, str, str]] = []  # (ref, declared_via, declaration locator)
+    for index, ref in enumerate(str_list(data, "documentDescribes", ptr())):
+        declarations.append((ref, "documentDescribes", ptr("documentDescribes", index)))
+    for rel in relationships:
+        if rel["raw_relationship"] == "DESCRIBES" and rel["source"] == document_ref:
+            declarations.append((rel["target"], "DESCRIBES", rel["locator"]))
+        elif rel["raw_relationship"] == "DESCRIBED_BY" and rel["target"] == document_ref:
+            declarations.append((rel["source"], "DESCRIBED_BY", rel["locator"]))
+
+    records: list[dict[str, Any]] = []
+    for ref, via, declaration_locator in declarations:
+        if ref in packages:
+            component, package_locator = packages[ref]
+            document.subjects.append(
+                DocumentSubject(
+                    ref=ref, component=component, locator=package_locator,
+                    declared_via=via, listed_as_component=True,
+                )
+            )
+            resolved = "package"
+        elif ref in known and known[ref][0] in ("file", "snippet"):
+            resolved = known[ref][0]
+        else:
+            resolved = "unresolved"
+        records.append(
+            {"ref": ref, "declared_via": via, "declaration_locator": declaration_locator,
+             "resolved_as": resolved}
+        )
+
+    by_documentdescribes = {r["ref"] for r in records if r["declared_via"] == "documentDescribes"}
+    by_relationship = {r["ref"] for r in records if r["declared_via"] != "documentDescribes"}
+    mismatch: list[dict[str, str]] = []
+    if by_documentdescribes and by_relationship:  # both mechanisms used: report any disagreement
+        mismatch = [{"ref": ref, "declared_only_via": "documentDescribes"}
+                    for ref in sorted(by_documentdescribes - by_relationship)]
+        mismatch += [{"ref": ref, "declared_only_via": "relationships"}
+                     for ref in sorted(by_relationship - by_documentdescribes)]
+
+    document.other_defined_refs = registry
+    declared["defined_ref_locators"] = canonical_json(locators)
+    declared["defined_ref_conflicts"] = canonical_json(conflicts)
+    declared["subject_declarations"] = canonical_json(records)
+    declared["subject_declaration_mismatch"] = canonical_json(mismatch)
 
 
 def _split_tool(text: str) -> tuple[str, Optional[str]]:

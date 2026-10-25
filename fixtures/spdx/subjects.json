@@ -1,0 +1,31 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "multi-subject-sbom",
+  "documentNamespace": "https://example.com/spdx/multi-subject-1",
+  "creationInfo": {
+    "created": "2026-01-15T10:00:00Z",
+    "creators": ["Tool: example-spdx-tool-1.4.0"]
+  },
+  "documentDescribes": ["SPDXRef-appA", "SPDXRef-appB", "SPDXRef-fileA", "SPDXRef-ghost"],
+  "packages": [
+    {"SPDXID": "SPDXRef-appA", "name": "app-a", "versionInfo": "1.0.0", "downloadLocation": "NOASSERTION"},
+    {"SPDXID": "SPDXRef-appB", "name": "app-b", "versionInfo": "2.0.0", "downloadLocation": "NOASSERTION"},
+    {"SPDXID": "SPDXRef-lib", "name": "some-lib", "versionInfo": "3.0.0", "downloadLocation": "NOASSERTION"}
+  ],
+  "files": [
+    {"SPDXID": "SPDXRef-fileA", "fileName": "./a.bin", "checksums": [{"algorithm": "SHA1", "checksumValue": "da39a3ee5e6b4b0d3255bfef95601890afd80709"}]}
+  ],
+  "snippets": [
+    {"SPDXID": "SPDXRef-snip1", "snippetFromFile": "SPDXRef-fileA", "ranges": []}
+  ],
+  "relationships": [
+    {"spdxElementId": "SPDXRef-DOCUMENT", "relationshipType": "DESCRIBES", "relatedSpdxElement": "SPDXRef-appA"},
+    {"spdxElementId": "SPDXRef-lib", "relationshipType": "DESCRIBED_BY", "relatedSpdxElement": "SPDXRef-DOCUMENT"},
+    {"spdxElementId": "SPDXRef-appA", "relationshipType": "DEPENDS_ON", "relatedSpdxElement": "SPDXRef-lib"},
+    {"spdxElementId": "SPDXRef-appA", "relationshipType": "CONTAINS", "relatedSpdxElement": "SPDXRef-fileA"},
+    {"spdxElementId": "SPDXRef-fileA", "relationshipType": "GENERATED_FROM", "relatedSpdxElement": "SPDXRef-snip1"},
+    {"spdxElementId": "SPDXRef-appA", "relationshipType": "DEPENDS_ON", "relatedSpdxElement": "SPDXRef-missing"}
+  ]
+}

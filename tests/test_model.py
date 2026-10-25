@@ -138,7 +138,7 @@ def test_provenance_lives_on_source_documents_not_on_items_or_findings():
     integrity_fields = {f.name for f in dataclasses.fields(model.Integrity)}
     assert integrity_fields == {
         "artifact_digest_binding", "signature", "signature_verified",
-        "trust_anchor_id", "signed_coverage",
+        "trust_anchor_id", "signed_coverage", "established_coverage",
     }
     item_fields = {f.name for f in dataclasses.fields(model.EvidenceItem)}
     assert {"dimension", "state", "value_or_ref", "source_doc", "locator", "derived_from"} <= item_fields
@@ -179,3 +179,121 @@ def test_justification_type_is_only_the_predicate_supported_subset():
             with pytest.raises(ValueError):
                 model.JustificationType(raw)
             assert model.Justification(justification=raw).justification == raw
+
+
+# ---- G3a: declared vs established signature coverage ------------------------------------
+
+def test_integrity_defaults_leave_coverage_unestablished():
+    integrity = model.Integrity()
+    assert integrity.signed_coverage == []  # nothing declared
+    assert integrity.established_coverage is None  # not established (distinct from [])
+    assert integrity.signature_verified is None
+
+
+def test_established_coverage_distinguishes_none_empty_and_populated():
+    unestablished = model.Integrity()
+    verified_empty = model.Integrity(signature_verified=True, established_coverage=[])
+    verified_some = model.Integrity(signature_verified=True, established_coverage=["#/components/0"])
+    assert unestablished.established_coverage is None
+    assert verified_empty.established_coverage == [] and verified_empty.established_coverage is not None
+    assert verified_some.established_coverage == ["#/components/0"]
+
+
+def test_signed_coverage_and_established_coverage_are_independent_fields():
+    integrity = model.Integrity(signed_coverage=["#"])
+    assert integrity.established_coverage is None  # declaring coverage establishes nothing
+    other = model.Integrity()
+    assert other.signed_coverage == [] and integrity.signed_coverage == ["#"]  # no shared default list
+
+
+def test_established_coverage_annotation_is_optional_list_of_str():
+    hints = typing.get_type_hints(model.Integrity)
+    assert hints["established_coverage"] == typing.Optional[list[str]]
+    assert hints["signed_coverage"] == list[str]
+
+
+# ---- G2: per-finding document roles ------------------------------------------------------
+
+def test_document_role_members_are_exactly_the_approved_set():
+    assert {r.value for r in model.DocumentRole} == {
+        "primary_sbom", "corroborating", "vex_statement", "reachability_report", "other",
+    }
+    assert all(isinstance(r.value, str) for r in model.DocumentRole)
+
+
+def _finding(**kwargs):
+    return model.Finding(
+        component=model.Component(name="c"),
+        vulnerability=model.Vulnerability(id="CVE-0000-0002"),
+        disposition=model.Disposition.NOT_AFFECTED,
+        justification=model.Justification("component_not_present"),
+        evidence=[],
+        scope=model.Scope(product_id="p"),
+        **kwargs,
+    )
+
+
+def test_finding_document_roles_default_is_empty_meaning_no_role():
+    finding = _finding()
+    assert finding.document_roles == {}
+    assert typing.get_type_hints(model.Finding)["document_roles"] == dict[str, model.DocumentRole]
+    assert _finding().document_roles is not finding.document_roles  # no shared default dict
+
+
+def test_one_shared_source_document_can_have_different_roles_in_different_findings():
+    shared = model.SourceDocument(doc_id="doc-1", integrity=model.Integrity())
+    before = dataclasses.replace(shared)
+    one = _finding(source_documents={"doc-1": shared},
+                   document_roles={"doc-1": model.DocumentRole.PRIMARY_SBOM})
+    two = _finding(source_documents={"doc-1": shared},
+                   document_roles={"doc-1": model.DocumentRole.CORROBORATING})
+    three = _finding(source_documents={"doc-1": shared})
+    assert one.source_documents["doc-1"] is two.source_documents["doc-1"] is shared
+    assert one.document_roles["doc-1"] is model.DocumentRole.PRIMARY_SBOM
+    assert two.document_roles["doc-1"] is model.DocumentRole.CORROBORATING
+    assert "doc-1" not in three.document_roles  # absent entry = no role; not defaulted to anything
+    assert shared == before  # assigning roles did not touch the document
+
+
+def test_roles_are_not_stored_on_the_source_document():
+    names = {f.name for f in dataclasses.fields(model.SourceDocument)}
+    assert not {n for n in names if "role" in n}
+
+
+# ---- G12: document subject and defined-reference registry --------------------------------
+
+def test_source_document_subject_fields_default_to_empty():
+    document = model.SourceDocument(doc_id="d", integrity=model.Integrity())
+    assert document.subjects == []
+    assert document.document_ref is None
+    assert document.other_defined_refs == {}
+    assert model.SourceDocument(doc_id="e", integrity=model.Integrity()).subjects is not document.subjects
+
+
+def test_document_subject_fields():
+    assert [f.name for f in dataclasses.fields(model.DocumentSubject)] == [
+        "ref", "component", "locator", "declared_via", "listed_as_component",
+    ]
+    assert typing.get_type_hints(model.DocumentSubject)["ref"] == typing.Optional[str]
+
+
+def test_a_subject_with_no_ref_and_not_listed_is_representable():
+    subject = model.DocumentSubject(
+        ref=None, component=model.Component(name="app"), locator="#/metadata/component",
+        declared_via="metadata.component", listed_as_component=False,
+    )
+    assert subject.ref is None and subject.listed_as_component is False
+
+
+# ---- spec text ----------------------------------------------------------------------------
+
+SPEC = Path(__file__).resolve().parent.parent / "docs" / "formal_specification_v0.2.md"
+
+
+def test_spec_documents_established_coverage_and_the_a5_amendment():
+    text = SPEC.read_text(encoding="utf-8")
+    assert "established_coverage" in text
+    assert "Establishing signed coverage" in text
+    assert "an assertion, not proof" in text
+    a5_line = next(l for l in text.splitlines() if l.startswith("- **A5.** Trust anchors"))
+    assert "`signature_verified`" in a5_line and "`established_coverage`" in a5_line

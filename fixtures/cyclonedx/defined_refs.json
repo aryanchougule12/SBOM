@@ -1,0 +1,89 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-15T10:00:00Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "bom-ref": "tool-1",
+          "name": "sbom-tool",
+          "version": "1.0",
+          "components": [
+            {"type": "library", "bom-ref": "tool-1-nested", "name": "tool-lib", "version": "0.1"}
+          ]
+        }
+      ],
+      "services": [{"bom-ref": "tool-svc", "name": "scan-service"}]
+    },
+    "component": {
+      "type": "application",
+      "bom-ref": "app-1",
+      "name": "example-app",
+      "version": "2.0.0",
+      "hashes": [{"alg": "SHA-256", "content": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"}],
+      "components": [
+        {"type": "library", "bom-ref": "subject-nested", "name": "bundled-lib", "version": "1.0"}
+      ],
+      "pedigree": {
+        "ancestors": [
+          {"type": "application", "bom-ref": "app-ancestor", "name": "example-app-old", "version": "1.0.0"}
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "lib-1",
+      "name": "listed-lib",
+      "version": "1.0.0",
+      "components": [
+        {"type": "library", "bom-ref": "lib-1-child", "name": "listed-child", "version": "0.1"}
+      ],
+      "pedigree": {
+        "variants": [
+          {"type": "library", "bom-ref": "lib-1-variant", "name": "listed-lib-fork", "version": "1.0.0-fork"}
+        ]
+      }
+    }
+  ],
+  "services": [
+    {
+      "bom-ref": "svc-1",
+      "name": "payments",
+      "services": [{"bom-ref": "svc-1-nested", "name": "ledger"}]
+    }
+  ],
+  "annotations": [
+    {
+      "bom-ref": "ann-1",
+      "subjects": ["lib-1"],
+      "annotator": {"service": {"bom-ref": "ann-svc", "name": "reviewer"}},
+      "timestamp": "2026-01-15T10:00:00Z",
+      "text": "checked"
+    }
+  ],
+  "formulation": [
+    {
+      "bom-ref": "form-1",
+      "components": [{"type": "library", "bom-ref": "form-comp", "name": "build-dep", "version": "3"}],
+      "services": [{"bom-ref": "form-svc", "name": "ci"}]
+    }
+  ],
+  "declarations": {
+    "targets": {
+      "components": [{"type": "library", "bom-ref": "decl-comp", "name": "target-lib"}],
+      "services": [{"bom-ref": "decl-svc", "name": "target-svc"}]
+    }
+  },
+  "dependencies": [
+    {
+      "ref": "app-1",
+      "dependsOn": ["lib-1", "svc-1", "svc-1-nested", "subject-nested", "tool-1", "form-comp", "truly-missing"]
+    },
+    {"ref": "lib-1", "dependsOn": ["lib-1-child"], "provides": ["decl-svc"]}
+  ]
+}

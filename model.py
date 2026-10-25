@@ -89,6 +89,23 @@ class ArtifactKind(str, Enum):
     UNKNOWN = "unknown"
 
 
+class DocumentRole(str, Enum):
+    """The role a source document plays for one particular ``Finding`` (§1.2 roles).
+
+    Roles are relative to a finding (``Finding.document_roles``). ``CORROBORATING``
+    means only that the document was *explicitly designated as offered for
+    corroboration*; it does not by itself establish artifact binding, sufficient
+    provenance, ecosystem coverage, or that any generation-method criterion of §4.3
+    is met. No role is implied by a document merely being present.
+    """
+
+    PRIMARY_SBOM = "primary_sbom"
+    CORROBORATING = "corroborating"
+    VEX_STATEMENT = "vex_statement"
+    REACHABILITY_REPORT = "reachability_report"
+    OTHER = "other"
+
+
 class ProvenanceLevel(IntEnum):
     """The provenance ladder P0-P3 (§1.2).
 
@@ -247,9 +264,28 @@ class Scope:
 class Integrity:
     """``integrity {...}`` of a source document (§1.1).
 
-    ``signature_verified`` is ``None`` when verification was not attempted or its
-    outcome is unknown; the model does not interpret it.
-    ``signed_coverage`` is the set of locators the signature actually covers.
+    ``signature_verified`` is the verification result: ``None`` when verification was
+    not attempted or its outcome is unknown, ``False`` when it was attempted and did
+    not verify, ``True`` when it verified. The model does not interpret it.
+
+    ``signed_coverage`` records the coverage *declared by the input*. It is an
+    assertion: it is neither proof that a signature verifies nor proof that the
+    asserted coverage was actually signed. With several signatures it is the union of
+    the declared claims and is not attributable to any one of them.
+
+    ``established_coverage`` is the verified locator coverage that a verification result
+    establishes (§1.2 step 3, A5):
+
+    * ``None``: verified coverage is not established or is unavailable (the default,
+      and the only value parsing ever produces).
+    * ``[]``: verification explicitly established an empty set of covered locators.
+    * a non-empty list: only locators that the verification result establishes as
+      covered, for the signature(s) it verified.
+
+    Parsing alone never sets ``signature_verified`` to ``True`` and never populates
+    ``established_coverage``; both are set only by a verification step, which no parser
+    performs. ``signed_coverage`` must never be copied into ``established_coverage``
+    without such a result.
     """
 
     artifact_digest_binding: Optional[str] = None
@@ -257,6 +293,32 @@ class Integrity:
     signature_verified: Optional[bool] = None
     trust_anchor_id: Optional[str] = None
     signed_coverage: list[str] = field(default_factory=list)
+    established_coverage: Optional[list[str]] = None
+
+
+@dataclass
+class DocumentSubject:
+    """The artifact an SBOM document describes (its *subject*), distinct from the list
+    of components the document inventories.
+
+    ``ref`` is the identifier the document itself uses to point at the subject
+    (CycloneDX ``bom-ref``, SPDX ``SPDXID``); ``None`` when the input gives none.
+    ``component`` carries the subject's name, version, identifiers and hashes as
+    declared. ``locator`` is a JSON Pointer in URI-fragment form (for example
+    ``#/metadata/component`` or ``#/packages/0``). ``declared_via`` names the input
+    construct that declared the subject (``metadata.component``, ``documentDescribes``,
+    ``DESCRIBES`` or ``DESCRIBED_BY``). ``listed_as_component`` is True when the same
+    entity is also an entry of the document's component list (an SPDX described
+    package), False when it is not (CycloneDX ``metadata.component``).
+
+    A subject is not evidence that any other component is, or is not, present.
+    """
+
+    ref: Optional[str]
+    component: Component
+    locator: str
+    declared_via: str
+    listed_as_component: bool
 
 
 @dataclass
@@ -271,6 +333,22 @@ class SourceDocument:
     document (e.g. declared ecosystem or artifact coverage referenced by §4.3 and
     assumption A7). Their structure is unspecified until a later stage defines how
     they are extracted; nothing here interprets them.
+
+    Reference registry (for resolving dependency endpoints; it asserts nothing about
+    inventory):
+
+    * ``subjects``: the artifact(s) the document describes (see ``DocumentSubject``).
+    * ``document_ref``: the document's own node reference (SPDX ``SPDXID`` of the
+      document, e.g. ``SPDXRef-DOCUMENT``); ``None`` for formats without one. It is not
+      a package or a target component.
+    * ``other_defined_refs``: ``reference -> kind`` for objects the document declares in
+      schema-supported locations that are neither listed in the ordinary component
+      collection nor the subject (for example CycloneDX services and components nested
+      under the subject, SPDX files and snippets). Registering a reference only means a
+      dependency endpoint naming it is declared rather than dangling. It does not add the
+      object to the inventory, does not assert inventory completeness, and is not
+      evidence that any target component is present. Source locators for these
+      references are kept in ``declared_metadata["defined_ref_locators"]``.
     """
 
     doc_id: str
@@ -283,6 +361,9 @@ class SourceDocument:
     method: Optional[str] = None
     integrity: Integrity = field(default_factory=Integrity)
     declared_metadata: dict[str, str] = field(default_factory=dict)
+    subjects: list[DocumentSubject] = field(default_factory=list)
+    document_ref: Optional[str] = None
+    other_defined_refs: dict[str, str] = field(default_factory=dict)
 
 
 # --------------------------------------------------------------------------
@@ -329,6 +410,12 @@ class Finding:
 
     ``source_documents`` is the registry that ``EvidenceItem.source_doc`` refers
     to (§1: "plus source documents and evidence items that carry provenance").
+
+    ``document_roles`` maps a source-document id to the role that document plays *for
+    this finding*. It lives here, not on ``SourceDocument``, because one shared
+    ``SourceDocument`` can play different roles for different findings. An absent entry
+    means no role is established: a document's presence in ``source_documents`` never
+    implies that it is the primary SBOM or that it corroborates anything.
     """
 
     component: Optional[Component]
@@ -339,3 +426,4 @@ class Finding:
     scope: Scope
     source_documents: dict[str, SourceDocument] = field(default_factory=dict)
     product: Optional[Component] = None
+    document_roles: dict[str, DocumentRole] = field(default_factory=dict)
