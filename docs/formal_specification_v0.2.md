@@ -116,7 +116,7 @@ Each dimension names a *subject*. The state describes the observation status of 
 - **Step 4.** Verdict = the minimum ceiling over all triggered rules (Supported > Weak > Insufficient). If none triggered and all Supported conditions hold, the verdict is Supported.
 - **Step 5.** Output every triggered code.
 
-**Rationale grammar:** `<CLASS>[CODE,…]: text`, where CLASS is `CONTRADICTORY_EVIDENCE`, `CANNOT_BE_ESTABLISHED`, or `BELOW_BAR`. These are sub-reasons, not verdicts. Codes are ordered by class rank (CONTRADICTORY, then CANNOT, then BELOW), then by rule ID ascending, then alphabetically within per-hazard codes. Free text is not evaluated.
+**Rationale grammar:** `<CLASS>[CODE,…]: text`, where CLASS is `CONTRADICTORY_EVIDENCE`, `CANNOT_BE_ESTABLISHED`, or `BELOW_BAR`. These are sub-reasons, not verdicts. Codes are ordered by class rank (CONTRADICTORY, then CANNOT, then BELOW). After ordering by rationale class rank, order rule identifiers by their alphabetic rule-family prefix and then by their numeric suffix interpreted as an integer, never by lexicographic ordering of the entire identifier. For codes within the same rule, order per-hazard codes alphabetically. Free text is not evaluated.
 
 **D-5 (explicitly outside the procedure).** Whether Weak (or Supported) is acceptable to a downstream consumer is a policy question. The procedure defines no acceptance threshold and no function from verdict to action.
 

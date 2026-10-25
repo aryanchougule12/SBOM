@@ -9,7 +9,7 @@ This addendum is a changelog for the N16 correction. The changes below are prese
 - **P3 rule for separate corroborating documents:** per §1.2 rule 5 (minimum-across-documents), a separate document relied upon to reach Supported must independently meet the P3 floor. It cannot borrow the primary SBOM's provenance.
 - **NT10 updated:** to remain Supported, the separate content-based layer scan must have effective provenance P3.
 - **NT14 added:** the otherwise equivalent separate layer scan at P1 produces Weak with N16.
-- §4.4 (Supported conditions) now requires, for binary or container artifacts, a content-based basis whose EP is P3 when it is a separate corroborating document, and that none of N1–N16 is triggered.
+- §4.4 (Supported conditions) now requires, for binary or container artifacts, a content-based basis whose EP is P3 when it is a separate corroborating document, and that none of N1–N17 is triggered.
 
 ## `PROV_CORR` clarification
 
