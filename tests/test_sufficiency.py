@@ -14,6 +14,9 @@ def test_stub_is_honestly_unimplemented():
         sufficiency.evaluate_finding(None)  # type: ignore[arg-type]
 
 
-@pytest.mark.skip(reason="pending: the Step 0-5 decision procedure and aggregation cases AG1-AG5 are not implemented")
+@pytest.mark.skip(
+    reason="pending: the Step 0-5 decision procedure is not implemented "
+    "(aggregation AG1-AG5 is covered in tests/test_aggregation.py)"
+)
 def test_decision_procedure_and_aggregation():
     raise AssertionError("placeholder")
