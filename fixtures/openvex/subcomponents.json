@@ -1,0 +1,41 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://example.com/vex/subcomponents",
+  "author": "Example Security Team",
+  "timestamp": "2026-01-15T10:00:00Z",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {"name": "CVE-2026-0100"},
+      "products": [
+        {
+          "@id": "pkg:oci/example-app@sha256%3Adef",
+          "identifiers": {
+            "purl": "pkg:oci/example-app@sha256%3Adef",
+            "cpe23": "cpe:2.3:a:Example:App:2.0:*:*:*:*:*:*:*"
+          },
+          "hashes": {"sha-256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"},
+          "subcomponents": [
+            {
+              "@id": "pkg:maven/org.apache.logging.log4j/log4j-core@2.4",
+              "identifiers": {
+                "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.4",
+                "cpe23": "cpe:2.3:a:Apache:Log4j:2.4:*:*:*:*:*:*:*",
+                "cpe22": "cpe:/a:apache:log4j:2.4"
+              },
+              "hashes": {"sha-1": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"}
+            },
+            {"@id": "example-sub-only-an-id"},
+            {"identifiers": {"purl": "pkg:npm/Left-Pad@1.3.0"}}
+          ]
+        },
+        {
+          "@id": "pkg:oci/other-app@sha256%3Aghi",
+          "identifiers": {"purl": "pkg:oci/other-app@sha256%3Aghi"}
+        }
+      ],
+      "status": "not_affected",
+      "justification": "component_not_present"
+    }
+  ]
+}

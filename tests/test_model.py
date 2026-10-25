@@ -101,6 +101,32 @@ def test_can_construct_a_finding():
     assert finding.evidence[0].source_doc in finding.source_documents
 
 
+def test_finding_separates_the_target_component_from_the_product():
+    hints = typing.get_type_hints(model.Finding)
+    assert hints["component"] == typing.Optional[model.Component]  # C; None = unresolved
+    assert hints["product"] == typing.Optional[model.Component]
+    finding = model.Finding(
+        component=None,
+        vulnerability=model.Vulnerability(id="CVE-0000-0001"),
+        disposition=model.Disposition.NOT_AFFECTED,
+        justification=model.Justification("component_not_present"),
+        evidence=[],
+        scope=model.Scope(product_id="p"),
+        product=model.Component(name="", bom_ref="p"),
+    )
+    assert finding.component is None  # unresolved is representable and distinct from the product
+    assert finding.product is not None
+    default = model.Finding(
+        component=model.Component(name="c"),
+        vulnerability=model.Vulnerability(id="CVE-0000-0001"),
+        disposition=model.Disposition.NOT_AFFECTED,
+        justification=model.Justification("component_not_present"),
+        evidence=[],
+        scope=model.Scope(product_id="p"),
+    )
+    assert default.product is None  # product is optional for findings not built from a product entry
+
+
 def test_provenance_lives_on_source_documents_not_on_items_or_findings():
     """Structure check: there is no global PROV field, and evidence items refer to
     their source document by id rather than carrying provenance themselves."""

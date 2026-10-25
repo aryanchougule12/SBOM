@@ -20,6 +20,8 @@ F = (C, V, D, J, E), with finding-level scope S, plus source documents and evide
 | **S** | `product_id`, `artifact_digest[]`, `artifact_kind ∈ {source, binary, container, other}`, `version`, `build_id`, `deployment_config_id`, `environment_assumptions`, `valid_interval`. The claim holds only for S. |
 | **E** | Evidence items `(dimension, state, value_or_ref, source_doc, locator, derived_from[])`. |
 
+For a finding derived from a VEX statement, C is the specific component that the finding's evidence concerns, not merely the product under assessment. When a product entry in the statement identifies one or more relevant subcomponents, those subcomponents identify the target component C for the corresponding findings. When no subcomponent identifies C, the target component cannot be established from the VEX statement alone. In that case, MATCH (§4.1) must be extracted as Unknown, with an explicit reason that no component-level target was identified. The product's identifiers must not be treated as identifier variants of C.
+
 Req(J) denotes whichever of Req(component_not_present) (§4) or Req(vulnerable_code_not_in_execute_path) (§5) applies to a given justification J; the notation is used generically in places that apply to both.
 
 A justification value outside the two predicates this specification defines (§4, §5) is not evaluated by either Req(J); it must be preserved as received and explicitly reported as unsupported by the pipeline stage that encounters it, never silently coerced into one of the two supported predicates.
@@ -47,7 +49,7 @@ Here `signed_coverage` is the set of locators the signature actually covers.
 **Effective provenance EP(item):**
 1. An item with no `source_doc` is P0.
 2. Otherwise EP is the level of its source document.
-3. If the item's locator lies outside `signed_coverage`, EP is capped at `min(level, P1)`.
+3. **Signed-coverage cap.** This step applies only to a source document that carries a signature. If the document has no signature, the cap does not apply; the absence of a signature neither lowers EP through this step nor satisfies any requirement of the level table (P2 still requires the document to declare a digest equal to `S.artifact_digest`). For a signed document, the cap applies only when the signed coverage relevant to the calculation is *established* under the verification assumptions (A5) and the item's locator lies outside that established coverage; EP is then capped at `min(level, P1)`. A coverage declaration read from the document itself (for example by a parser reading a signature object) is an unverified claim: it is not cryptographic verification and not proof of what the signature actually covers. A coverage that is unavailable or only claimed is not treated as an empty, verified coverage set, so it does not trigger the cap; it likewise does not establish that any locator lies inside verified coverage, and P3 remains governed solely by its definition in the level table (`signature_verified` for the content in question).
 4. For a derived item, EP ≤ the minimum EP of its inputs, unless the derivation occurred inside the signed analysis.
 5. Where several documents jointly support one conclusion, the relevant provenance is the **minimum** EP across them.
 
@@ -118,9 +120,10 @@ Each dimension names a *subject*. The state describes the observation status of 
 - **Step 2.** Compute dimension states, applying the derivation rules.
 - **Step 3.** Evaluate **all** rules in the predicate's table, with no short-circuiting.
 - **Step 4.** Verdict = the minimum ceiling over all triggered rules (Supported > Weak > Insufficient). If none triggered and all Supported conditions hold, the verdict is Supported.
+  - **No-rule default.** If no rule in the predicate's rule table triggers, but not every Supported condition (§4.4 or §5.5) holds, the verdict is Insufficient. This default applies only when no rule's ceiling already governs the outcome. Its rationale class is `NO_RULE_APPLIES`, which has no rule code because no specific rule triggered; it is emitted only when this default applies and never co-occurs with codes belonging to a triggered rule.
 - **Step 5.** Output every triggered code.
 
-**Rationale grammar:** `<CLASS>[CODE,…]: text`, where CLASS is `CONTRADICTORY_EVIDENCE`, `CANNOT_BE_ESTABLISHED`, or `BELOW_BAR`. These are sub-reasons, not verdicts. Codes are ordered by class rank (CONTRADICTORY, then CANNOT, then BELOW). After ordering by rationale class rank, order rule identifiers by their alphabetic rule-family prefix and then by their numeric suffix interpreted as an integer, never by lexicographic ordering of the entire identifier. For codes within the same rule, order per-hazard codes alphabetically. Free text is not evaluated.
+**Rationale grammar:** `<CLASS>[CODE,…]: text`, where CLASS is `CONTRADICTORY_EVIDENCE`, `CANNOT_BE_ESTABLISHED`, `BELOW_BAR`, or `NO_RULE_APPLIES` (the class of the Step 4 no-rule default, which has no rule code, so its code list is empty). These are sub-reasons, not verdicts. Codes are ordered by class rank (CONTRADICTORY, then CANNOT, then BELOW). After ordering by rationale class rank, order rule identifiers by their alphabetic rule-family prefix and then by their numeric suffix interpreted as an integer, never by lexicographic ordering of the entire identifier. For codes within the same rule, order per-hazard codes alphabetically. Free text is not evaluated.
 
 **D-5 (explicitly outside the procedure).** Whether Weak (or Supported) is acceptable to a downstream consumer is a policy question. The procedure defines no acceptance threshold and no function from verdict to action.
 
@@ -207,7 +210,7 @@ Under the preconditions above, GEN relative to C is therefore exactly one of `ma
 
 - **A1.** The SBOM parses correctly.
 - **A2.** Normalization is deterministic and versioned.
-- **A3.** V supplies enough identifiers to enumerate variants.
+- **A3.** V supplies enough identifiers to enumerate variants. This assumption holds only when C is established per §1's VEX-target-component rule; when no subcomponent identifies C, this assumption does not apply and MATCH is extracted as Unknown per that rule.
 - **A4.** Completeness is a self-assertion by the generator.
 - **A5.** Trust anchors are configured externally. The spec consumes only a boolean.
 - **A6.** S identifies the artifact unambiguously.

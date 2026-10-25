@@ -318,14 +318,24 @@ class EvidenceItem:
 class Finding:
     """F = (C, V, D, J, E) with finding-level scope S.
 
+    ``component`` is **C**, the specific component the finding's evidence concerns
+    (§1). It is ``None`` when the target component is *unresolved*, i.e. cannot be
+    established from the input; ``None`` is never to be read as "no component" or
+    filled in from the product. ``product`` is the product under assessment (what a VEX
+    statement asserts a status for). The two are distinct entities: the product's
+    identifiers are never identifier variants of C, and neither is derived from the
+    other. ``product`` is ``None`` for findings that were not built from a product
+    entry.
+
     ``source_documents`` is the registry that ``EvidenceItem.source_doc`` refers
     to (§1: "plus source documents and evidence items that carry provenance").
     """
 
-    component: Component
+    component: Optional[Component]
     vulnerability: Vulnerability
     disposition: Disposition
     justification: Justification
     evidence: list[EvidenceItem]
     scope: Scope
     source_documents: dict[str, SourceDocument] = field(default_factory=dict)
+    product: Optional[Component] = None

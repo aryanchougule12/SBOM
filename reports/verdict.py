@@ -22,7 +22,10 @@ class Verdict(str, Enum):
 
 
 class RationaleClass(str, Enum):
-    """Rationale class tokens of §3 (sub-reasons, not verdicts)."""
+    """Rationale class tokens of §3 (sub-reasons, not verdicts).
+
+    NOTE: the specification (docs/formal_specification_v0.2.md §3) defines a fourth class, NO_RULE_APPLIES, not yet reflected here — this must be added when rationale generation is implemented (Stage 3/4).
+    """
 
     CONTRADICTORY_EVIDENCE = "CONTRADICTORY_EVIDENCE"
     CANNOT_BE_ESTABLISHED = "CANNOT_BE_ESTABLISHED"

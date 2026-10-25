@@ -36,12 +36,24 @@ silently lose claims.) A ``Finding`` is the document's **claim**, not a verified
   rejected as invalid, so ``""`` always means "absent".
 * ``justification.asserted_by`` is the document ``author``. ``justification.statement``
   is the statement's ``impact_statement``.
-* ``component`` holds the product's identity: ``purl`` from ``identifiers.purl``, ``cpe``
+* ``product`` holds the product's identity: ``purl`` from ``identifiers.purl``, ``cpe``
   from ``identifiers.cpe22``/``cpe23``, ``hashes`` from ``hashes`` (key = algorithm as
   written), and ``bom_ref`` from the product ``@id``. ``name`` is ``""`` because OpenVEX
   products carry no name. A product ``@id`` is NOT parsed as a purl. A product must have
-  an ``@id`` or at least one ``identifiers`` entry. ``subcomponents`` are preserved in
-  the statement-level ``products`` metadata but yield no separate ``Finding``.
+  an ``@id`` or at least one ``identifiers`` entry.
+* ``component`` is the **target component C** (specification §1), which is NOT the
+  product. In OpenVEX v0.2.0 a product entry may carry ``subcomponents``, a list of
+  component structs (``@id``, ``identifiers``, ``hashes``) nested *inside that product
+  entry*; they identify the components "subject of the VEX statement". Each
+  (statement, product, subcomponent) tuple yields one ``Finding`` whose ``component`` is
+  that subcomponent, read with the same rules as a product and carrying only its own
+  identifiers and variants, and whose ``product`` is the enclosing product. A product with
+  N subcomponents therefore yields N findings (none is dropped); a product with no
+  subcomponents yields one finding with ``component = None``: the target is unresolved
+  and the product is never used in its place. Product and subcomponent identifiers are
+  never merged, compared or assumed equivalent. ``declared_metadata["finding_targets"]``
+  of the statement-level document lists, in finding order, each finding's
+  ``product_locator`` and ``target_locator`` (``null`` when unresolved).
 * ``vulnerability.id`` is the vulnerability ``name`` (or ``@id`` if there is no name);
   ``aliases`` are copied; ``source``, ``affected_ranges`` and ``locus`` stay empty.
 * ``scope.product_id`` is the product ``@id`` (``""`` if only ``identifiers`` are given).
@@ -72,8 +84,9 @@ Document level: ``format``, ``spec_version``, ``document_id``, ``author``, ``rol
 ``locator_convention``. Statement level: ``statement_locator``, ``parent_document``,
 ``status_raw``, ``justification_raw``, ``impact_statement``, ``status_notes``,
 ``action_statement``, ``action_statement_timestamp``, ``last_updated``,
-``statement_version``, ``vulnerability``, ``products``, ``unextracted_statement_fields``,
-``assertion_status``, ``locator_convention``. Keys appear only when the input has them.
+``statement_version``, ``vulnerability``, ``products``, ``finding_targets``,
+``unextracted_statement_fields``, ``assertion_status``, ``locator_convention``. Keys
+appear only when the input has them (``finding_targets`` is always present).
 
 Not represented
 ---------------
@@ -240,30 +253,43 @@ def _read_statement(
     impact = get_str(stmt, "impact_statement", locator)
     statement_doc = _statement_document(stmt, locator, document, status, justification_raw, impact)
 
+    # One finding per (product, subcomponent); a product with no subcomponents yields one
+    # finding whose target component is unresolved (None). Nothing is dropped or merged.
     findings: list[Finding] = []
-    for p_index, product in enumerate(products):
+    targets: list[dict[str, Any]] = []
+    for p_index, product_item in enumerate(products):
         p_locator = ptr_join(locator, "products", p_index)
-        component, product_id = _read_product(product, p_locator)
-        findings.append(
-            Finding(
-                component=component,
-                vulnerability=Vulnerability(
-                    id=vulnerability.id, aliases=list(vulnerability.aliases)
-                ),
-                disposition=disposition,
-                justification=Justification(
-                    justification=justification_raw if justification_raw is not None else "",
-                    asserted_by=author,
-                    statement=impact,
-                ),
-                evidence=[],
-                scope=Scope(product_id=product_id, artifact_kind=ArtifactKind.UNKNOWN),
-                source_documents={
-                    document.doc_id: document,
-                    statement_doc.doc_id: statement_doc,
-                },
-            )
+        product, product_id = _read_product(product_item, p_locator)
+        subcomponents = _read_subcomponents(product_item, p_locator)
+        resolved: list[tuple[Optional[Component], Optional[str]]] = (
+            [(sub, sub_locator) for sub, sub_locator in subcomponents]
+            if subcomponents
+            else [(None, None)]
         )
+        for target, target_locator in resolved:
+            targets.append({"product_locator": p_locator, "target_locator": target_locator})
+            findings.append(
+                Finding(
+                    component=target,
+                    product=product,
+                    vulnerability=Vulnerability(
+                        id=vulnerability.id, aliases=list(vulnerability.aliases)
+                    ),
+                    disposition=disposition,
+                    justification=Justification(
+                        justification=justification_raw if justification_raw is not None else "",
+                        asserted_by=author,
+                        statement=impact,
+                    ),
+                    evidence=[],
+                    scope=Scope(product_id=product_id, artifact_kind=ArtifactKind.UNKNOWN),
+                    source_documents={
+                        document.doc_id: document,
+                        statement_doc.doc_id: statement_doc,
+                    },
+                )
+            )
+    statement_doc.declared_metadata["finding_targets"] = canonical_json(targets)
     return findings
 
 
@@ -282,10 +308,33 @@ def _read_vulnerability(stmt: dict[str, Any], locator: str) -> Vulnerability:
 
 def _read_product(item: Any, locator: str) -> tuple[Component, str]:
     obj = require_object(item, locator, "product")
+    component = _component_from_struct(obj, locator, "product")
+    return component, component.bom_ref if component.bom_ref is not None else ""
+
+
+def _read_subcomponents(
+    product_item: Any, product_locator: str
+) -> list[tuple[Component, str]]:
+    """Read ``subcomponents`` of one product entry (OpenVEX v0.2.0: nested in the product).
+
+    Every entry is returned, in order, with its locator; none is dropped. Each is read
+    with its own identifiers only and is never combined with the product's.
+    """
+    obj = require_object(product_item, product_locator, "product")
+    result: list[tuple[Component, str]] = []
+    for index, entry in enumerate(get_list(obj, "subcomponents", product_locator)):
+        sub_locator = ptr_join(product_locator, "subcomponents", index)
+        sub_obj = require_object(entry, sub_locator, "subcomponent")
+        result.append((_component_from_struct(sub_obj, sub_locator, "subcomponent"), sub_locator))
+    return result
+
+
+def _component_from_struct(obj: dict[str, Any], locator: str, what: str) -> Component:
+    """Read an OpenVEX ``component`` struct (shared by products and subcomponents)."""
     product_ref = get_str(obj, "@id", locator)
     identifiers = get_object(obj, "identifiers", locator) or {}
     if product_ref is None and not identifiers:
-        raise InvalidDocumentError("a product needs an '@id' or 'identifiers'", locator)
+        raise InvalidDocumentError(f"a {what} needs an '@id' or 'identifiers'", locator)
     id_locator = ptr_join(locator, "identifiers")
     purl = get_str(identifiers, "purl", id_locator)
     cpes = [
@@ -312,7 +361,7 @@ def _read_product(item: Any, locator: str) -> tuple[Component, str]:
         bom_ref=product_ref,
         identifier_variants=build_identifier_variants("", None, purl, cpes, hashes),
     )
-    return component, product_ref if product_ref is not None else ""
+    return component
 
 
 def _statement_document(

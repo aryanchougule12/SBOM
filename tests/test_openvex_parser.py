@@ -265,7 +265,7 @@ def test_unextracted_top_level_fields_are_listed():
 
 def test_product_identifiers_are_preserved_exactly():
     _, [finding] = parse_openvex(NOT_PRESENT)
-    component = finding.component
+    component = finding.product
     assert component.purl == "pkg:oci/example-app@sha256%3Aabc"
     assert component.bom_ref == "pkg:oci/example-app@sha256%3Aabc"
     assert component.hashes == [model.Hash("sha-256", HASH_UPPER)]  # key and case kept
@@ -274,29 +274,29 @@ def test_product_identifiers_are_preserved_exactly():
 
 def test_cpe_identifiers_keep_their_original_form():
     _, [finding] = parse_openvex(NOT_IN_PATH)
-    assert finding.component.cpe == ["cpe:2.3:a:Vendor:Product:1.0:*:*:*:*:*:*:*"]
+    assert finding.product.cpe == ["cpe:2.3:a:Vendor:Product:1.0:*:*:*:*:*:*:*"]
     _, findings = parse_openvex(MIXED)
-    assert findings[0].component.cpe == ["cpe:/a:vendor:product:1.0"]  # 2.2 form, not converted
+    assert findings[0].product.cpe == ["cpe:/a:vendor:product:1.0"]  # 2.2 form, not converted
 
 
 def test_variants_are_versioned_and_do_not_overwrite_originals():
     _, [finding] = parse_openvex(NOT_PRESENT)
-    assert [(v.kind, v.value) for v in finding.component.identifier_variants] == [
+    assert [(v.kind, v.value) for v in finding.product.identifier_variants] == [
         ("purl", "pkg:oci/example-app@sha256%3Aabc"),
         ("hash:sha256", HASH_UPPER.lower()),
     ]
-    assert {v.normalization_rule_version for v in finding.component.identifier_variants} == {
+    assert {v.normalization_rule_version for v in finding.product.identifier_variants} == {
         VARIANT_NORMALIZATION_VERSION
     }
     _, [other] = parse_openvex(NOT_IN_PATH)
-    assert [(v.kind, v.value) for v in other.component.identifier_variants] == [
+    assert [(v.kind, v.value) for v in other.product.identifier_variants] == [
         ("cpe", "cpe:2.3:a:vendor:product:1.0:*:*:*:*:*:*:*"),
     ]
 
 
 def test_a_product_id_is_not_parsed_as_a_purl_or_used_to_invent_variants():
     _, findings = parse_openvex(UNSUPPORTED)
-    component = findings[0].component
+    component = findings[0].product
     assert component.bom_ref == "example-product-2"
     assert component.purl is None and component.cpe == []
     assert component.identifier_variants == []
@@ -324,7 +324,7 @@ def test_artifact_kind_is_not_inferred_from_the_product_status_or_justification(
     # An OCI-looking purl (component_not_present fixture), the three statuses in the
     # mixed fixture and both supported justifications all still yield UNKNOWN.
     _, [oci] = parse_openvex(NOT_PRESENT)
-    assert oci.component.purl.startswith("pkg:oci/")
+    assert oci.product.purl.startswith("pkg:oci/")
     assert oci.scope.artifact_kind is model.ArtifactKind.UNKNOWN
     _, mixed = parse_openvex(MIXED)
     assert {f.disposition for f in mixed} == {
@@ -345,6 +345,140 @@ def test_a_nonstandard_artifact_kind_field_is_reported_not_adopted():
     assert finding.scope.artifact_kind is model.ArtifactKind.UNKNOWN  # no format support for it
     reported = json.loads(statement_doc(finding).declared_metadata["unextracted_statement_fields"])
     assert reported == ["artifact_kind"]  # visible, not silently dropped
+
+
+# ---- target component C versus product (spec §1, G1) --------------------------------
+# In OpenVEX v0.2.0 `subcomponents` is nested inside each product entry (not a
+# statement-level field). The product is what the statement asserts a status for; the
+# subcomponents identify the component the evidence concerns (the target C).
+
+SUBS = FIXTURES / "subcomponents.json"
+PRODUCT_A_ID = "pkg:oci/example-app@sha256%3Adef"
+LOG4J = "pkg:maven/org.apache.logging.log4j/log4j-core@2.4"
+
+
+def variant_pairs(component):
+    return {(v.kind, v.value) for v in component.identifier_variants}
+
+
+def test_a_product_with_a_subcomponent_keeps_the_product_and_extracts_a_distinct_target():
+    _, findings = parse_openvex(SUBS)
+    finding = findings[0]
+    product, target = finding.product, finding.component
+    # The product is fully retained ...
+    assert product.bom_ref == PRODUCT_A_ID
+    assert product.purl == PRODUCT_A_ID
+    assert product.cpe == ["cpe:2.3:a:Example:App:2.0:*:*:*:*:*:*:*"]
+    assert product.hashes == [model.Hash("sha-256", "A" * 64)]
+    assert finding.scope.product_id == PRODUCT_A_ID  # the claim is about the product
+    # ... and the target is a separate entity carrying only the subcomponent's own data.
+    assert target is not None and target is not product
+    assert target.bom_ref == LOG4J
+    assert target.purl == LOG4J
+    assert target.cpe == ["cpe:/a:apache:log4j:2.4", "cpe:2.3:a:Apache:Log4j:2.4:*:*:*:*:*:*:*"]
+    assert target.hashes == [model.Hash("sha-1", "B" * 40)]
+    assert (target.purl, target.cpe) != (product.purl, product.cpe)
+
+
+def test_a_product_without_subcomponents_keeps_the_product_but_has_no_established_target():
+    _, findings = parse_openvex(SUBS)
+    unresolved = findings[3]  # second product entry, no subcomponents
+    assert unresolved.component is None  # unresolved: never replaced by the product
+    assert unresolved.product.bom_ref == "pkg:oci/other-app@sha256%3Aghi"
+    assert unresolved.product.purl == "pkg:oci/other-app@sha256%3Aghi"
+    assert unresolved.scope.product_id == "pkg:oci/other-app@sha256%3Aghi"
+    # The same holds for every product-only fixture:
+    for path in (NOT_PRESENT, NOT_IN_PATH, UNSUPPORTED):
+        _, found = parse_openvex(path)
+        assert found and all(f.component is None and f.product is not None for f in found)
+
+
+def test_multiple_subcomponents_are_all_represented_in_order_and_none_is_dropped():
+    document, findings = parse_openvex(SUBS)
+    assert len(findings) == 4  # 3 subcomponents of product A + 1 unresolved product B
+    targets = [f.component for f in findings[:3]]
+    assert [t.bom_ref for t in targets] == [LOG4J, "example-sub-only-an-id", None]
+    assert targets[2].purl == "pkg:npm/Left-Pad@1.3.0"  # identifiers-only subcomponent kept
+    assert {f.product.bom_ref for f in findings[:3]} == {PRODUCT_A_ID}  # same product each time
+    stmt = statement_doc(findings[0])
+    assert json.loads(stmt.declared_metadata["finding_targets"]) == [
+        {"product_locator": "#/statements/0/products/0",
+         "target_locator": "#/statements/0/products/0/subcomponents/0"},
+        {"product_locator": "#/statements/0/products/0",
+         "target_locator": "#/statements/0/products/0/subcomponents/1"},
+        {"product_locator": "#/statements/0/products/0",
+         "target_locator": "#/statements/0/products/0/subcomponents/2"},
+        {"product_locator": "#/statements/0/products/1", "target_locator": None},
+    ]
+    raw_products = json.loads(stmt.declared_metadata["products"])
+    assert len(raw_products[0]["subcomponents"]) == 3  # raw statement data preserved too
+
+
+def test_product_identifiers_are_never_copied_into_the_targets_identifier_variants():
+    _, findings = parse_openvex(SUBS)
+    product_variants = variant_pairs(findings[0].product)
+    assert product_variants  # the product does have variants of its own
+    for finding in findings[:3]:
+        assert not (variant_pairs(finding.component) & product_variants)
+    # A subcomponent that gives only an @id has no identifiers or variants of its own;
+    # it does not inherit the product's purl, CPE or hashes.
+    bare = findings[1].component
+    assert (bare.purl, bare.cpe, bare.hashes, bare.identifier_variants) == (None, [], [], [])
+    # Without any subcomponent there is no target at all, hence no variants to fill in:
+    assert findings[3].component is None
+    assert variant_pairs(findings[3].product) == {("purl", "pkg:oci/other-app@sha256%3Aghi")}
+
+
+def test_variants_of_a_target_are_derived_from_the_targets_own_identifiers_only():
+    _, findings = parse_openvex(SUBS)
+    assert [(v.kind, v.value) for v in findings[0].component.identifier_variants] == [
+        ("purl", LOG4J),
+        ("cpe", "cpe:/a:apache:log4j:2.4"),
+        ("cpe", "cpe:2.3:a:apache:log4j:2.4:*:*:*:*:*:*:*"),
+        ("hash:sha1", "b" * 40),
+    ]
+    assert {v.normalization_rule_version for v in findings[0].component.identifier_variants} == {
+        VARIANT_NORMALIZATION_VERSION
+    }
+
+
+def test_equal_looking_product_and_subcomponent_identifiers_are_not_merged_or_equated():
+    data = json.loads(SUBS.read_text(encoding="utf-8"))
+    product = data["statements"][0]["products"][0]
+    product["subcomponents"] = [{"@id": PRODUCT_A_ID, "identifiers": {"purl": PRODUCT_A_ID}}]
+    _, findings = parse_openvex(encode(data))
+    first = findings[0]
+    assert first.component is not None and first.product is not None
+    assert first.component is not first.product  # still two entities
+    assert first.component.purl == first.product.purl  # preserved as given, no equivalence claimed
+    assert len(findings) == 2  # the identical-looking subcomponent was not collapsed away
+
+
+def test_subcomponents_are_read_from_the_product_entry_not_from_the_statement():
+    data = load()  # component_not_present fixture: one product, no subcomponents
+    data["statements"][0]["subcomponents"] = [{"@id": "statement-level-is-not-the-schema"}]
+    document, [finding] = parse_openvex(encode(data))
+    assert finding.component is None  # a statement-level key is not a subcomponent list
+    reported = json.loads(statement_doc(finding).declared_metadata["unextracted_statement_fields"])
+    assert reported == ["subcomponents"]  # visible, not silently dropped
+
+
+@pytest.mark.parametrize(
+    "mutator, locator",
+    [
+        (lambda p: p.update(subcomponents={}), "#/statements/0/products/0/subcomponents"),
+        (lambda p: p["subcomponents"].append(7), "#/statements/0/products/0/subcomponents/3"),
+        (lambda p: p["subcomponents"].append({}), "#/statements/0/products/0/subcomponents/3"),
+        (lambda p: p["subcomponents"][0].update(identifiers={"purl": 5}), "#/statements/0/products/0/subcomponents/0/identifiers/purl"),
+        (lambda p: p["subcomponents"][0].update(hashes={"sha-1": 5}), "#/statements/0/products/0/subcomponents/0/hashes/sha-1"),
+    ],
+)
+def test_invalid_subcomponent_structures_are_rejected_with_a_locator(mutator, locator):
+    data = json.loads(SUBS.read_text(encoding="utf-8"))
+    mutator(data["statements"][0]["products"][0])
+    with pytest.raises(InvalidDocumentError) as caught:
+        parse_openvex(encode(data))
+    assert caught.value.locator == locator
 
 
 # ---- malformed input ----------------------------------------------------------------
