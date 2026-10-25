@@ -132,16 +132,16 @@ Each dimension names a *subject*. The state describes the observation status of 
 | MATCH | C under any identifier variant (purl, CPE, name+version, hash). `Absent` only if all derivable variants were searched. |
 | DECL | The completeness declaration for the scope containing C's would-be location. Use the most specific composition record, and fall back to document level only if it covers S. Mapping, e.g. CycloneDX aggregates: `complete` → Present; `incomplete*` → Incomplete; `unknown` / `not_specified` → Unknown. Formats with no completeness field give `Unknown`. |
 | BIND | Binding of the inventory and declaration to S (digest, else product and version). |
-| GEN | Declared generation method of the primary SBOM, relative to C: `manifest_only`, `content_based`, or `unknown`. |
+| GEN | Declared generation method of the primary SBOM, evaluated relative to C specifically (including `C.ecosystem`). Exactly one of: `manifest_only` (the documented method explicitly lists only manifest-class sources, §4.3); `content_based` (the documented method performs content-based analysis and, relative to C, the primary SBOM satisfies every requirement of a content-based basis in §4.3); `unknown` (any other case, including an absent or ambiguous method, content-based analysis whose declared ecosystem coverage excludes `C.ecosystem`, or content-based analysis that fails another basis requirement). |
 
 ### 4.2 Rules
 
 | ID | Condition | Ceiling | Class | Code |
 |---|---|---|---|---|
-| N1 | MATCH Present, from any document including a corroborating one | Insufficient | CONTRADICTORY | `CLAIM_CONTRADICTED_BY_INVENTORY` |
+| N1 | Aggregated MATCH = Present, from any document including a corroborating one. Does not apply when the aggregated MATCH state is Contradictory (see N17) | Insufficient | CONTRADICTORY | `CLAIM_CONTRADICTED_BY_INVENTORY` |
 | N2 | INV Unknown or missing | Insufficient | CANNOT | `NO_INVENTORY` |
 | N3 | BIND Unknown or mismatched | Insufficient | CANNOT | `SCOPE_UNBOUND` |
-| N4 | INV Contradictory (documents disagree, or a dependency edge references a `bom_ref` absent from the component list) | Insufficient | CONTRADICTORY | `INVENTORY_CONTRADICTION` |
+| N4 | INV Contradictory through an inventory-level structural contradiction or inconsistency not already classified as a MATCH-only contradiction under N17 (e.g., a dependency edge references a `bom_ref` absent from the component list, or documents disagree about the component list other than through the MATCH-only conflict of N17) | Insufficient | CONTRADICTORY | `INVENTORY_CONTRADICTION` |
 | N5 | DECL Unknown **and** `PROV_SBOM` = P0 | Insufficient | CANNOT | `NO_EVIDENTIAL_VALUE` |
 | N6 | DECL Incomplete | Weak | BELOW | `DECLARED_INCOMPLETE` |
 | N7 | DECL Unknown **and** `PROV_SBOM` ≥ P1 | Weak | BELOW | `COMPLETENESS_UNDECLARED` |
@@ -152,8 +152,11 @@ Each dimension names a *subject*. The state describes the observation status of 
 | N12 | `PROV_SBOM` < P3 | Weak | BELOW | `INVENTORY_PROVENANCE_BELOW_P3` |
 | N13 | Contradiction confined to provenance metadata | Weak | CONTRADICTORY | `PROVENANCE_INCONSISTENT` |
 | N14 | **Manifest-only trigger** (see below) | Weak | BELOW | `MANIFEST_ONLY_UNCORROBORATED` |
-| N15 | Same as N14, but the primary SBOM's GEN = `unknown` | Weak | CANNOT | `GENERATION_METHOD_UNKNOWN` |
+| N15 | Same as N14, but the primary SBOM's GEN relative to C = `unknown` | Weak | CANNOT | `GENERATION_METHOD_UNKNOWN` |
 | N16 | A separate content-based corroborating document is relied upon to remove N14/N15, but its effective provenance is below P3 | Weak | BELOW | `CORROBORATION_PROVENANCE_BELOW_P3` |
+| N17 | MATCH Contradictory: one in-scope document finds C under a valid identifier while another source with declared sufficient coverage asserts absence for the corresponding scope | Insufficient | CONTRADICTORY | `MATCH_CONTRADICTION` |
+
+**Interaction of N1, N4, and N17 (deterministic output).** All rules are still evaluated and every genuinely applicable code is preserved (§3). N1 applies when the aggregated MATCH state is Present; it does not also fire when the aggregated MATCH state is Contradictory and N17 applies. N17 exclusively handles the defined MATCH-Contradictory case. N4 applies to inventory-level structural contradictions or inconsistencies not already classified as a MATCH-only contradiction under N17; it does not fire solely because of the conflicting MATCH observations covered by N17. If an independent inventory-level contradiction is also present, N4 and N17 both fire.
 
 ### 4.3 Manifest-only trigger (N14 and N15), defined precisely
 
@@ -168,11 +171,17 @@ A **content-based basis for C** is a source document d such that all of these ho
 - d's declared coverage of the artifact is whole, not Incomplete.
 - d's declared ecosystem coverage includes `C.ecosystem`.
 
-The primary SBOM can itself be such a document. Its result for C must not be Present (that is N1) and must not conflict with the primary SBOM (that is N4).
+The primary SBOM can itself be such a document. Its result for C must not be Present (that is N1, or N17 if another source with declared sufficient coverage asserts absence) and must not otherwise conflict with the primary SBOM at inventory level (that is N4).
+
+A qualifying content-based basis for C must satisfy every requirement above, including artifact binding, sufficient (whole) coverage, applicable ecosystem coverage (`C.ecosystem`), and provenance (EP ≥ P1). A method being content-based for unrelated ecosystems is not sufficient evidence for C.
 
 **N14 additionally requires** that the primary SBOM's documented `method` explicitly indicates manifest-only generation: it lists only package manifests, lockfiles, build descriptors, or source-declared dependency metadata, with no analysis of the shipped artifact's contents. An explicit method of that kind establishes GEN = `manifest_only`. `generation_context ∈ {source, build}` may support that interpretation but is not, by itself, sufficient to classify the method as manifest-only, and never alone triggers N14.
 
-**N15 instead applies** when GEN is `unknown`, so manifest-only generation cannot be ruled out. GEN is `unknown` whenever the method is absent, ambiguous, or does not clearly list only manifest-class sources. In particular, do not infer `manifest_only` from `generation_context` alone when the method is not established. For a binary or container finding with no qualifying content-based basis, N15 caps the verdict at Weak.
+GEN is evaluated relative to C specifically. If the primary SBOM's documented method performs content-based analysis but its declared ecosystem coverage does not include C.ecosystem, GEN relative to C is `unknown`, and N15 applies if no other qualifying content-based basis for C exists.
+
+Under the preconditions above, GEN relative to C is therefore exactly one of `manifest_only` (N14) or `unknown` (N15). `content_based` means the primary SBOM is itself a qualifying basis, so the preconditions do not hold and neither rule fires. A primary SBOM cannot bypass both N14 and N15.
+
+**N15 instead applies** when GEN relative to C is `unknown`, so manifest-only generation cannot be ruled out. GEN is `unknown` whenever it is neither `manifest_only` nor `content_based` relative to C as defined in §4.1: for example, when the method is absent or ambiguous, does not clearly list only manifest-class sources and does not qualify as content-based for C, or performs content-based analysis that fails a basis requirement. In particular, do not infer `manifest_only` from `generation_context` alone when the method is not established. For a binary or container finding with no qualifying content-based basis, N15 caps the verdict at Weak.
 
 **N16 applies** when the content-based basis is a document separate from the primary SBOM (a corroborating scan), and that document's EP is below P3. Per the minimum-across-documents rule (§1.2, rule 5), a separate document relied upon to support the Supported verdict must independently meet the P3 floor; it cannot borrow the primary SBOM's provenance. If the primary SBOM itself is the content-based basis, N16 does not apply: `PROV_SBOM` is used directly and no separate `PROV_CORR` value is instantiated.
 
@@ -186,7 +195,7 @@ The primary SBOM can itself be such a document. Its result for C must not be Pre
 - BIND Present.
 - `PROV_SBOM` = P3 and `PROV_DECL` = P3.
 - For binary or container artifacts, a content-based basis exists, and if that basis is a separate corroborating document (not the primary SBOM), its EP = P3.
-- None of N1–N16 triggered.
+- None of N1–N17 triggered.
 
 **Sufficiency vs. truth.** Supported means: *an SBOM with attributed, integrity-protected origin declares its list complete for S, C appears nowhere in it, and for binary or container artifacts the inventory is backed by content-appropriate evidence meeting the same provenance bar.* It does not mean C is absent. Signatures and hashes establish authenticity and identity, not completeness.
 
@@ -232,6 +241,13 @@ All cases assume BIND Present and `PROV_DECL` = `PROV_SBOM` unless stated.
 | NT14 | container | Present | Absent | Present | P3 / P3 | manifest_only; basis = separate layer scan, EP P1, bound, whole-artifact, ecosystem ⊇ C's, no match | **Weak** | N16 |
 | NT15 | container | Present | Absent | Present | P3 / P3 | content_based; primary SBOM itself analyzes shipped contents, bound, whole-artifact, ecosystem ⊇ C's, no match | **Supported** | none |
 | NT16 | container | Present | Absent | Present | P3 / P3 | unknown (`generation_context` = build; method not stated, so `manifest_only` is not inferred); no basis | **Weak** | N15 |
+| NT17 | container | Present | Absent | Present | P3 / P3 | primary SBOM method explicitly performs content-based analysis, but its declared ecosystem coverage excludes `C.ecosystem`; no separate qualifying basis; GEN relative to C = unknown | **Weak** | N15 |
+| NT18 | source | Present (structurally consistent) | Contradictory (one P3 source finds C under a valid identifier; another P3 source with declared sufficient coverage asserts absence for the corresponding scope; MATCH-only conflict) | Present | P3 / P3 | n/a | **Insufficient** | N17 (not N1, not N4) |
+| NT19 | source | Present | Present (aggregate of `Present` + `Incomplete`, no `Absent`; cf. AG1) | Present | P3 / P3 | n/a | **Insufficient** | N1 |
+| NT20 | source | Contradictory (two P3 documents disagree about the component list for a component other than C; no source records C) | Absent | Present | P3 / P3 | n/a | **Insufficient** | N4 |
+| NT21 | source | Contradictory (independent structural inconsistency, e.g. dangling `bom_ref`) | Contradictory (as NT18) | Present | P3 / P3 | n/a | **Insufficient** | N4, N17 |
+
+Regression coverage for the N1/N4/N17 split: NT13 and NT19 exercise N1, NT6 and NT20 exercise N4, NT18 exercises N17 alone, and NT21 shows N4 and N17 co-firing when both conditions are independently present.
 
 ## 5. Req(vulnerable_code_not_in_execute_path)
 
@@ -385,3 +401,6 @@ Baseline **RT1**: LOCUS Present; REACH Absent (K1, full coverage); ENTRY Present
 - **U-3.** Ecosystem coverage and content-based method are self-asserted by the corroborating tool (CE-N6). Consider a controlled vocabulary.
 - **U-6.** LOCUS provenance is recorded but not gated.
 - **U-7.** How `generation_context` and method class are extracted from specific SBOM formats (CycloneDX lifecycles and tools, SPDX creation info) is unspecified.
+- **U-9.** "Overlapping scope" (§2, rule 2/AG2) has no formal definition; an implementation choice is needed.
+- **U-10.** M-1's "degrading a state never raises a verdict" should be clarified to state it governs claim-unfavorable degradation; AG1 (Present + Incomplete = Present) is not a counterexample since adding corroborating-but-weaker evidence to an existing positive observation is not a degradation of that observation.
+- **U-11.** Zero evidence items for a subject should explicitly map to Unknown (already implied by the Unknown definition, but not stated in the aggregation procedure itself).
