@@ -1,7 +1,7 @@
 """Typed data model for the SBOM evidence-sufficiency prototype (Stage 0).
 
 Authoritative source: ``docs/formal_specification_v0.2.md`` and
-``docs/spec_addendum_v0.2.1.md`` at commit e0d5bfadf9bd45e753051d7e7c8654f656ddb8ef.
+``docs/spec_addendum_v0.2.1.md`` as committed in this repository.
 Section references below (e.g. "§1.1") refer to that specification.
 
 This module contains data structures only. It deliberately does NOT implement
