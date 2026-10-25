@@ -50,10 +50,14 @@ class Disposition(str, Enum):
 
 
 class JustificationType(str, Enum):
-    """The two justification values the specification defines predicates for.
+    """The predicate-supported subset of justification values: the two values the
+    specification defines predicates for.
 
-    §1 describes ``justification`` as a "VEX/CSAF value". Only these two are
-    covered by the committed specification, so only these two are modelled.
+    This is NOT the complete VEX justification vocabulary. §1 describes
+    ``justification`` as a "VEX/CSAF value", but only these two are covered by
+    the committed specification. Other valid VEX justifications exist and must
+    remain representable (see ``Justification.justification``, which is a raw
+    string); this enum only names the ones the prototype can evaluate.
     """
 
     COMPONENT_NOT_PRESENT = "component_not_present"
@@ -175,9 +179,16 @@ class Vulnerability:
 
 @dataclass
 class Justification:
-    """J: ``justification`` (VEX/CSAF value), ``asserted_by``, ``statement``."""
+    """J: ``justification`` (VEX/CSAF value), ``asserted_by``, ``statement``.
 
-    justification: JustificationType
+    ``justification`` preserves the raw input value as a string. Values outside
+    the predicate-supported subset (``JustificationType``), including valid VEX
+    justifications such as ``vulnerable_code_not_present`` and arbitrary
+    unrecognized strings, remain representable so that a later pipeline stage can
+    reject them explicitly. The model neither validates nor classifies the value.
+    """
+
+    justification: str
     asserted_by: Optional[str] = None
     statement: Optional[str] = None
 

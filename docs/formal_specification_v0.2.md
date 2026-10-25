@@ -20,6 +20,8 @@ F = (C, V, D, J, E), with finding-level scope S, plus source documents and evide
 | **S** | `product_id`, `artifact_digest[]`, `artifact_kind ∈ {source, binary, container, other}`, `version`, `build_id`, `deployment_config_id`, `environment_assumptions`, `valid_interval`. The claim holds only for S. |
 | **E** | Evidence items `(dimension, state, value_or_ref, source_doc, locator, derived_from[])`. |
 
+A justification value outside the two predicates this specification defines (§4, §5) is not evaluated by either Req(J); it must be preserved as received and explicitly reported as unsupported by the pipeline stage that encounters it, never silently coerced into one of the two supported predicates.
+
 ### 1.1 Source-document provenance (SDP)
 
 Provenance is recorded **once per source document** (an SBOM file, a reachability report, an attestation). Each evidence item points to its document through `source_doc` and `locator`.

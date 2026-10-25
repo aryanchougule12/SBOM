@@ -5,6 +5,9 @@ enumerations match the committed specification. They assert no predicate semanti
 """
 
 import dataclasses
+import typing
+
+import pytest
 
 import model
 
@@ -60,7 +63,7 @@ def test_can_construct_a_finding():
         component=component,
         vulnerability=vulnerability,
         disposition=model.Disposition.NOT_AFFECTED,
-        justification=model.Justification(model.JustificationType.COMPONENT_NOT_PRESENT),
+        justification=model.Justification(model.JustificationType.COMPONENT_NOT_PRESENT.value),
         evidence=[item],
         scope=model.Scope(product_id="product-1", artifact_kind=model.ArtifactKind.CONTAINER),
         source_documents={"doc-1": document},
@@ -83,3 +86,40 @@ def test_provenance_lives_on_source_documents_not_on_items_or_findings():
     }
     item_fields = {f.name for f in dataclasses.fields(model.EvidenceItem)}
     assert {"dimension", "state", "value_or_ref", "source_doc", "locator", "derived_from"} <= item_fields
+
+
+def test_justification_field_is_annotated_as_a_raw_string():
+    # get_type_hints resolves the postponed (``from __future__ import annotations``)
+    # annotations in model.py, so this checks the real annotation, not a string literal.
+    assert typing.get_type_hints(model.Justification)["justification"] is str
+
+
+# Supported subset, valid VEX justifications outside it, and an arbitrary string
+# (with a case variant and non-ASCII text) to show nothing is normalized or restricted.
+RAW_JUSTIFICATIONS = [
+    "component_not_present",
+    "vulnerable_code_not_in_execute_path",
+    "vulnerable_code_not_present",
+    "vulnerable_code_cannot_be_controlled_by_adversary",
+    "inline_mitigations_already_exist",
+    "COMPONENT_NOT_PRESENT",
+    "x-unrecognized/Future Value ☃",
+]
+
+
+@pytest.mark.parametrize("raw", RAW_JUSTIFICATIONS)
+def test_justification_preserves_raw_values_exactly(raw):
+    stored = model.Justification(justification=raw).justification
+    assert stored == raw
+    assert type(stored) is str
+
+
+def test_justification_type_is_only_the_predicate_supported_subset():
+    supported = {t.value for t in model.JustificationType}
+    assert supported == {"component_not_present", "vulnerable_code_not_in_execute_path"}
+    # Unsupported values are not enum members, yet the model still represents them.
+    for raw in RAW_JUSTIFICATIONS:
+        if raw not in supported:
+            with pytest.raises(ValueError):
+                model.JustificationType(raw)
+            assert model.Justification(justification=raw).justification == raw
