@@ -1,0 +1,31 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://example.com/vex/component-not-present",
+  "author": "Example Security Team",
+  "role": "Document Creator",
+  "timestamp": "2026-01-15T10:00:00Z",
+  "version": 1,
+  "tooling": "example-vex-tool 0.3.0",
+  "statements": [
+    {
+      "vulnerability": {
+        "@id": "https://nvd.nist.gov/vuln/detail/CVE-2026-0001",
+        "name": "CVE-2026-0001",
+        "aliases": ["GHSA-xxxx-yyyy-zzzz"]
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/example-app@sha256%3Aabc",
+          "identifiers": {"purl": "pkg:oci/example-app@sha256%3Aabc"},
+          "hashes": {"sha-256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"}
+        }
+      ],
+      "status": "not_affected",
+      "justification": "component_not_present",
+      "impact_statement": "The affected library is not part of this image.",
+      "timestamp": "2026-01-15T10:05:00Z",
+      "supplier": "Example Supplier",
+      "status_notes": "Checked at build time."
+    }
+  ]
+}

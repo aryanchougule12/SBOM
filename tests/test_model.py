@@ -6,6 +6,7 @@ enumerations match the committed specification. They assert no predicate semanti
 
 import dataclasses
 import typing
+from pathlib import Path
 
 import pytest
 
@@ -35,8 +36,37 @@ def test_provenance_roles_are_named():
     }
 
 
-def test_artifact_kinds_match_the_spec():
-    assert {k.value for k in model.ArtifactKind} == {"source", "binary", "container", "other"}
+def test_artifact_kinds_are_the_four_spec_values_plus_unknown_for_missing_input():
+    assert {k.value for k in model.ArtifactKind} == {
+        "source", "binary", "container", "other", "unknown",
+    }
+
+
+def test_the_four_original_artifact_kind_values_are_unchanged():
+    assert model.ArtifactKind.SOURCE.value == "source"
+    assert model.ArtifactKind.BINARY.value == "binary"
+    assert model.ArtifactKind.CONTAINER.value == "container"
+    assert model.ArtifactKind.OTHER.value == "other"
+    assert model.ArtifactKind.UNKNOWN is not model.ArtifactKind.OTHER
+
+
+def test_scope_defaults_a_missing_artifact_kind_to_unknown_never_other():
+    assert model.Scope(product_id="p").artifact_kind is model.ArtifactKind.UNKNOWN
+    default = {f.name: f.default for f in dataclasses.fields(model.Scope)}["artifact_kind"]
+    assert default is model.ArtifactKind.UNKNOWN
+    assert default is not model.ArtifactKind.OTHER
+
+
+def test_no_parser_module_falls_back_to_artifact_kind_other():
+    """Static guard: OTHER is only for an explicitly established kind, so no parser
+    source may reference it at all (parsers cannot yet establish any kind)."""
+    parser_dir = Path(__file__).resolve().parent.parent / "sbom_parser"
+    offenders = [
+        path.name
+        for path in sorted(parser_dir.glob("*.py"))
+        if "ArtifactKind.OTHER" in path.read_text(encoding="utf-8")
+    ]
+    assert offenders == []
 
 
 def test_can_construct_a_finding():

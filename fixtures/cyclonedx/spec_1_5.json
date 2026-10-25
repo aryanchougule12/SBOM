@@ -1,0 +1,12 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-15T10:00:00Z",
+    "tools": [{"vendor": "Example", "name": "legacy-tool", "version": "0.9"}]
+  },
+  "components": [
+    {"type": "library", "name": "v15-lib", "version": "1.5.0", "purl": "pkg:pypi/v15-lib@1.5.0"}
+  ]
+}

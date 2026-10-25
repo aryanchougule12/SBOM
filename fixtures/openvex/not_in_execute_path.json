@@ -1,0 +1,20 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://example.com/vex/not-in-execute-path",
+  "author": "Example Security Team",
+  "timestamp": "2026-01-15T10:00:00Z",
+  "version": 2,
+  "statements": [
+    {
+      "vulnerability": {"name": "CVE-2026-0002"},
+      "products": [
+        {
+          "@id": "example-product-1",
+          "identifiers": {"cpe23": "cpe:2.3:a:Vendor:Product:1.0:*:*:*:*:*:*:*"}
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path"
+    }
+  ]
+}

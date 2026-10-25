@@ -1,0 +1,29 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://example.com/vex/mixed",
+  "author": "Example Security Team",
+  "role": "Document Creator",
+  "timestamp": "2026-01-15T10:00:00Z",
+  "last_updated": "2026-02-01T09:00:00Z",
+  "version": 3,
+  "statements": [
+    {
+      "vulnerability": {"name": "CVE-2026-0005", "description": "Example description."},
+      "products": [
+        {"@id": "example-product-3a", "identifiers": {"cpe22": "cpe:/a:vendor:product:1.0"}},
+        {"@id": "example-product-3b", "subcomponents": [{"@id": "example-sub-1"}]}
+      ],
+      "status": "affected",
+      "action_statement": "Upgrade to 1.1.",
+      "action_statement_timestamp": "2026-01-16T00:00:00Z",
+      "timestamp": "2026-01-16T00:00:00Z",
+      "supplier": "Statement Supplier"
+    },
+    {
+      "vulnerability": {"@id": "https://example.com/vuln/only-an-id"},
+      "products": [{"@id": "example-product-3c"}],
+      "status": "under_investigation",
+      "custom_field": "kept out of the model but reported"
+    }
+  ]
+}

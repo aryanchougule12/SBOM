@@ -1,0 +1,17 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {"timestamp": "2026-01-15T10:00:00Z"},
+  "components": [
+    {"type": "library", "bom-ref": "s1", "name": "signed-doc-lib", "version": "1.0.0"}
+  ],
+  "compositions": [
+    {"aggregate": "complete", "assemblies": ["s1"]}
+  ],
+  "signature": {
+    "algorithm": "RS256",
+    "value": "ZmFrZS1zaWduYXR1cmUtbm90LXZlcmlmaWFibGU",
+    "publicKey": {"kty": "RSA", "n": "ZmFrZS1tb2R1bHVz", "e": "AQAB"}
+  }
+}

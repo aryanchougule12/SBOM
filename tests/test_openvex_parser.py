@@ -1,19 +1,399 @@
-"""Stage 0 structure tests for sbom_parser.openvex (stub only)."""
+"""Stage 1 tests for sbom_parser.openvex.
+
+Parsing only: a parsed Finding is the document's claim. These tests assert no predicate
+result, evidence sufficiency, aggregation, reachability or verdict. Everything is
+offline and deterministic (hand-authored fixtures).
+"""
+
+import copy
+import json
+from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 
+import model
 from sbom_parser import openvex
+from sbom_parser.errors import InvalidDocumentError, MalformedInputError, UnsupportedVersionError
+from sbom_parser.identifiers import VARIANT_NORMALIZATION_VERSION
+from sbom_parser.openvex import parse_openvex
+
+FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "openvex"
+NOT_PRESENT = FIXTURES / "component_not_present.json"
+NOT_IN_PATH = FIXTURES / "not_in_execute_path.json"
+UNSUPPORTED = FIXTURES / "unsupported_justification.json"
+MIXED = FIXTURES / "mixed_statements.json"
+HASH_UPPER = "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+SUPPORTED_JUSTIFICATIONS = {t.value for t in model.JustificationType}
 
 
-def test_module_exposes_the_stub_interface():
-    assert callable(openvex.parse_openvex)
+def load(path=NOT_PRESENT):
+    return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def test_stub_is_honestly_unimplemented():
-    with pytest.raises(NotImplementedError):
-        openvex.parse_openvex(b"")
+def encode(obj):
+    return json.dumps(obj).encode("utf-8")
 
 
-@pytest.mark.skip(reason="pending: OpenVEX parsing is not implemented and no fixtures exist yet")
-def test_parses_an_openvex_document():
-    raise AssertionError("placeholder")
+def meta(document, key):
+    return json.loads(document.declared_metadata[key])
+
+
+def statement_doc(finding):
+    [doc] = [d for key, d in finding.source_documents.items() if "#/statements/" in key]
+    return doc
+
+
+# ---- supported versions -------------------------------------------------------------
+
+def test_supported_context_is_exactly_openvex_v0_2_0():
+    assert openvex.SUPPORTED_CONTEXTS == ("https://openvex.dev/ns/v0.2.0",)
+
+
+@pytest.mark.parametrize(
+    "context",
+    ["https://openvex.dev/ns/v0.1.0", "https://openvex.dev/ns/v0.3.0", "https://openvex.dev/ns", "https://openvex.dev/ns/v0.2.0/"],
+)
+def test_other_openvex_contexts_are_reported_as_unsupported(context):
+    data = load()
+    data["@context"] = context
+    with pytest.raises(UnsupportedVersionError) as caught:
+        parse_openvex(encode(data))
+    assert caught.value.locator == "#/@context"
+
+
+def test_missing_or_unrelated_context_is_an_invalid_document():
+    data = load()
+    del data["@context"]
+    with pytest.raises(InvalidDocumentError):
+        parse_openvex(encode(data))
+    data["@context"] = "https://example.com/not-openvex"
+    with pytest.raises(InvalidDocumentError):
+        parse_openvex(encode(data))
+    data["@context"] = 2
+    with pytest.raises(InvalidDocumentError):
+        parse_openvex(encode(data))
+
+
+# ---- input forms and determinism ----------------------------------------------------
+
+def test_bytes_str_path_and_pathlib_inputs_give_identical_results():
+    from_bytes = parse_openvex(NOT_PRESENT.read_bytes())
+    assert parse_openvex(str(NOT_PRESENT)) == from_bytes
+    assert parse_openvex(NOT_PRESENT) == from_bytes
+
+
+def test_parsing_is_deterministic():
+    assert parse_openvex(MIXED) == parse_openvex(MIXED)
+
+
+def test_missing_file_is_not_swallowed():
+    with pytest.raises(FileNotFoundError):
+        parse_openvex(FIXTURES / "does_not_exist.json")
+
+
+# ---- document-level provenance ------------------------------------------------------
+
+def test_document_level_metadata_is_extracted():
+    document, _ = parse_openvex(NOT_PRESENT)
+    assert document.doc_id.startswith("openvex:sha256:")
+    assert (document.producer, document.producer_class) == ("Example Security Team", "Document Creator")
+    assert document.created == datetime(2026, 1, 15, 10, 0, tzinfo=timezone.utc)
+    assert document.tool_name == "example-vex-tool 0.3.0"  # verbatim, not split
+    assert document.tool_version is None
+    declared = document.declared_metadata
+    assert declared["document_id"] == "https://example.com/vex/component-not-present"
+    assert declared["document_version"] == "1"
+    assert declared["statement_count"] == "1"
+    assert declared["spec_version"] == "https://openvex.dev/ns/v0.2.0"
+
+
+def test_fields_openvex_does_not_state_are_not_inferred():
+    document, _ = parse_openvex(NOT_IN_PATH)
+    assert document.producer_class is None  # no role in this fixture
+    assert document.tool_name is None
+    assert document.generation_context is None and document.method is None
+    assert document.integrity == model.Integrity()  # v0.2.0 documents carry no signature
+    assert document.declared_metadata["assertion_status"] == "self_asserted_unverified"
+
+
+# ---- findings: the claim as stated --------------------------------------------------
+
+def test_component_not_present_statement_is_extracted():
+    document, [finding] = parse_openvex(NOT_PRESENT)
+    assert finding.disposition is model.Disposition.NOT_AFFECTED
+    assert finding.justification.justification == "component_not_present"
+    assert finding.justification.asserted_by == "Example Security Team"
+    assert finding.justification.statement == "The affected library is not part of this image."
+    assert finding.vulnerability.id == "CVE-2026-0001"
+    assert finding.vulnerability.aliases == ["GHSA-xxxx-yyyy-zzzz"]
+    assert finding.scope.product_id == "pkg:oci/example-app@sha256%3Aabc"
+    assert finding.evidence == []  # a VEX claim is not evidence for itself
+
+
+def test_vulnerable_code_not_in_execute_path_statement_is_extracted():
+    _, [finding] = parse_openvex(NOT_IN_PATH)
+    assert finding.disposition is model.Disposition.NOT_AFFECTED
+    assert finding.justification.justification == "vulnerable_code_not_in_execute_path"
+    assert finding.vulnerability.id == "CVE-2026-0002"
+    assert finding.justification.statement is None
+
+
+def test_supported_justifications_are_kept_as_plain_strings_not_enum_members():
+    for path in (NOT_PRESENT, NOT_IN_PATH):
+        _, [finding] = parse_openvex(path)
+        raw = finding.justification.justification
+        assert type(raw) is str
+        assert raw in SUPPORTED_JUSTIFICATIONS
+
+
+def test_unsupported_justification_strings_are_preserved_exactly():
+    _, findings = parse_openvex(UNSUPPORTED)
+    raws = [f.justification.justification for f in findings]
+    assert raws == ["vulnerable_code_not_present", "Inline_Mitigations_Already_Exist"]
+    for raw in raws:
+        assert type(raw) is str
+        assert raw not in SUPPORTED_JUSTIFICATIONS  # not coerced, not mapped, not rejected
+    assert all(f.disposition is model.Disposition.NOT_AFFECTED for f in findings)  # claim kept as-is
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "vulnerable_code_not_present",
+        "vulnerable_code_cannot_be_controlled_by_adversary",
+        "inline_mitigations_already_exist",
+        "COMPONENT_NOT_PRESENT",
+        " component_not_present",
+        "x-unrecognized/Future Value ☃",
+    ],
+)
+def test_arbitrary_justification_strings_survive_unchanged(raw):
+    data = load()
+    data["statements"][0]["justification"] = raw
+    _, [finding] = parse_openvex(encode(data))
+    assert finding.justification.justification == raw
+
+
+def test_an_absent_justification_is_the_empty_string_and_an_empty_input_is_rejected():
+    _, findings = parse_openvex(MIXED)
+    assert all(f.justification.justification == "" for f in findings)  # none stated
+    data = load()
+    data["statements"][0]["justification"] = ""
+    with pytest.raises(InvalidDocumentError) as caught:
+        parse_openvex(encode(data))
+    assert caught.value.locator == "#/statements/0/justification"
+
+
+def test_disposition_is_the_asserted_status_and_not_recomputed():
+    _, findings = parse_openvex(MIXED)
+    assert [f.disposition for f in findings] == [
+        model.Disposition.AFFECTED, model.Disposition.AFFECTED, model.Disposition.UNDER_INVESTIGATION,
+    ]
+
+
+def test_unknown_status_is_an_invalid_document():
+    data = load()
+    data["statements"][0]["status"] = "exploitable"
+    with pytest.raises(InvalidDocumentError) as caught:
+        parse_openvex(encode(data))
+    assert caught.value.locator == "#/statements/0/status"
+
+
+def test_one_finding_per_statement_and_product_for_every_status():
+    document, findings = parse_openvex(MIXED)
+    assert document.declared_metadata["statement_count"] == "2"
+    assert [(f.scope.product_id, f.vulnerability.id) for f in findings] == [
+        ("example-product-3a", "CVE-2026-0005"),
+        ("example-product-3b", "CVE-2026-0005"),
+        ("example-product-3c", "https://example.com/vuln/only-an-id"),
+    ]
+
+
+# ---- statement-level provenance -----------------------------------------------------
+
+def test_document_and_statement_provenance_are_kept_distinct():
+    document, [finding] = parse_openvex(NOT_PRESENT)
+    assert document.doc_id in finding.source_documents
+    stmt = statement_doc(finding)
+    assert stmt is not document
+    assert stmt.doc_id == f"{document.doc_id}#/statements/0"
+    assert stmt.producer == "Example Supplier"  # statement supplier, not the document author
+    assert document.producer == "Example Security Team"
+    assert stmt.created == datetime(2026, 1, 15, 10, 5, tzinfo=timezone.utc)
+    assert stmt.declared_metadata["parent_document"] == document.doc_id
+    assert stmt.declared_metadata["statement_locator"] == "#/statements/0"
+    assert stmt.declared_metadata["status_notes"] == "Checked at build time."
+    assert stmt.declared_metadata["justification_raw"] == "component_not_present"
+
+
+def test_nothing_is_inherited_between_document_and_statement_provenance():
+    document, [finding] = parse_openvex(NOT_IN_PATH)
+    stmt = statement_doc(finding)
+    assert stmt.producer is None and stmt.created is None  # statement states neither
+    assert document.created is not None and document.producer is not None
+
+
+def test_statement_level_fields_are_preserved_when_present():
+    _, findings = parse_openvex(MIXED)
+    stmt = statement_doc(findings[0])
+    assert stmt.declared_metadata["action_statement"] == "Upgrade to 1.1."
+    assert stmt.declared_metadata["action_statement_timestamp"] == "2026-01-16T00:00:00Z"
+    assert stmt.producer == "Statement Supplier"
+    assert json.loads(stmt.declared_metadata["vulnerability"])["description"] == "Example description."
+    # statements sharing one source statement share one statement-level document:
+    assert statement_doc(findings[1]).doc_id == stmt.doc_id
+    assert statement_doc(findings[2]).doc_id != stmt.doc_id
+
+
+def test_subcomponents_and_unknown_statement_fields_are_reported_not_dropped():
+    document, findings = parse_openvex(MIXED)
+    products = json.loads(statement_doc(findings[0]).declared_metadata["products"])
+    assert products[1]["subcomponents"] == [{"@id": "example-sub-1"}]
+    assert json.loads(statement_doc(findings[2]).declared_metadata["unextracted_statement_fields"]) == ["custom_field"]
+    assert json.loads(statement_doc(findings[0]).declared_metadata["unextracted_statement_fields"]) == []
+
+
+def test_unextracted_top_level_fields_are_listed():
+    data = load()
+    data["x-extension"] = {"a": 1}
+    document, _ = parse_openvex(encode(data))
+    assert json.loads(document.declared_metadata["unextracted_top_level_fields"]) == ["x-extension"]
+
+
+# ---- component identity: preservation -----------------------------------------------
+
+def test_product_identifiers_are_preserved_exactly():
+    _, [finding] = parse_openvex(NOT_PRESENT)
+    component = finding.component
+    assert component.purl == "pkg:oci/example-app@sha256%3Aabc"
+    assert component.bom_ref == "pkg:oci/example-app@sha256%3Aabc"
+    assert component.hashes == [model.Hash("sha-256", HASH_UPPER)]  # key and case kept
+    assert component.name == "" and component.version is None  # OpenVEX products carry no name
+
+
+def test_cpe_identifiers_keep_their_original_form():
+    _, [finding] = parse_openvex(NOT_IN_PATH)
+    assert finding.component.cpe == ["cpe:2.3:a:Vendor:Product:1.0:*:*:*:*:*:*:*"]
+    _, findings = parse_openvex(MIXED)
+    assert findings[0].component.cpe == ["cpe:/a:vendor:product:1.0"]  # 2.2 form, not converted
+
+
+def test_variants_are_versioned_and_do_not_overwrite_originals():
+    _, [finding] = parse_openvex(NOT_PRESENT)
+    assert [(v.kind, v.value) for v in finding.component.identifier_variants] == [
+        ("purl", "pkg:oci/example-app@sha256%3Aabc"),
+        ("hash:sha256", HASH_UPPER.lower()),
+    ]
+    assert {v.normalization_rule_version for v in finding.component.identifier_variants} == {
+        VARIANT_NORMALIZATION_VERSION
+    }
+    _, [other] = parse_openvex(NOT_IN_PATH)
+    assert [(v.kind, v.value) for v in other.component.identifier_variants] == [
+        ("cpe", "cpe:2.3:a:vendor:product:1.0:*:*:*:*:*:*:*"),
+    ]
+
+
+def test_a_product_id_is_not_parsed_as_a_purl_or_used_to_invent_variants():
+    _, findings = parse_openvex(UNSUPPORTED)
+    component = findings[0].component
+    assert component.bom_ref == "example-product-2"
+    assert component.purl is None and component.cpe == []
+    assert component.identifier_variants == []
+
+
+def test_scope_carries_only_what_the_document_states():
+    _, [finding] = parse_openvex(NOT_PRESENT)
+    scope = finding.scope
+    assert scope.product_id == "pkg:oci/example-app@sha256%3Aabc"
+    assert scope.artifact_digest == [] and scope.build_id is None and scope.valid_interval is None
+    # OpenVEX does not state an artifact kind, so it is UNKNOWN (never the OTHER fallback):
+    assert scope.artifact_kind is model.ArtifactKind.UNKNOWN
+
+
+@pytest.mark.parametrize("path", [NOT_PRESENT, NOT_IN_PATH, UNSUPPORTED, MIXED])
+def test_unspecified_artifact_kind_is_unknown_not_other_for_every_finding(path):
+    _, findings = parse_openvex(path)
+    assert findings
+    for finding in findings:
+        assert finding.scope.artifact_kind is model.ArtifactKind.UNKNOWN
+        assert finding.scope.artifact_kind is not model.ArtifactKind.OTHER
+
+
+def test_artifact_kind_is_not_inferred_from_the_product_status_or_justification():
+    # An OCI-looking purl (component_not_present fixture), the three statuses in the
+    # mixed fixture and both supported justifications all still yield UNKNOWN.
+    _, [oci] = parse_openvex(NOT_PRESENT)
+    assert oci.component.purl.startswith("pkg:oci/")
+    assert oci.scope.artifact_kind is model.ArtifactKind.UNKNOWN
+    _, mixed = parse_openvex(MIXED)
+    assert {f.disposition for f in mixed} == {
+        model.Disposition.AFFECTED, model.Disposition.UNDER_INVESTIGATION,
+    }
+    assert {f.scope.artifact_kind for f in mixed} == {model.ArtifactKind.UNKNOWN}
+    for justification in ("component_not_present", "vulnerable_code_not_in_execute_path"):
+        data = load()
+        data["statements"][0]["justification"] = justification
+        _, [finding] = parse_openvex(encode(data))
+        assert finding.scope.artifact_kind is model.ArtifactKind.UNKNOWN
+
+
+def test_a_nonstandard_artifact_kind_field_is_reported_not_adopted():
+    data = load()
+    data["statements"][0]["artifact_kind"] = "container"
+    _, [finding] = parse_openvex(encode(data))
+    assert finding.scope.artifact_kind is model.ArtifactKind.UNKNOWN  # no format support for it
+    reported = json.loads(statement_doc(finding).declared_metadata["unextracted_statement_fields"])
+    assert reported == ["artifact_kind"]  # visible, not silently dropped
+
+
+# ---- malformed input ----------------------------------------------------------------
+
+def test_malformed_json_fixture_is_rejected():
+    with pytest.raises(MalformedInputError):
+        parse_openvex(FIXTURES / "malformed.json")
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [b"", b"null", b"[]", b"\xff\xfe", b'{"@id": 1, "@id": 2}', b'{"x": -Infinity}'],
+)
+def test_malformed_inputs_raise_instead_of_returning_empty_results(raw):
+    with pytest.raises(MalformedInputError):
+        parse_openvex(raw)
+
+
+# ---- structurally invalid documents -------------------------------------------------
+
+def _mutated(mutator):
+    data = copy.deepcopy(load())
+    mutator(data)
+    return encode(data)
+
+
+@pytest.mark.parametrize(
+    "mutator, locator",
+    [
+        (lambda d: d.pop("@id"), "#"),
+        (lambda d: d.pop("author"), "#"),
+        (lambda d: d.pop("timestamp"), "#"),
+        (lambda d: d.update(timestamp="soon"), "#/timestamp"),
+        (lambda d: d.update(version="1"), "#/version"),
+        (lambda d: d.update(statements={}), "#/statements"),
+        (lambda d: d["statements"].append(3), "#/statements/1"),
+        (lambda d: d["statements"][0].pop("status"), "#/statements/0"),
+        (lambda d: d["statements"][0].update(justification=5), "#/statements/0/justification"),
+        (lambda d: d["statements"][0].pop("vulnerability"), "#/statements/0"),
+        (lambda d: d["statements"][0].update(vulnerability="CVE-2026-0001"), "#/statements/0/vulnerability"),
+        (lambda d: d["statements"][0]["vulnerability"].clear(), "#/statements/0/vulnerability"),
+        (lambda d: d["statements"][0].update(products=[]), "#/statements/0/products"),
+        (lambda d: d["statements"][0].pop("products"), "#/statements/0/products"),
+        (lambda d: d["statements"][0]["products"].append({}), "#/statements/0/products/1"),
+        (lambda d: d["statements"][0]["products"][0].update(hashes={"sha-256": 1}), "#/statements/0/products/0/hashes/sha-256"),
+        (lambda d: d["statements"][0]["vulnerability"].update(aliases="x"), "#/statements/0/vulnerability/aliases"),
+    ],
+)
+def test_structurally_invalid_documents_raise_with_a_locator(mutator, locator):
+    with pytest.raises(InvalidDocumentError) as caught:
+        parse_openvex(_mutated(mutator))
+    assert caught.value.locator == locator

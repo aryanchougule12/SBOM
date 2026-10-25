@@ -1,0 +1,62 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-15T10:00:00Z",
+    "lifecycles": [{"phase": "build"}],
+    "tools": {
+      "components": [
+        {"type": "application", "name": "example-sbom-tool", "version": "1.2.3"}
+      ]
+    },
+    "authors": [{"name": "Example Build Team"}],
+    "component": {
+      "type": "application",
+      "bom-ref": "app-1",
+      "name": "example-app",
+      "version": "2.0.0",
+      "hashes": [
+        {"alg": "SHA-256", "content": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"}
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "lib-purl",
+      "name": "Left-Pad",
+      "version": "1.3.0",
+      "purl": "pkg:NPM/Left-Pad@1.3.0",
+      "supplier": {"name": "Example Supplier"},
+      "hashes": [
+        {"alg": "SHA-256", "content": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"}
+      ],
+      "licenses": [{"license": {"id": "MIT"}}],
+      "components": [
+        {"type": "library", "bom-ref": "lib-nested", "name": "nested-lib", "version": "0.1.0"}
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "lib-cpe",
+      "name": "Example Product",
+      "version": "1.0",
+      "cpe": "cpe:2.3:a:Vendor:Product:1.0:*:*:*:*:*:*:*"
+    },
+    {"type": "library", "bom-ref": "lib-name", "name": "Plain-Lib", "version": "2.1.0"}
+  ],
+  "dependencies": [
+    {"ref": "app-1", "dependsOn": ["lib-purl", "lib-cpe"]},
+    {"ref": "lib-purl", "dependsOn": ["lib-nested"]},
+    {"ref": "lib-name", "dependsOn": []}
+  ],
+  "compositions": [
+    {
+      "aggregate": "complete",
+      "assemblies": ["lib-purl", "lib-cpe", "lib-name"],
+      "dependencies": ["app-1"]
+    }
+  ]
+}

@@ -65,12 +65,28 @@ class JustificationType(str, Enum):
 
 
 class ArtifactKind(str, Enum):
-    """``S.artifact_kind`` (§1)."""
+    """``S.artifact_kind`` (§1), plus ``UNKNOWN`` for missing input.
+
+    ``SOURCE``, ``BINARY``, ``CONTAINER`` and ``OTHER`` are the four values listed in
+    §1. ``OTHER`` may be used only when the input explicitly establishes a kind outside
+    source/binary/container; it is never a fallback for missing information.
+
+    ``UNKNOWN`` is not one of the four values listed in §1. It means the artifact kind
+    cannot be determined from the available input. It is a representation of absent
+    information in the data model; how it interacts with the rules that depend on the
+    artifact kind (for example N14/N15, §4.3) is defined by a later stage, not here.
+
+    OPEN ISSUE (deferred): the specification does not yet define ``UNKNOWN`` or say how
+    N14/N15 treat it. This is to be resolved during Stage 3's mandatory design-gap
+    review, before N14/N15 are implemented. Until then no rule may treat ``UNKNOWN`` as
+    ``SOURCE`` or ``OTHER``, or as a reason to skip those rules.
+    """
 
     SOURCE = "source"
     BINARY = "binary"
     CONTAINER = "container"
     OTHER = "other"
+    UNKNOWN = "unknown"
 
 
 class ProvenanceLevel(IntEnum):
@@ -207,11 +223,15 @@ class ValidInterval:
 
 @dataclass
 class Scope:
-    """S: the claim holds only for S."""
+    """S: the claim holds only for S.
+
+    ``artifact_kind`` defaults to ``ArtifactKind.UNKNOWN`` (kind not determinable from
+    the input), never to ``OTHER``.
+    """
 
     product_id: str
     artifact_digest: list[str] = field(default_factory=list)
-    artifact_kind: ArtifactKind = ArtifactKind.OTHER
+    artifact_kind: ArtifactKind = ArtifactKind.UNKNOWN
     version: Optional[str] = None
     build_id: Optional[str] = None
     deployment_config_id: Optional[str] = None

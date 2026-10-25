@@ -1,0 +1,57 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "example-sbom",
+  "documentNamespace": "https://example.com/spdx/example-sbom-1",
+  "creationInfo": {
+    "created": "2026-01-15T10:00:00Z",
+    "creators": ["Tool: example-spdx-tool-1.4.0", "Organization: Example Org"],
+    "licenseListVersion": "3.21"
+  },
+  "documentDescribes": ["SPDXRef-app"],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-app",
+      "name": "example-app",
+      "versionInfo": "2.0.0",
+      "downloadLocation": "NOASSERTION",
+      "supplier": "Organization: Example Org",
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-lib1",
+      "name": "Left-Pad",
+      "versionInfo": "1.3.0",
+      "downloadLocation": "NOASSERTION",
+      "supplier": "NOASSERTION",
+      "checksums": [
+        {"algorithm": "SHA256", "checksumValue": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"}
+      ],
+      "externalRefs": [
+        {"referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:NPM/Left-Pad@1.3.0"},
+        {"referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:npm/left-pad@1.3.0"},
+        {"referenceCategory": "SECURITY", "referenceType": "cpe23Type", "referenceLocator": "cpe:2.3:a:Vendor:Product:1.0:*:*:*:*:*:*:*"},
+        {"referenceCategory": "OTHER", "referenceType": "advisory", "referenceLocator": "https://example.com/advisory/1"}
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-lib2",
+      "name": "Plain-Lib",
+      "versionInfo": "2.1.0",
+      "downloadLocation": "NOASSERTION"
+    }
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-file1",
+      "fileName": "./a.txt",
+      "checksums": [{"algorithm": "SHA1", "checksumValue": "da39a3ee5e6b4b0d3255bfef95601890afd80709"}]
+    }
+  ],
+  "relationships": [
+    {"spdxElementId": "SPDXRef-DOCUMENT", "relationshipType": "DESCRIBES", "relatedSpdxElement": "SPDXRef-app"},
+    {"spdxElementId": "SPDXRef-app", "relationshipType": "DEPENDS_ON", "relatedSpdxElement": "SPDXRef-lib1"},
+    {"spdxElementId": "SPDXRef-lib2", "relationshipType": "DEPENDENCY_OF", "relatedSpdxElement": "SPDXRef-app"}
+  ]
+}
