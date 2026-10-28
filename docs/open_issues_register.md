@@ -267,6 +267,22 @@ These are choices made in the pure `Req(component_not_present)` engine (`evidenc
 5. A separate corroborating document is a content-based basis only if the caller states that it meets the non-provenance criteria and its EP is at least P1; it is "relied upon" (N16) only for binary/container artifacts whose primary SBOM is not itself content-based.
 6. `prov_decl` is a required input when `decl` is Present and is ignored otherwise.
 
+## Implementation conventions made in the Phase 2 profile slice (unconfirmed; not approved semantic decisions)
+
+These are choices in `evidence/profile.py` (profile loading and validation only; unwired from `evidence/extraction.py` and `evidence/cnp_rules.py`). They need explicit confirmation. None of them settles G3c, G10, G11, G13 or G18, and none changes the formal specification.
+
+1. **[P] Scope identifiability.** A profile scope needs `product_id` plus a `version` or at least one digest (`PROFILE_SCOPE_NOT_IDENTIFIABLE`). This is a project policy motivated by A6 and the BIND wording ("digest, else product and version"); the specification does not mandate the check.
+2. **[R-based] Digest form.** Digests are canonical `alg:hex` (G3c decision 2), normalized with the existing `sbom_parser.identifiers` helpers, sorted and de-duplicated. The normalized value must be non-empty hexadecimal (`0-9a-f`), otherwise `PROFILE_DIGEST_MALFORMED`; this is a profile validation rule that leaves the approved normalization unchanged, and no algorithm-specific length is required because none is approved. Subject selection and digest comparison stay open (G3c); no digest is compared here.
+3. **[C] Artifact kind gate.** A profile scope must state `source`, `binary`, `container` or `other`; a missing or `unknown` kind is `PROFILE_ARTIFACT_KIND_REQUIRED`. This is a pre-evaluation gate and does not settle G10 (the semantics of `ArtifactKind.UNKNOWN` for N14/N15/N16 remain open). An assertion's scope block must state a kind as well, so that the scope tuples are comparable.
+4. **[C] One document, one role.** Exactly one `primary_sbom`; `corroborating` is recognized and rejected (`PROFILE_ROLE_UNSUPPORTED`). `Finding.document_roles` remains the only engine-facing role map; `apply_profile` rejects a pre-existing map that conflicts (`PROFILE_ROLE_CONFLICT`).
+5. **[C] `finding_selector`.** `(vulnerability, product_id)`. Zero matches, several matches (for example an OpenVEX statement with several subcomponents) and an absent selector with several findings are distinct errors; ambiguity is never resolved silently.
+6. **[C] Merge, never override.** `apply_profile` returns a copy and rejects a value that disagrees with what the finding already states (scope, target component, roles).
+7. **[C] Assertion checking in two layers.** Structure is a hard error. Semantics produce non-fatal diagnostics: only `"full_component_list"` is recognized (`INV_ASSERTION_STATEMENT_UNSUPPORTED` otherwise); a scope block differing from the profile scope, a document not listed in `documents[]`, and differing statements for one document make the assertions unusable; identical duplicates collapse to the first. `would_be_location.document` outside `documents[]` is a hard error, whereas an assertion naming an unsupplied document is only a diagnostic.
+8. **[C] Evaluator-entered, not authenticated.** `entered_by`, `entered_at` and `basis` are unverified metadata and never enter a decision. Scope-tuple equality between an assertion and the profile is a consistency check, not artifact identity and not BIND.
+9. **[C] Forbidden fields.** Names that would supply an evidence state, provenance level, rule outcome or verdict are rejected with `PROFILE_FORBIDDEN_FIELD` wherever they occur; other unknown fields are `PROFILE_UNKNOWN_FIELD`.
+
+Not done in this slice: INV state derivation, BIND, the structural contradiction classifier (G11 Q4), C3 (duplicate identifiers), a profile digest, and integration with extraction or the engine. A usable assertion is only an input to a later step; it never sets INV and INV `Present` still requires BIND `MATCHED`.
+
 ## Cross-reference: resolved prerequisite changes
 
 These were resolved before the audit and are **not** unresolved gaps. They were not rows of the audit's gap register.
