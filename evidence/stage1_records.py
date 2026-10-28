@@ -37,9 +37,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Iterable, Mapping, Optional, Sequence
 
-from model import Component, EvidenceState, Finding, SourceDocument
+from model import Component, EvidenceState, Finding, Hash, SourceDocument
 from sbom_parser._common import InputSource
 from sbom_parser.cyclonedx import parse_cyclonedx
+from sbom_parser.identifiers import build_identifier_variants
 from sbom_parser.openvex import parse_openvex
 from sbom_parser.spdx import parse_spdx
 
@@ -123,6 +124,17 @@ class SubjectDeclaration:
     resolved_as: str
 
 
+@dataclass(frozen=True)
+class LocatedComponent:
+    """A component the parser recorded with its document locator but did not return in the
+    ordinary component list: a component nested under the CycloneDX subject
+    (``metadata.component``). ``declared_type`` is the CycloneDX ``type`` string."""
+
+    locator: str
+    declared_type: Optional[str]
+    component: Component
+
+
 class ReferenceStatus(str, Enum):
     """Neutral result of a registry lookup. Not a finding about the inventory."""
 
@@ -161,7 +173,11 @@ class SbomRecord:
     ``unextracted_*`` keys) so nothing the parser recorded is dropped. For CycloneDX,
     ``nodes`` holds ``dependencies`` entries; for SPDX it is empty and ``edges`` holds the
     relationships. ``subject_declarations`` is SPDX-only; ``signature_records`` is
-    CycloneDX-only; the other format leaves them empty.
+    CycloneDX-only; the other format leaves them empty. ``subject_components`` are the
+    components nested under the CycloneDX subject (pre-order); ``subject_components_extracted``
+    is True when the document's stored metadata actually carried that list (always for SPDX,
+    which has no such nesting) and False when it was absent, in which case the member domain
+    of the document is not known to be fully extracted.
     """
 
     document: SourceDocument
@@ -177,6 +193,8 @@ class SbomRecord:
     defined_ref_locators: Mapping[str, str]
     defined_ref_conflicts: tuple[Mapping[str, Any], ...]
     unextracted_top_level_fields: tuple[str, ...]
+    subject_components: tuple[LocatedComponent, ...] = ()
+    subject_components_extracted: bool = False
 
     @property
     def doc_id(self) -> str:
@@ -362,6 +380,42 @@ def _decode_string_map(document: SourceDocument, key: str) -> dict[str, str]:
     return value
 
 
+def _decode_subject_components(document: SourceDocument) -> tuple[bool, tuple[LocatedComponent, ...]]:
+    key = "subject_component_index"
+    if key not in document.declared_metadata:
+        return False, ()
+    located: list[LocatedComponent] = []
+    for e in _entries(document, key):
+        raw = _field(document, key, e, "component", dict)
+        name = _field(document, key, raw, "name", str)
+        version = _field(document, key, raw, "version", str, nullable=True)
+        purl = _field(document, key, raw, "purl", str, nullable=True)
+        cpes = list(_str_tuple(document, key, raw, "cpe"))
+        hashes: list[Hash] = []
+        for h in _field(document, key, raw, "hashes", list):
+            if not isinstance(h, dict):
+                raise RecordDecodeError(document.doc_id, key, "hash entries must be objects")
+            hashes.append(Hash(_field(document, key, h, "algorithm", str), _field(document, key, h, "value", str)))
+        located.append(
+            LocatedComponent(
+                locator=_field(document, key, e, "locator", str),
+                declared_type=_field(document, key, e, "type", str, nullable=True),
+                component=Component(
+                    name=name,
+                    version=version,
+                    purl=purl,
+                    cpe=cpes,
+                    ecosystem=None,
+                    supplier=_field(document, key, raw, "supplier", str, nullable=True),
+                    hashes=hashes,
+                    bom_ref=_field(document, key, raw, "bom_ref", str, nullable=True),
+                    identifier_variants=build_identifier_variants(name, version, purl, cpes, hashes),
+                ),
+            )
+        )
+    return True, tuple(located)
+
+
 def from_parsed_sbom(document: SourceDocument, components: Sequence[Component]) -> SbomRecord:
     """Bundle a parsed CycloneDX or SPDX result into an ``SbomRecord``.
 
@@ -424,6 +478,10 @@ def from_parsed_sbom(document: SourceDocument, components: Sequence[Component]) 
         raise RecordDecodeError(
             document.doc_id, "unextracted_top_level_fields", "expected a list of strings"
         )
+    if fmt == FORMAT_CYCLONEDX:
+        subject_extracted, subject_components = _decode_subject_components(document)
+    else:
+        subject_extracted, subject_components = True, ()  # SPDX has no nesting under a subject
     return SbomRecord(
         document=document,
         components=tuple(components),
@@ -438,6 +496,8 @@ def from_parsed_sbom(document: SourceDocument, components: Sequence[Component]) 
         defined_ref_locators=_decode_string_map(document, "defined_ref_locators"),
         defined_ref_conflicts=tuple(_entries(document, "defined_ref_conflicts")),
         unextracted_top_level_fields=tuple(unextracted),
+        subject_components=subject_components,
+        subject_components_extracted=subject_extracted,
     )
 
 

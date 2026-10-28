@@ -54,7 +54,7 @@ JSON text)
 ------------------------------------------------------------------------------------
 ``format``, ``spec_version``, ``serial_number``, ``bom_version``, ``metadata`` (the
 whole ``metadata`` object), ``created_raw``, ``tools``, ``authors``, ``lifecycles``,
-``component_index``, ``declared_dependency_nodes``, ``declared_dependency_edges``,
+``component_index``, ``subject_component_index``, ``declared_dependency_nodes``, ``declared_dependency_edges``,
 ``composition_records``, ``signature_records``, ``signature_verification``,
 ``signed_coverage_basis``, ``defined_ref_locators``, ``defined_ref_conflicts``,
 ``unextracted_top_level_fields``, ``assertion_status``, ``locator_convention``. Locators
@@ -65,7 +65,11 @@ Components
 Every entry of ``components`` and, recursively, of nested ``components`` is returned in
 document (pre-order) order. ``metadata.component`` (the described subject) is NOT
 returned as a component; it is a typed ``DocumentSubject`` and is also preserved inside
-``declared_metadata["metadata"]``.
+``declared_metadata["metadata"]``. The components nested under the subject
+(``metadata.component.components``, recursively, pre-order) are not returned either; they are
+recorded with their locators, types and fields in ``declared_metadata["subject_component_index"]``
+and exposed as typed records by the Stage 1 adapter (they are inventory members, kept apart from
+the top-level list).
 ``Component`` is filled from ``name``, ``version``, ``purl``, ``cpe`` (one string),
 ``bom-ref``, ``hashes`` (``alg``/``content``) and ``supplier.name``. Identifiers are
 kept exactly as supplied; derived keys use ``identifiers.variant-norm-v1``.
@@ -259,6 +263,7 @@ def parse_cyclonedx(source: SBOMSource) -> tuple[SourceDocument, list[Component]
         _read_component(item, ptr("components", index), components, component_index)
     declared["component_index"] = canonical_json(component_index)
     _read_subject_and_refs(data, spec_version, component_index, document, declared)
+    _read_subject_components(data, declared)
 
     _read_dependencies(data, declared)
     declared["composition_records"] = canonical_json(_read_compositions(data))
@@ -383,6 +388,44 @@ def _component_from_obj(obj: dict[str, Any], locator: str) -> Component:
         hashes=hashes,
         bom_ref=bom_ref,
         identifier_variants=build_identifier_variants(name, version, purl, cpes, hashes),
+    )
+
+
+def _component_record(component: Component) -> dict[str, Any]:
+    """The fields of a ``Component`` that Stage 1 needs to rebuild it (identifier variants are
+    rebuilt from them with the same function the parser uses)."""
+    return {
+        "name": component.name,
+        "version": component.version,
+        "purl": component.purl,
+        "cpe": list(component.cpe),
+        "supplier": component.supplier,
+        "bom_ref": component.bom_ref,
+        "hashes": [{"algorithm": h.algorithm, "value": h.value} for h in component.hashes],
+    }
+
+
+def _read_subject_components(data: dict[str, Any], declared: dict[str, str]) -> None:
+    """Components nested under ``metadata.component`` (recursively, pre-order).
+
+    They are constituents of the described subject (schema: ``component.components``, "a list of
+    software and hardware components included in the parent component"), so they are inventory
+    members that the ordinary ``components`` list does not contain. They are NOT returned in the
+    component list: the subject and what it contains stay separate from the top-level list, and
+    ``declared_metadata["subject_component_index"]`` records each one with its locator, its
+    ``type`` and its fields. The subject itself, services, pedigree objects and tool components
+    are not recorded here.
+    """
+    metadata = get_object(data, "metadata", ptr())
+    subject = get_object(metadata, "component", ptr("metadata")) if metadata is not None else None
+    nested: list[Component] = []
+    index: list[dict[str, Any]] = []
+    if subject is not None:
+        base = ptr("metadata", "component")
+        for n_index, item in enumerate(get_list(subject, "components", base)):
+            _read_component(item, ptr_join(base, "components", n_index), nested, index)
+    declared["subject_component_index"] = canonical_json(
+        [{**entry, "component": _component_record(component)} for component, entry in zip(nested, index)]
     )
 
 

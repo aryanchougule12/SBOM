@@ -1,6 +1,6 @@
 """Tests for evidence.cnp_rules (Phase 1: the pure Req(component_not_present) engine).
 
-NT1-NT21 are encoded from ``docs/formal_specification_v0.2.md`` section 4.7 at the
+NT1-NT25 are encoded from ``docs/formal_specification_v0.2.md`` section 4.7 at the
 dimension level, exactly as the specification states them. The engine is a function of
 already computed dimension states, so nothing here touches parsing, extraction, matching,
 binding or provenance computation.
@@ -220,7 +220,7 @@ def test_states_no_rule_addresses_fall_to_the_default_and_are_reported():
         evaluation = evaluate_cnp(inputs(**overrides))
         assert evaluation.triggered == (), label
         assert evaluation.result.verdict is INSUFFICIENT and evaluation.result.codes == (), label
-        assert evaluation.uncovered_states == (label,), label
+        assert evaluation.uncovered_states == (label,) == evaluation.unresolved_dimensions, label
 
 
 def test_inv_absent_is_not_read_as_missing():
@@ -228,16 +228,162 @@ def test_inv_absent_is_not_read_as_missing():
     assert evaluate_cnp(inputs(inv=None)).rule_ids == ("N2",)
 
 
-def test_literal_step_4_lets_another_weak_rule_govern_an_uncovered_state():
-    # MATCH Unknown is addressed by no rule. With PROV_SBOM at P2, N12 (Weak) triggers, and the
-    # literal Step 4 ("minimum ceiling over all triggered rules") yields Weak, although the
-    # section 3 definition of Insufficient ("a required dimension is ... Unknown") points the
-    # other way. The engine follows the procedure and reports the uncovered state; the
-    # tension itself is not resolved here.
+def test_unresolved_dimension_ceiling_caps_a_weak_rule_at_insufficient():
+    # NT22 (specification addendum v0.2.2). MATCH Unknown is addressed by no rule. With
+    # PROV_SBOM at P2, N12 (Weak) triggers; the clarified Step 4 applies the unresolved-dimension
+    # ceiling, so the single final verdict is Insufficient. The code list is unchanged and the
+    # unresolved dimension is reported in the separate limitations field.
     evaluation = evaluate_cnp(inputs(match=S.UNKNOWN, prov_sbom=P.P2))
     assert list(evaluation.rule_ids) == ["N12"]
-    assert evaluation.result.verdict is WEAK
+    assert evaluation.result.verdict is INSUFFICIENT
+    assert evaluation.result.codes == ("INVENTORY_PROVENANCE_BELOW_P3",)
+    assert evaluation.result.rationale.startswith("BELOW_BAR[INVENTORY_PROVENANCE_BELOW_P3]: ")
+    assert evaluation.result.limitations == ("MATCH=Unknown",) == evaluation.unresolved_dimensions
     assert evaluation.uncovered_states == ("MATCH=Unknown",)
+
+
+def test_nt24_and_nt25_inv_incomplete_and_decl_ambiguous_are_capped_by_the_same_ceiling():
+    # NT24: INV Incomplete, NT25: DECL Ambiguous; both are in no rule of the table. At P3 the
+    # no-rule default gives Insufficient, so N12 at P2 must not turn that into Weak (P-3).
+    for overrides, label in ((dict(inv=S.INCOMPLETE), "INV=Incomplete"), (dict(decl=S.AMBIGUOUS, prov_decl=None), "DECL=Ambiguous")):
+        at_p3 = evaluate_cnp(inputs(**overrides))
+        at_p2 = evaluate_cnp(inputs(prov_sbom=P.P2, **overrides))
+        assert at_p3.result.verdict is INSUFFICIENT and at_p3.rule_ids == ()
+        assert at_p2.rule_ids == ("N12",) and at_p2.result.verdict is INSUFFICIENT
+        assert at_p2.result.limitations == (label,)
+
+
+def test_unresolved_dimension_ceiling_for_a_contradictory_declaration():
+    # NT23: DECL Contradictory is governed by no rule either.
+    evaluation = evaluate_cnp(inputs(decl=S.CONTRADICTORY, prov_sbom=P.P2))
+    assert list(evaluation.rule_ids) == ["N12"]
+    assert evaluation.result.verdict is INSUFFICIENT
+    assert evaluation.result.limitations == ("DECL=Contradictory",)
+
+
+def test_states_that_a_rule_governs_keep_that_rules_ceiling():
+    # NT7/NT8/NT11 behaviour is unchanged: DECL Unknown (N5/N7), GEN unknown (N15), INV Unknown (N2),
+    # BIND Unknown (N3), MATCH Contradictory (N17) are governed, so they impose no extra ceiling.
+    weak = evaluate_cnp(inputs(decl=S.UNKNOWN, prov_sbom=P.P1))
+    assert set(weak.rule_ids) == {"N7", "N12"} and weak.result.verdict is WEAK and weak.result.limitations == ()
+    container = evaluate_cnp(inputs(artifact_kind=ArtifactKind.CONTAINER, gen=GenState.UNKNOWN))
+    assert container.rule_ids == ("N15",) and container.result.verdict is WEAK and container.result.limitations == ()
+    assert evaluate_cnp(inputs(match=S.CONTRADICTORY)).result.limitations == ()
+    assert evaluate_cnp(inputs(inv=S.CONTRADICTORY)).result.limitations == ()
+
+
+# The complete state table for Req(component_not_present): for every required dimension and every
+# state, which rule (if any) governs it. "ok" means the state meets that dimension's Supported
+# condition; "governed" states keep the ceiling the rule table gives them; every other state is
+# "ungoverned" and imposes the unresolved-dimension ceiling (section 3 Step 4, addendum v0.2.2).
+OK, GOVERNED, UNGOVERNED = "ok", "governed", "ungoverned"
+DIMENSION_STATE_TABLE = {
+    ("INV", None): (GOVERNED, "N2"),
+    ("INV", S.PRESENT): (OK, None),
+    ("INV", S.UNKNOWN): (GOVERNED, "N2"),
+    ("INV", S.CONTRADICTORY): (GOVERNED, "N4"),
+    ("INV", S.ABSENT): (UNGOVERNED, "INV=Absent"),
+    ("INV", S.INCOMPLETE): (UNGOVERNED, "INV=Incomplete"),
+    ("INV", S.AMBIGUOUS): (UNGOVERNED, "INV=Ambiguous"),
+    ("MATCH", S.ABSENT): (OK, None),
+    ("MATCH", S.PRESENT): (GOVERNED, "N1"),
+    ("MATCH", S.AMBIGUOUS): (GOVERNED, "N8"),
+    ("MATCH", S.INCOMPLETE): (GOVERNED, "N9"),
+    ("MATCH", S.CONTRADICTORY): (GOVERNED, "N17"),
+    ("MATCH", S.UNKNOWN): (UNGOVERNED, "MATCH=Unknown"),
+    ("DECL", S.PRESENT): (OK, None),
+    ("DECL", S.INCOMPLETE): (GOVERNED, "N6"),
+    ("DECL", S.UNKNOWN): (GOVERNED, "N7"),  # N5 instead at P0; both are governed
+    ("DECL", S.ABSENT): (UNGOVERNED, "DECL=Absent"),
+    ("DECL", S.AMBIGUOUS): (UNGOVERNED, "DECL=Ambiguous"),
+    ("DECL", S.CONTRADICTORY): (UNGOVERNED, "DECL=Contradictory"),
+}
+RULE_CEILING = {r.rule_id: r.ceiling for r in CNP_RULES}
+
+
+def _state_kwargs(dimension, state):
+    return {dimension.lower(): state}
+
+
+@pytest.mark.parametrize("dimension,state", sorted(DIMENSION_STATE_TABLE, key=lambda k: (k[0], str(k[1]))))
+@pytest.mark.parametrize("weak_trigger", [None, "N12", "N11", "N13"])
+def test_every_required_dimension_state_is_either_ok_governed_or_capped(dimension, state, weak_trigger):
+    kind, rule_or_label = DIMENSION_STATE_TABLE[(dimension, state)]
+    overrides = _state_kwargs(dimension, state)
+    if weak_trigger == "N12":
+        overrides["prov_sbom"] = P.P2
+    elif weak_trigger == "N11":
+        overrides["prov_decl"] = P.P2
+    elif weak_trigger == "N13":
+        overrides["provenance_metadata_contradiction"] = True
+    if dimension == "DECL" and state is not S.PRESENT:
+        overrides["prov_decl"] = None
+    evaluation = evaluate_cnp(inputs(**overrides))
+    verdict = evaluation.result.verdict
+    if kind == UNGOVERNED:
+        # no rule governs the state, so it must impose Insufficient whatever Weak rules also fire
+        assert rule_or_label in evaluation.unresolved_dimensions and rule_or_label in evaluation.result.limitations
+        assert verdict is INSUFFICIENT
+        assert evaluation.result.codes == tuple(r.code for r in evaluation.triggered)  # no code was added
+        assert "NO_RULE_APPLIES" not in evaluation.result.rationale or not evaluation.triggered
+    else:
+        assert evaluation.unresolved_dimensions == () == evaluation.result.limitations
+        if kind == GOVERNED:
+            assert rule_or_label in evaluation.rule_ids or (rule_or_label == "N7" and "N5" in evaluation.rule_ids)
+            expected = min([r.ceiling for r in evaluation.triggered], key=lambda v: {INSUFFICIENT: 0, WEAK: 1, SUPPORTED: 2}[v])
+            assert verdict is expected  # the table's ceiling, never raised or lowered by the clarification
+        elif weak_trigger is None:
+            assert verdict is SUPPORTED
+        else:
+            assert verdict is WEAK
+
+
+def test_governed_states_keep_the_ceiling_the_specification_table_gives_them():
+    # NT7/NT8/NT11 behaviour: Weak rules govern DECL Unknown (N7) and GEN unknown (N15); DECL Incomplete
+    # (N6), MATCH Ambiguous (N8) and Incomplete (N9) are Weak; the rest are Insufficient.
+    assert evaluate_cnp(inputs(decl=S.UNKNOWN, prov_sbom=P.P1)).result.verdict is WEAK
+    assert evaluate_cnp(inputs(decl=S.UNKNOWN, prov_sbom=P.P0)).result.verdict is INSUFFICIENT  # N5
+    assert evaluate_cnp(inputs(artifact_kind=CONTAINER, gen=GenState.UNKNOWN)).result.verdict is WEAK
+    assert evaluate_cnp(inputs(artifact_kind=BINARY, gen=GenState.MANIFEST_ONLY)).result.verdict is WEAK
+    assert evaluate_cnp(inputs(decl=S.INCOMPLETE)).result.verdict is WEAK
+    assert evaluate_cnp(inputs(match=S.AMBIGUOUS)).result.verdict is WEAK
+    assert evaluate_cnp(inputs(match=S.INCOMPLETE)).result.verdict is WEAK
+    for overrides in (dict(inv=S.UNKNOWN), dict(inv=None), dict(inv=S.CONTRADICTORY), dict(match=S.PRESENT),
+                      dict(match=S.CONTRADICTORY), dict(bind=BindState.UNKNOWN), dict(bind=BindState.MISMATCHED)):
+        assert evaluate_cnp(inputs(**overrides)).result.verdict is INSUFFICIENT, overrides
+
+
+def test_a_governed_weak_state_together_with_an_ungoverned_state_is_insufficient():
+    # simultaneous triggers: N6 (Weak, governed) + N12 (Weak) + MATCH=Unknown (ungoverned)
+    evaluation = evaluate_cnp(inputs(decl=S.INCOMPLETE, prov_sbom=P.P2, match=S.UNKNOWN, prov_decl=None))
+    assert set(evaluation.rule_ids) == {"N6", "N12"}
+    assert evaluation.result.verdict is INSUFFICIENT
+    assert evaluation.result.limitations == ("MATCH=Unknown",)
+    # several ungoverned states are all reported
+    both = evaluate_cnp(inputs(inv=S.INCOMPLETE, decl=S.AMBIGUOUS, match=S.UNKNOWN, prov_sbom=P.P1, prov_decl=None))
+    assert both.result.limitations == ("MATCH=Unknown", "INV=Incomplete", "DECL=Ambiguous")
+    assert both.result.verdict is INSUFFICIENT
+
+
+def test_container_gen_weak_rules_do_not_hide_an_ungoverned_state():
+    for kind in (CONTAINER, BINARY):
+        for gen in (GenState.UNKNOWN, GenState.MANIFEST_ONLY):
+            evaluation = evaluate_cnp(inputs(artifact_kind=kind, gen=gen, inv=S.AMBIGUOUS))
+            assert evaluation.rule_ids in (("N14",), ("N15",))
+            assert evaluation.result.verdict is INSUFFICIENT and evaluation.result.limitations == ("INV=Ambiguous",)
+
+
+def test_a_strictly_insufficient_rule_with_an_ungoverned_state_reports_both():
+    evaluation = evaluate_cnp(inputs(match=S.PRESENT, decl=S.ABSENT))
+    assert evaluation.rule_ids == ("N1",) and evaluation.result.verdict is INSUFFICIENT
+    assert evaluation.result.limitations == ("DECL=Absent",)
+    assert evaluation.result.codes == ("CLAIM_CONTRADICTED_BY_INVENTORY",)
+
+
+def test_a_single_final_result_with_no_conflicting_second_verdict():
+    evaluation = evaluate_cnp(inputs(match=S.UNKNOWN, prov_sbom=P.P2))
+    assert not hasattr(evaluation, "literal_result") and not hasattr(evaluation, "engine_result")
+    assert evaluation.result.verdict is INSUFFICIENT
 
 
 # ---- BIND keeps its three distinct states ---------------------------------------------------------------------------
@@ -362,8 +508,13 @@ def test_invariants_hold_over_the_whole_source_artifact_grid():
         result = evaluation.result
         count += 1
         if evaluation.triggered:
-            # verdict = minimum ceiling; every triggered code is output; no NO_RULE_APPLIES
-            assert result.verdict is min((r.ceiling for r in evaluation.triggered), key=ceilings.get)
+            # verdict = minimum ceiling over the triggered rules and (addendum v0.2.2) the
+            # unresolved-dimension ceiling; every triggered code is output; no NO_RULE_APPLIES
+            expected = [r.ceiling for r in evaluation.triggered]
+            if evaluation.unresolved_dimensions:
+                expected.append(INSUFFICIENT)
+            assert result.verdict is min(expected, key=ceilings.get)
+            assert result.limitations == evaluation.unresolved_dimensions
             assert result.codes == tuple(r.code for r in evaluation.triggered)
             assert "NO_RULE_APPLIES" not in result.rationale
         elif evaluation.supported_conditions_hold:
@@ -381,6 +532,53 @@ def test_invariants_hold_over_the_whole_source_artifact_grid():
     # 7 INV values (six states or missing) x 6 MATCH x 3 BIND x 4 PROV_SBOM x (5 non-Present DECL
     # states + Present with 4 PROV_DECL values).
     assert count == 7 * 6 * 3 * 4 * (5 + 4)
+
+
+def test_an_unresolved_dimension_always_means_insufficient_over_the_whole_grid():
+    seen = 0
+    for case in _grid():
+        evaluation = evaluate_cnp(case)
+        expected = tuple(
+            label for label, hit in (
+                ("MATCH=Unknown", case.match is S.UNKNOWN),
+                (f"INV={case.inv.value}" if case.inv is not None else "", case.inv in (S.ABSENT, S.INCOMPLETE, S.AMBIGUOUS)),
+                (f"DECL={case.decl.value}", case.decl in (S.ABSENT, S.AMBIGUOUS, S.CONTRADICTORY)),
+            )
+            if hit
+        )
+        assert evaluation.unresolved_dimensions == expected == evaluation.result.limitations
+        if expected:
+            seen += 1
+            assert evaluation.result.verdict is INSUFFICIENT
+    assert seen > 0
+
+
+_VERDICT_ORDER = {INSUFFICIENT: 0, WEAK: 1, SUPPORTED: 2}
+
+
+def test_p3_monotone_downgrade_lower_provenance_never_improves_the_verdict():
+    """Specification P-3, checked over every state combination (with and without a container
+    kind): lowering PROV_SBOM or PROV_DECL, or degrading BIND from matched, never raises the verdict.
+    This is the property the unresolved-dimension ceiling restores for INV Absent/Incomplete/Ambiguous
+    and DECL Absent/Ambiguous (otherwise Weak at P2 would beat the no-rule Insufficient at P3)."""
+    levels = list(P)
+    checked = 0
+    for kind, gen in ((SOURCE, GenState.UNKNOWN), (CONTAINER, GenState.UNKNOWN), (CONTAINER, GenState.CONTENT_BASED)):
+        for inv, match, decl, bind in itertools.product([None] + list(S), list(S), list(S), list(BindState)):
+            def verdict(prov_sbom, prov_decl, bind_state=bind):
+                case = CnpInputs(kind, inv, match, decl, bind_state, prov_sbom,
+                                 prov_decl if decl is S.PRESENT else None, gen)
+                return _VERDICT_ORDER[evaluate_cnp(case).result.verdict]
+            for prov_sbom, prov_decl in itertools.product(levels, levels):
+                best = verdict(prov_sbom, prov_decl)
+                for lower_sbom in (l for l in levels if l <= prov_sbom):
+                    for lower_decl in (l for l in levels if l <= prov_decl):
+                        assert verdict(lower_sbom, lower_decl) <= best, (kind, gen, inv, match, decl, bind, prov_sbom, prov_decl, lower_sbom, lower_decl)
+                        checked += 1
+                if bind is BindState.MATCHED:
+                    for worse in (BindState.UNKNOWN, BindState.MISMATCHED):
+                        assert verdict(prov_sbom, prov_decl, worse) <= best
+    assert checked > 10000
 
 
 def test_only_nt1_style_inputs_reach_supported_on_a_source_artifact():

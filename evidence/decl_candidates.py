@@ -112,6 +112,11 @@ class StatusReason(str, Enum):
     PARENT_HAS_NO_BOM_REF = "PARENT_HAS_NO_BOM_REF"
     PARENT_REFERENCE_AMBIGUOUS = "PARENT_REFERENCE_AMBIGUOUS"
     NO_RECORD_NAMES_PARENT = "NO_RECORD_NAMES_PARENT"
+    # entry by explicit placement (enumerate_decl_candidates_for_placement)
+    PLACEMENT_UNSPECIFIED = "PLACEMENT_UNSPECIFIED"
+    PLACEMENT_INVALID = "PLACEMENT_INVALID"
+    PARENT_REF_NOT_IN_DOCUMENT = "PARENT_REF_NOT_IN_DOCUMENT"
+    PARENT_NOT_A_COMPONENT = "PARENT_NOT_A_COMPONENT"
 
 
 class CandidateRelation(str, Enum):
@@ -216,6 +221,7 @@ class DeclEnumeration:
     groups: tuple[DeclGroup, ...]
     root_level_candidates: tuple[RootLevelCandidate, ...]
     exclusions: tuple[DeclExclusion, ...]
+    placement: Optional[str] = None  # set only by the placement entry point
 
 
 # ---- G6-D8 worst case -------------------------------------------------------------------
@@ -486,10 +492,87 @@ def enumerate_decl_candidates(record: SbomRecord, target_locator: Optional[str])
     )
 
 
+def enumerate_decl_candidates_for_placement(
+    record: SbomRecord, placement: Optional[str], parent_ref: Optional[str]
+) -> DeclEnumeration:
+    """Enumerate the DECL candidates for a would-be target that is NOT in the document, from the
+    evaluator's explicit placement (register G6-D6, G1r; profile schema 1.1).
+
+    * ``placement=None``: unspecified; the status is ``TARGET_LOCATION_UNAVAILABLE`` (nothing is
+      selected from a guessed position).
+    * ``"top_level"``: the target would be a top-level BOM component. It has no parent assembly,
+      so the status is ``NO_CANDIDATE`` (``TOP_LEVEL_TARGET_NO_PARENT_ASSEMBLY``) and the records
+      naming the root are reported as root-level candidates for a ``TOP_LEVEL`` position.
+    * ``"nested_under_component"`` with ``parent_ref``: the target would be a direct child of the
+      component whose ``bom-ref`` is ``parent_ref``. The parent must be a component of this
+      document (the subject, a listed component or a nested component) and its reference must be
+      unambiguous; records naming it are component-specific candidates (G6-D1, D11, D12), and
+      records naming the root are root-level candidates unless the parent is the root itself.
+
+    Everything else (scope filtering, BOM-Link, ambiguous or unregistered references, the G6-D8
+    worst case, root-level candidates that never cover S here) is exactly as in
+    ``enumerate_decl_candidates``. Pure; nothing is mutated.
+    """
+    registry = _Registry.build(record)
+
+    def result(status, reasons, parent_locator=None, parent=None, candidates=(), groups=(),
+               roots=(), exclusions=()):
+        return DeclEnumeration(
+            doc_id=record.doc_id, target_locator=None, status=status, status_reasons=tuple(reasons),
+            parent_locator=parent_locator, parent_ref=parent, candidates=tuple(candidates),
+            groups=tuple(groups), root_level_candidates=tuple(roots), exclusions=tuple(exclusions),
+            placement=placement,
+        )
+
+    if placement is None:
+        _, roots, exclusions = _scan(record, registry, None)
+        return result(EnumerationStatus.TARGET_LOCATION_UNAVAILABLE, (StatusReason.PLACEMENT_UNSPECIFIED,),
+                      roots=roots, exclusions=exclusions)
+
+    if placement == "top_level":
+        _, roots, exclusions = _scan(record, registry, ("#/components/0", _TOP, None), virtual_target=True)
+        return result(EnumerationStatus.NO_CANDIDATE, (StatusReason.TOP_LEVEL_TARGET_NO_PARENT_ASSEMBLY,),
+                      _TOP, None, roots=roots, exclusions=exclusions)
+
+    if placement != "nested_under_component" or not parent_ref:
+        return result(EnumerationStatus.TARGET_LOCATION_UNAVAILABLE, (StatusReason.PLACEMENT_INVALID,))
+
+    if parent_ref in registry.conflicted_refs:
+        _, roots, exclusions = _scan(record, registry, None)
+        return result(EnumerationStatus.NO_CANDIDATE, (StatusReason.PARENT_REFERENCE_AMBIGUOUS,),
+                      None, parent_ref, exclusions=exclusions)
+    locations = sorted(
+        {loc for loc, ref in registry.listed.items() if ref == parent_ref}
+        | {loc for loc, ref in registry.nested.items() if ref == parent_ref}
+        | ({registry.subject_locator} if registry.subject_locator and registry.subject_ref == parent_ref else set())
+    )
+    if len(locations) > 1:  # the same reference at two component locations: ambiguous
+        return result(EnumerationStatus.NO_CANDIDATE, (StatusReason.PARENT_REFERENCE_AMBIGUOUS,), None, parent_ref)
+    if not locations:
+        reason = (StatusReason.PARENT_NOT_A_COMPONENT if parent_ref in registry.other.values()
+                  else StatusReason.PARENT_REF_NOT_IN_DOCUMENT)
+        return result(EnumerationStatus.TARGET_NOT_IN_DOCUMENT, (reason,), None, parent_ref)
+    parent_locator = locations[0]
+    virtual = f"{parent_locator}/components/0"
+    candidates, roots, exclusions = _scan(record, registry, (virtual, parent_locator, parent_ref), virtual_target=True)
+    if candidates:
+        states = [c.state for c in candidates]
+        group = DeclGroup(
+            parent_locator=parent_locator, parent_ref=parent_ref, members=tuple(candidates),
+            state=worst_case_state(states), tie=len(candidates) > 1, disagreement=len(set(states)) > 1,
+        )
+        return result(EnumerationStatus.CANDIDATES_FOUND, (), parent_locator, parent_ref, candidates, (group,),
+                      roots, exclusions)
+    return result(EnumerationStatus.NO_CANDIDATE, (StatusReason.NO_RECORD_NAMES_PARENT,), parent_locator,
+                  parent_ref, roots=roots, exclusions=exclusions)
+
+
 def _scan(
     record: SbomRecord,
     registry: _Registry,
     target: Optional[tuple[str, str, Optional[str]]],
+    *,
+    virtual_target: bool = False,
 ) -> tuple[list[DeclCandidate], list[RootLevelCandidate], list[DeclExclusion]]:
     """One pass over the composition records. ``target`` is ``(locator, parent_locator,
     parent_ref)`` or ``None`` (then only target-independent findings and, if the root is
@@ -504,7 +587,10 @@ def _scan(
     tree: Optional[str] = None
     if target is not None:
         target_locator, _, _ = target
-        target_ref = registry.ref_at(target_locator)
+        # A virtual target (a would-be child that is not in the document) has no reference of
+        # its own; a real component that happens to sit at the same pointer must not be read
+        # as "the target".
+        target_ref = None if virtual_target else registry.ref_at(target_locator)
         above = [registry.ref_at(loc) for loc in _ancestors_above_parent(target_locator)]
         tree = _component_tree(target_locator, registry.subject_locator)
 

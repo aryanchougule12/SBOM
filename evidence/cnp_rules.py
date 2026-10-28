@@ -26,13 +26,17 @@ Interpretations the specification leaves open (each is visible in the code and t
 * ``BIND`` has three distinct input states (``MATCHED``, ``MISMATCHED``, ``UNKNOWN``).
   N3 treats the last two identically, but the factual state is preserved in the
   evaluation and named in the rationale text.
-* The dimension states that no rule of the table addresses -- MATCH ``Unknown``; DECL
-  ``Absent``/``Ambiguous``/``Contradictory``; INV ``Absent``/``Incomplete``/``Ambiguous``
-  -- are reported in ``CnpEvaluation.uncovered_states`` and are not otherwise treated.
-  Under the literal Step 4 a Weak rule that triggers for another reason still yields
-  Weak even if such a state is present (the §3 definition of Insufficient, "a required
-  dimension is missing or Unknown", points the other way). That tension is reported, not
-  resolved, here.
+* Step 4 applies the unresolved-dimension ceiling of the clarified specification (section 3,
+  addendum v0.2.2, register G18). A required dimension in a state that fails its Supported
+  condition and that no rule of the table governs caps the verdict at Insufficient even when only
+  Weak-ceiling rules triggered. For this predicate those states are exactly: MATCH ``Unknown``;
+  INV ``Absent``, ``Incomplete``, ``Ambiguous``; DECL ``Absent``, ``Ambiguous``, ``Contradictory``.
+  The states that a rule governs keep that rule's ceiling (INV Unknown/missing N2, INV
+  Contradictory N4, BIND N3, DECL Unknown N5/N7, DECL Incomplete N6, MATCH Present N1, Ambiguous
+  N8, Incomplete N9, Contradictory N17, GEN N14/N15). Without the extension to the INV and DECL
+  states, a lower provenance level could raise the verdict (a Weak N12 would replace the
+  no-rule default Insufficient), which P-3 forbids. The ceiling adds no code or rationale class;
+  it is reported in ``VerdictResult.limitations`` and ``CnpEvaluation.unresolved_dimensions``.
 * Several rationale classes in one result are rendered as one ``<CLASS>[CODE,...]: text``
   segment per class, in class-rank order, joined by `` | `` (the specification gives the
   grammar of a single segment). A Supported result has no class and an empty rationale.
@@ -166,10 +170,13 @@ class TriggeredRule:
 class CnpEvaluation:
     """The outcome of ``evaluate_cnp``.
 
-    ``result`` is the ``(verdict, codes, rationale)`` of §3. ``triggered`` lists every
-    triggered rule in output order. ``unmet_supported_conditions`` names each §4.4
-    condition that does not hold. ``uncovered_states`` names dimension states that no
-    rule addresses (see the module docstring); they do not change ``result``.
+    ``result`` is the single final ``(verdict, codes, rationale)`` of §3 as clarified by
+    addendum v0.2.2. ``triggered`` lists every triggered rule in output order.
+    ``unmet_supported_conditions`` names each §4.4 condition that does not hold.
+    ``unresolved_dimensions`` names the dimension states that impose the unresolved-dimension
+    ceiling (they are also in ``result.limitations``). ``uncovered_states`` names every
+    dimension state that no rule of the table addresses; it equals ``unresolved_dimensions``
+    (kept as a separate field for callers written before the ceiling covered every such state).
     """
 
     inputs: CnpInputs
@@ -178,6 +185,7 @@ class CnpEvaluation:
     supported_conditions_hold: bool
     unmet_supported_conditions: tuple[str, ...]
     uncovered_states: tuple[str, ...]
+    unresolved_dimensions: tuple[str, ...] = ()
 
     @property
     def rule_ids(self) -> tuple[str, ...]:
@@ -391,6 +399,9 @@ def _unmet_supported_conditions(c: _Context) -> tuple[str, ...]:
 
 
 def _uncovered_states(i: CnpInputs) -> tuple[str, ...]:
+    """Dimension states that fail a Supported condition and that no rule of the table addresses
+    (section 3 Step 4 as clarified in addendum v0.2.2): MATCH Unknown; INV Absent, Incomplete,
+    Ambiguous; DECL Absent, Ambiguous, Contradictory."""
     found: list[str] = []
     if i.match is _S.UNKNOWN:
         found.append("MATCH=Unknown")
@@ -399,6 +410,11 @@ def _uncovered_states(i: CnpInputs) -> tuple[str, ...]:
     if i.decl in (_S.ABSENT, _S.AMBIGUOUS, _S.CONTRADICTORY):
         found.append(f"DECL={i.decl.value}")
     return tuple(found)
+
+
+def _unresolved_dimensions(i: CnpInputs) -> tuple[str, ...]:
+    """The unresolved-dimension ceiling applies to exactly the uncovered states."""
+    return _uncovered_states(i)
 
 
 # ---- rationale (§3 grammar) ----------------------------------------------------------------------------
@@ -437,16 +453,18 @@ def evaluate_cnp(inputs: CnpInputs) -> CnpEvaluation:
     )
     unmet = _unmet_supported_conditions(context)
 
-    # Step 4.
+    # Step 4, with the unresolved-dimension ceiling.
+    unresolved = _unresolved_dimensions(inputs)
     if triggered:
-        verdict = min((r.ceiling for r in triggered), key=_VERDICT_RANK.__getitem__)
-        result = VerdictResult(verdict, _rationale(triggered), tuple(r.code for r in triggered))
+        ceilings = [r.ceiling for r in triggered] + ([Verdict.INSUFFICIENT] if unresolved else [])
+        verdict = min(ceilings, key=_VERDICT_RANK.__getitem__)
+        result = VerdictResult(verdict, _rationale(triggered), tuple(r.code for r in triggered), unresolved)
     elif not unmet:
         result = VerdictResult(Verdict.SUPPORTED, "", ())
     else:
         # No-rule default: no code, and it never co-occurs with a triggered rule's code.
         rationale = f"{RationaleClass.NO_RULE_APPLIES.value}[]: no rule triggered, but Supported conditions not met: " + "; ".join(unmet)
-        result = VerdictResult(Verdict.INSUFFICIENT, rationale, ())
+        result = VerdictResult(Verdict.INSUFFICIENT, rationale, (), unresolved)
 
     return CnpEvaluation(
         inputs=inputs,
@@ -455,4 +473,5 @@ def evaluate_cnp(inputs: CnpInputs) -> CnpEvaluation:
         supported_conditions_hold=not unmet,
         unmet_supported_conditions=unmet,
         uncovered_states=_uncovered_states(inputs),
+        unresolved_dimensions=unresolved,
     )

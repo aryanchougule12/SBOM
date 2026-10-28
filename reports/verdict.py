@@ -40,11 +40,17 @@ class VerdictResult:
     """The ``(verdict, codes, rationale)`` output of §3. ``codes`` are the triggered
     rule codes in the §3 output order (empty for Supported and for the no-rule default).
     ``rationale`` follows the grammar ``<CLASS>[CODE,...]: text``; an empty string means
-    that no class applies (Supported)."""
+    that no class applies (Supported). ``limitations`` lists, as ``<DIMENSION>=<State>``, the
+    required dimensions whose state fails a Supported condition and is governed by no rule (for
+    ``Req(component_not_present)``: MATCH Unknown; INV Absent, Incomplete, Ambiguous; DECL
+    Absent, Ambiguous, Contradictory), which impose the Insufficient ceiling of section 3 Step 4
+    (specification addendum v0.2.2). It is a separate field: no rule code or rationale class is
+    added for it, and the verdict is the single final one."""
 
     verdict: Verdict
     rationale: str
     codes: tuple[str, ...] = ()
+    limitations: tuple[str, ...] = ()
 
 
 def render_verdict(result: VerdictResult) -> str:

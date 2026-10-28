@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.1",
+  "profile_id": "fixture-profile",
+  "scope": {
+    "product_id": "pkg:oci/example-app@sha256%3Aabc",
+    "version": "2.0.0",
+    "artifact_digests": [
+      "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ],
+    "artifact_kind": "source"
+  },
+  "target": {
+    "component": {
+      "name": "absent-lib",
+      "version": "9.9",
+      "purl": "pkg:npm/absent-lib@9.9"
+    },
+    "would_be_location": {
+      "document": "@PRIMARY@",
+      "placement": "nested_under_component",
+      "parent_ref": "lib-b"
+    }
+  },
+  "documents": [
+    {
+      "doc_id": "@PRIMARY@",
+      "role": "primary_sbom"
+    }
+  ]
+}

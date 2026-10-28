@@ -25,6 +25,16 @@ document, nothing more:
   and objects reachable only through other schema locations are not included.
 * SPDX 2.3: every ``packages`` entry. ``files`` and ``snippets`` are not included.
 
+``subject_nested_components`` are the CycloneDX components nested under the subject
+(``metadata.component.components``, recursively, pre-order), which the parser records apart from
+the top-level list. The approved member domain (register, D1) is the union of the two: top-level
+components recursively, components nested under ``metadata.component``, and SPDX packages. The
+subject itself, services, SPDX files and snippets, and pedigree objects are not members.
+``evidence.inventory_members`` builds that union with the components themselves (for
+matching); ``member_domain_extracted`` says whether the document's stored metadata carried the
+subject-nested list, so that a domain that was not fully extracted is never mistaken for a
+complete one.
+
 A count of these is a count of records the parser returned. It is not the size of the
 inventory for S.
 
@@ -41,23 +51,16 @@ from typing import Any, Iterable, Mapping, Optional, TypeVar
 
 from evidence.stage1_records import ReferenceStatus, SbomRecord
 
+MEMBER_DOMAIN = (
+    "approved member domain: CycloneDX top-level components (recursively) and components nested "
+    "under metadata.component (recursively); SPDX packages; not the subject, services, SPDX files "
+    "or snippets, or pedigree objects"
+)
+
 LISTED_COMPONENT_COUNTING_DOMAIN = (
     "components the parser returned: CycloneDX top-level and nested 'components' (pre-order, "
     "excluding metadata.component and services); SPDX 'packages' (excluding files and snippets)"
 )
-
-
-@dataclass(frozen=True)
-class ListedComponentObservation:
-    """A component the parser returned. ``declared_type`` is the CycloneDX ``type`` string
-    (``None`` for SPDX). Nothing here says the component is a member of the inventory for S."""
-
-    doc_id: str
-    locator: str
-    name: str
-    version: Optional[str]
-    bom_ref: Optional[str]
-    declared_type: Optional[str]
 
 
 @dataclass(frozen=True)
@@ -69,6 +72,35 @@ class EndpointObservation:
     status: ReferenceStatus
     kinds: tuple[str, ...]
     locators: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ListedComponentObservation:
+    """A component the parser returned. ``declared_type`` is the CycloneDX ``type`` string
+    (``None`` for SPDX). ``registry`` is the neutral lookup of its raw ``bom_ref`` (``None``
+    when it has none). Nothing here says the component is a member of the inventory for S."""
+
+    doc_id: str
+    locator: str
+    name: str
+    version: Optional[str]
+    bom_ref: Optional[str]
+    declared_type: Optional[str]
+    registry: Optional[EndpointObservation] = None
+
+
+@dataclass(frozen=True)
+class SubjectNestedComponentObservation:
+    """A CycloneDX component nested under ``metadata.component``, recorded apart from the
+    top-level list. Same fields and caveats as ``ListedComponentObservation``."""
+
+    doc_id: str
+    locator: str
+    name: str
+    version: Optional[str]
+    bom_ref: Optional[str]
+    declared_type: Optional[str]
+    registry: Optional[EndpointObservation] = None
 
 
 @dataclass(frozen=True)
@@ -146,6 +178,14 @@ class InventoryObservations:
     subject_declaration_mismatches: tuple[RecordedEntry, ...]
     reference_conflicts: tuple[RecordedEntry, ...]
     unextracted_top_level_fields: tuple[str, ...]
+    subject_nested_components: tuple[SubjectNestedComponentObservation, ...] = ()
+    member_domain_extracted: bool = False
+
+    @property
+    def member_count(self) -> int:
+        """Listed plus subject-nested components (``MEMBER_DOMAIN``). A count of parsed records,
+        not the size of the inventory for S."""
+        return len(self.listed_components) + len(self.subject_nested_components)
 
     @property
     def listed_component_count(self) -> int:
@@ -168,14 +208,14 @@ class InventoryObservations:
 _T = TypeVar("_T")
 
 
-def _locator_key(locator: Optional[str]) -> tuple:
+def locator_sort_key(locator: Optional[str]) -> tuple:
     if locator is None:
         return ((2, 0, ""),)
     return tuple((0, int(seg), "") if seg.isdigit() else (1, 0, seg) for seg in locator.split("/"))
 
 
 def _ordered(items: Iterable[_T], locator_of) -> tuple[_T, ...]:
-    return tuple(sorted(items, key=lambda o: (_locator_key(locator_of(o)), repr(o))))
+    return tuple(sorted(items, key=lambda o: (locator_sort_key(locator_of(o)), repr(o))))
 
 
 def _endpoint(resolution) -> EndpointObservation:
@@ -193,6 +233,10 @@ def _recorded(doc_id: str, entry: Mapping[str, Any]) -> RecordedEntry:
     return RecordedEntry(doc_id, ref if isinstance(ref, str) else None, items)
 
 
+def _registry(record: SbomRecord, bom_ref: Optional[str]) -> Optional[EndpointObservation]:
+    return _endpoint(record.resolve(bom_ref)) if bom_ref is not None else None
+
+
 def observe_inventory(record: SbomRecord) -> InventoryObservations:
     """Build the neutral observations for ``record``. Pure and deterministic."""
     doc_id = record.doc_id
@@ -206,8 +250,24 @@ def observe_inventory(record: SbomRecord) -> InventoryObservations:
                 version=component.version,
                 bom_ref=component.bom_ref,
                 declared_type=entry.get("type") if isinstance(entry.get("type"), str) else None,
+                registry=_registry(record, component.bom_ref),
             )
             for component, entry in zip(record.components, record.component_index)
+        ),
+        lambda o: o.locator,
+    )
+    nested = _ordered(
+        (
+            SubjectNestedComponentObservation(
+                doc_id=doc_id,
+                locator=located.locator,
+                name=located.component.name,
+                version=located.component.version,
+                bom_ref=located.component.bom_ref,
+                declared_type=located.declared_type,
+                registry=_registry(record, located.component.bom_ref),
+            )
+            for located in record.subject_components
         ),
         lambda o: o.locator,
     )
@@ -263,4 +323,6 @@ def observe_inventory(record: SbomRecord) -> InventoryObservations:
         subject_declaration_mismatches=mismatches,
         reference_conflicts=conflicts,
         unextracted_top_level_fields=tuple(sorted(record.unextracted_top_level_fields)),
+        subject_nested_components=nested,
+        member_domain_extracted=record.subject_components_extracted,
     )

@@ -1,4 +1,4 @@
-"""Evaluator profile, schema version 1: loading and validation only (Phase 2, profile slice).
+"""Evaluator profile, schema versions 1 and 1.1: loading and validation only (Phase 2).
 
 An evaluator profile is the immutable, strictly validated input that carries what the
 SBOM and VEX formats cannot: the scope S the claim is about, the target component C, the
@@ -31,6 +31,12 @@ Project policy, not specification text (each item is a proposal recorded in the 
   ``container``, ``other``. A missing or ``unknown`` kind is a hard error
   (``PROFILE_ARTIFACT_KIND_REQUIRED``). This is a scoped pre-evaluation gate. It does not
   resolve register G10: ``ArtifactKind.UNKNOWN`` semantics for N14/N15/N16 stay open.
+* Schema ``"1.1"`` is additive. It makes the placement of a would-be target explicit:
+  ``target.would_be_location.placement`` is ``nested_under_component`` (with the direct parent's
+  ``parent_ref``) or ``top_level`` (with no ``parent_ref``; a top-level placement is never
+  expressed by naming a root ``bom-ref``). Schema ``"1"`` is accepted exactly as before and does
+  not accept ``placement`` (its location has an unspecified placement, from which nothing may be
+  selected). Version ``"2"`` and any other value remain unsupported.
 * Exactly one document, with role ``primary_sbom``. ``corroborating`` is recognised and
   refused (``PROFILE_ROLE_UNSUPPORTED``) in this slice.
 * ``Finding.document_roles`` is the only engine-facing role map; ``apply_profile``
@@ -74,6 +80,10 @@ from sbom_parser.identifiers import (
 )
 
 SCHEMA_VERSION = "1"
+SCHEMA_VERSION_PLACEMENT = "1.1"  # additive: explicit target placement (register G1r / G6)
+SUPPORTED_SCHEMA_VERSIONS = (SCHEMA_VERSION, SCHEMA_VERSION_PLACEMENT)
+PLACEMENT_TOP_LEVEL = "top_level"
+PLACEMENT_NESTED = "nested_under_component"
 SUPPORTED_ASSERTION_STATEMENT = "full_component_list"
 
 
@@ -98,6 +108,10 @@ class ProfileErrorCode(str, Enum):
     ROLE_CONFLICT = "PROFILE_ROLE_CONFLICT"
     SCOPE_CONFLICT = "PROFILE_SCOPE_CONFLICT"
     TARGET_CONFLICT = "PROFILE_TARGET_CONFLICT"
+    PLACEMENT_REQUIRED = "PROFILE_PLACEMENT_REQUIRED"
+    PLACEMENT_INVALID = "PROFILE_PLACEMENT_INVALID"
+    PARENT_REF_REQUIRED = "PROFILE_PARENT_REF_REQUIRED"
+    PARENT_REF_FORBIDDEN = "PROFILE_PARENT_REF_FORBIDDEN"
 
 
 class ProfileError(ValueError):
@@ -190,8 +204,19 @@ class TargetComponentSpec:
 
 @dataclass(frozen=True)
 class WouldBeLocation:
+    """Where the target component would appear in ``document`` if it were present.
+
+    Schema ``"1"`` carries only ``document`` and ``parent_ref`` (``placement`` is ``None``: the
+    placement is unspecified, so nothing may be selected from it). Schema ``"1.1"`` states
+    ``placement`` explicitly: ``nested_under_component`` names the direct parent assembly by
+    ``parent_ref`` (the ``bom-ref`` of the component whose ``components`` array would contain the
+    target); ``top_level`` has no parent and carries no ``parent_ref``. A top-level placement is
+    never expressed by naming a root ``bom-ref``.
+    """
+
     document: str
-    parent_ref: str
+    parent_ref: Optional[str]
+    placement: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -384,7 +409,37 @@ def _selector(value: Any, path: str) -> FindingSelector:
     )
 
 
-def _target(value: Any, path: str) -> TargetSpec:
+def _location(loc: Mapping[str, Any], location_path: str, schema_version: str) -> WouldBeLocation:
+    if schema_version == SCHEMA_VERSION:  # schema 1: exactly as before
+        _check_keys(loc, location_path, ("document", "parent_ref"))
+        return WouldBeLocation(
+            _string(_require(loc, location_path, "document"), _join(location_path, "document")),
+            _string(_require(loc, location_path, "parent_ref"), _join(location_path, "parent_ref")),
+        )
+    _check_keys(loc, location_path, ("document", "placement", "parent_ref"))
+    document = _string(_require(loc, location_path, "document"), _join(location_path, "document"))
+    placement_path = _join(location_path, "placement")
+    if "placement" not in loc:
+        raise _fail(ProfileErrorCode.PLACEMENT_REQUIRED, placement_path, "an explicit placement is required")
+    placement = loc["placement"]
+    if not isinstance(placement, str):
+        raise _fail(ProfileErrorCode.INVALID_TYPE, placement_path, "expected a string")
+    if placement not in (PLACEMENT_TOP_LEVEL, PLACEMENT_NESTED):
+        raise _fail(ProfileErrorCode.PLACEMENT_INVALID, placement_path,
+                    f"must be '{PLACEMENT_TOP_LEVEL}' or '{PLACEMENT_NESTED}'")
+    parent_path = _join(location_path, "parent_ref")
+    if placement == PLACEMENT_TOP_LEVEL:
+        if "parent_ref" in loc:
+            raise _fail(ProfileErrorCode.PARENT_REF_FORBIDDEN, parent_path,
+                        "a top-level placement has no parent; it is never expressed by naming a root bom-ref")
+        return WouldBeLocation(document, None, placement)
+    if "parent_ref" not in loc:
+        raise _fail(ProfileErrorCode.PARENT_REF_REQUIRED, parent_path,
+                    "a nested placement must name its direct parent assembly")
+    return WouldBeLocation(document, _string(loc["parent_ref"], parent_path), placement)
+
+
+def _target(value: Any, path: str, schema_version: str = SCHEMA_VERSION) -> TargetSpec:
     obj = _object(value, path)
     _check_keys(obj, path, ("component", "would_be_location"))
     component_path = _join(path, "component")
@@ -402,11 +457,7 @@ def _target(value: Any, path: str) -> TargetSpec:
     if "would_be_location" in obj:
         location_path = _join(path, "would_be_location")
         loc = _object(obj["would_be_location"], location_path)
-        _check_keys(loc, location_path, ("document", "parent_ref"))
-        location = WouldBeLocation(
-            _string(_require(loc, location_path, "document"), _join(location_path, "document")),
-            _string(_require(loc, location_path, "parent_ref"), _join(location_path, "parent_ref")),
-        )
+        location = _location(loc, location_path, schema_version)
     return TargetSpec(component, location)
 
 
@@ -513,14 +564,17 @@ def parse_profile(data: Mapping[str, Any]) -> ValidatedProfile:
     version = obj["schema_version"]
     if not isinstance(version, str):
         raise _fail(ProfileErrorCode.INVALID_TYPE, "schema_version", "expected a string")
-    if version != SCHEMA_VERSION:
-        raise _fail(ProfileErrorCode.SCHEMA_VERSION_UNSUPPORTED, "schema_version", f"only version {SCHEMA_VERSION!r} is supported")
+    if version not in SUPPORTED_SCHEMA_VERSIONS:
+        raise _fail(
+            ProfileErrorCode.SCHEMA_VERSION_UNSUPPORTED, "schema_version",
+            f"only versions {', '.join(repr(v) for v in SUPPORTED_SCHEMA_VERSIONS)} are supported",
+        )
     _check_keys(obj, "", ("schema_version", "profile_id", "finding_selector", "scope", "target", "documents", "inv_assertions"))
 
     profile_id = _string(_require(obj, "", "profile_id"), "profile_id")
     selector = _selector(obj["finding_selector"], "finding_selector") if "finding_selector" in obj else None
     scope = _scope(_require(obj, "", "scope"), "scope", profile_scope=True)
-    target = _target(obj["target"], "target") if "target" in obj else None
+    target = _target(obj["target"], "target", version) if "target" in obj else None
     documents = _documents(_require(obj, "", "documents"), "documents")
     if target is not None and target.would_be_location is not None:
         if target.would_be_location.document not in {d.doc_id for d in documents}:

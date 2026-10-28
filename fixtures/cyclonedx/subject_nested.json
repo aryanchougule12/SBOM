@@ -1,0 +1,108 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-15T10:00:00Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "equiv-tool",
+          "version": "1.2.3"
+        }
+      ]
+    },
+    "component": {
+      "type": "application",
+      "bom-ref": "app-1",
+      "name": "example-app",
+      "version": "2.0.0",
+      "purl": "pkg:generic/example-app@2.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "sub-a",
+          "name": "bundled-a",
+          "version": "1.0",
+          "purl": "pkg:npm/bundled-a@1.0",
+          "components": [
+            {
+              "type": "library",
+              "bom-ref": "sub-a1",
+              "name": "bundled-a1",
+              "version": "0.1",
+              "purl": "pkg:npm/bundled-a1@0.1"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "sub-b",
+          "name": "bundled-b",
+          "version": "2.0",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "abababababababababababababababababababababababababababababababab"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "lib-a",
+      "name": "lib-a",
+      "version": "1.0",
+      "purl": "pkg:npm/lib-a@1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "lib-b",
+      "name": "lib-b",
+      "version": "2.0",
+      "purl": "pkg:npm/lib-b@2.0",
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "lib-c",
+          "name": "lib-c",
+          "version": "3.0",
+          "purl": "pkg:npm/lib-c@3.0"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "app-1",
+      "dependsOn": [
+        "lib-a",
+        "sub-a"
+      ]
+    },
+    {
+      "ref": "sub-a",
+      "dependsOn": [
+        "sub-a1"
+      ]
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "complete",
+      "assemblies": [
+        "app-1"
+      ]
+    }
+  ]
+}
