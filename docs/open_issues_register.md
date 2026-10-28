@@ -57,7 +57,7 @@ Each row: affected sections/tests, issue, proposed fix, whether it changes resea
 - **Issue:** `Scope.artifact_digest` is `list[str]` with no defined format; `Integrity.artifact_digest_binding` is `Optional[str]` and no parser sets it; subject hashes are typed `Hash(algorithm, value)`; which subject binds when a document has several (SPDX subjects fixture: `appA`, `appB`) is undefined; SPDX file-subject checksums are not extracted at all; OpenVEX product hashes describe the product, not an SBOM.
 - **Proposed fix (audit):** canonical `<normalized-alg>:<normalized-hex>` for `Scope.artifact_digest`, compared with the `identifiers.normalize_hash_*` functions against subject hashes; decide which subject binds.
 - **Changes research semantics:** yes. **Blocks:** P2, P3, BIND.
-- **Status:** **Approved convention (canonical `alg:hex`).** Recorded; **not implemented**. The choice of which subject binds is still open. No P2/P3 is ever granted from declared hashes.
+- **Status:** **Approved convention (canonical `alg:hex`), and approved BIND decisions G3c-B1 to G3c-B5 (below).** The pure evaluator `evidence/bind.py` implements B1-B5 in isolation; it is **not wired** into extraction or the engine, so BIND is still not extracted. G3c is **not closed**: which hash or document object P2 reads (the subject only, as BIND does, or any declared digest), the P2/P3 grant itself and the use of BIND in EP stay open. No P2/P3 is ever granted from declared hashes, and `integrity.artifact_digest_binding` is never set by the evaluator.
 
 ### G3d: Locator containment and absent-locator semantics
 - **Affects:** spec §1.2 step 3.
@@ -221,7 +221,7 @@ Each row: affected sections/tests, issue, proposed fix, whether it changes resea
 - **Issue:** "mismatched" (N3) has no corresponding evidence state; mapping `Scope.product_id` (an OpenVEX `@id`, possibly a purl with an embedded digest that the parser deliberately does not parse) and `Scope.version` to an SBOM subject is undefined; OpenVEX scopes have no `artifact_digest`.
 - **Proposed fix:** define a mismatch representation and a product/version comparison; depends on G3c.
 - **Changes research semantics:** yes. **Blocks:** BIND.
-- **Status:** **Open.** BIND is not extracted (a `NOT_EVALUATED` diagnostic is reported).
+- **Status:** **Open (partly addressed).** The mismatch representation and the product/version comparison are the approved decisions G3c-B4 and G3c-B5, implemented only as the isolated evaluator `evidence/bind.py`. BIND is still not extracted (a `NOT_EVALUATED` diagnostic is reported) and the evaluator is not wired into extraction or the engine. The mapping of `Scope.product_id` is limited to purl and CPE identifiers; other product identifiers give `UNKNOWN`, so that part of the mapping stays open.
 
 ### G18: Step 4 versus the definition of Insufficient (found in Phase 1)
 - **Affects:** spec §3 (Verdict definitions, Step 4, no-rule default), §4.2 rule table.
@@ -282,6 +282,31 @@ These are choices in `evidence/profile.py` (profile loading and validation only;
 9. **[C] Forbidden fields.** Names that would supply an evidence state, provenance level, rule outcome or verdict are rejected with `PROFILE_FORBIDDEN_FIELD` wherever they occur; other unknown fields are `PROFILE_UNKNOWN_FIELD`.
 
 Not done in this slice: INV state derivation, BIND, the structural contradiction classifier (G11 Q4), C3 (duplicate identifiers), a profile digest, and integration with extraction or the engine. A usable assertion is only an input to a later step; it never sets INV and INV `Present` still requires BIND `MATCHED`.
+
+## Approved BIND decisions G3c-B1 to G3c-B5 (project policy; implemented in isolation)
+
+Labels are local, like the other register labels, and are not specification identifiers. They are project decisions **[R]** approved on the BIND design review; they are not specification text, which gives only "(digest, else product and version)" ([S] section 4.1). They are implemented as `evidence.bind.evaluate_bind` (tests in `tests/test_bind.py`), which is **not wired** into extraction or the engine.
+
+- **G3c-B1 Subject selection.** Only the subject the document declares is a candidate: `SourceDocument.subjects` and, for SPDX, every `SubjectDeclaration`. One distinct subject (one distinct `ref`) with every declaration resolved to a package is required. No subject, several distinct subjects, a declaration that resolved to a file, snippet or nothing, and repeated declarations of one reference that disagree on identity fields give `UNKNOWN`. No listed or nested component, similar name or VEX product is ever substituted.
+- **G3c-B2 Precedence.** The digest path decides when the scope and the subject have a comparable usable digest. Product and version is used only when none exists, and never overrides a comparable digest disagreement.
+- **G3c-B3 Digests.** Canonical `alg:hex` (decision 2); algorithms compared by normalized string only, with no alias table, allow-list or length rule. Agreement with no disagreement is `MATCHED`; disagreement with no agreement is `MISMATCHED` (single unambiguous subject, no self-conflicting digest sets); agreement together with disagreement, or two values for one algorithm on either side, is `UNKNOWN`. Malformed source-side digests are ignored and reported as diagnostics. A declared hash is not independent proof that the artifact is correctly identified.
+- **G3c-B4 Product/version fallback.** `Scope.product_id` must equal the subject purl, or one of its CPEs, after `variant-norm-v1`; the versions must be equal after trimming; no name, `bom-ref` or SPDXID match. Missing, incompatible or ambiguous evidence gives `UNKNOWN`.
+- **G3c-B5 `MISMATCHED`.** Only a digest disagreement under B3 produces it; a product or version difference is `UNKNOWN`.
+
+Not decided here and still open: G10 (the evaluator ignores `artifact_kind`), G11, G13, G18, "covers S" for DECL (G6 open point 2: BIND `MATCHED` is necessary, not sufficient), the use of BIND in EP/P2/P3, corroborating documents (`BIND(d)` for N14-N16), and an evaluator-selected subject.
+
+## Implementation conventions made in the BIND slice (unconfirmed; not approved semantic decisions)
+
+Choices in `evidence/bind.py` where B1-B5 are silent. They need explicit confirmation:
+
+1. "Malformed" source digests means an empty algorithm or value after normalization, or a value that is not hexadecimal (the profile's digest rule, applied to the source side). A malformed scope digest (possible only if a `ScopeIdentity` is built without profile validation) is likewise ignored with a diagnostic.
+2. A self-conflicting digest set (two values for one normalized algorithm) on either side gives `UNKNOWN` even when that algorithm is not comparable.
+3. The scope `product_id` is treated as a purl when it starts with `pkg:` and as a CPE when it starts with `cpe:` (case-insensitive); any other form gives `UNKNOWN` (`BIND_PRODUCT_ID_NOT_COMPARABLE`). A purl is compared only with the subject purl and a CPE only with the subject CPEs; CPE 2.2 and 2.3 are not converted.
+4. For SPDX, subject records and subject declarations that do not name the same packages give `UNKNOWN` (`BIND_SUBJECT_RECORDS_INCONSISTENT`). Subjects without a reference are never merged.
+5. Repeated declarations of one reference are compared on normalized name, trimmed version, normalized purl, normalized CPE set and normalized hash set; if they agree, the one with the smallest `(locator, declared_via)` is used.
+6. When several conditions apply, the first in `BindCode` declaration order is the reason and the rest are diagnostics. `BindState` is reused from `evidence.cnp_rules` (the engine does not import the evaluator).
+7. `evaluate_bind_for_profile` finds the profile's primary document by `doc_id` among the supplied SBOM records; none gives `UNKNOWN` and several give `UNKNOWN` (`BIND_PRIMARY_SBOM_AMBIGUOUS`).
+8. The result records its basis (`DIGEST` or `PRODUCT_VERSION`) so that a later provenance stage can distinguish a digest binding (P2) from a product/version binding. The evaluator grants no provenance level.
 
 ## Cross-reference: resolved prerequisite changes
 
