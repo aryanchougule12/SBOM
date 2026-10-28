@@ -138,7 +138,11 @@ class BindEvaluation:
     ``UNKNOWN``. ``reason`` is the stable code for the state (the first applicable code when
     several apply); the other applicable conditions are in ``diagnostics``.
     ``agreeing_digests`` (canonical ``alg:hex``) and ``disagreeing_algorithms`` describe the
-    digest comparison when it took place. This record never carries a provenance level.
+    digest comparison when it took place. ``document_id`` is the ``doc_id`` of the SBOM record
+    the result was derived from (``None`` when no record was evaluated); a later stage uses it
+    to check that a BIND result belongs to the document it is combined with. A subject
+    reference or locator is document-relative and does not identify a document. This record
+    never carries a provenance level.
     """
 
     state: BindState
@@ -149,8 +153,11 @@ class BindEvaluation:
     agreeing_digests: tuple[str, ...] = ()
     disagreeing_algorithms: tuple[str, ...] = ()
     diagnostics: tuple[BindDiagnostic, ...] = ()
+    document_id: Optional[str] = None
 
     def __post_init__(self) -> None:
+        if self.document_id is not None and (not isinstance(self.document_id, str) or not self.document_id.strip()):
+            raise ValueError("document_id must be None or a non-empty string")
         decisive = {
             BindCode.DIGEST_MATCH: (BindState.MATCHED, BindBasis.DIGEST),
             BindCode.PRODUCT_VERSION_MATCH: (BindState.MATCHED, BindBasis.PRODUCT_VERSION),
@@ -296,14 +303,14 @@ def _sorted(diagnostics: Iterable[BindDiagnostic]) -> tuple[BindDiagnostic, ...]
 
 
 def _unknown(blockers: list[BindDiagnostic], extra: Iterable[BindDiagnostic] = (),
-             subject: Optional[DocumentSubject] = None) -> BindEvaluation:
+             subject: Optional[DocumentSubject] = None, document_id: Optional[str] = None) -> BindEvaluation:
     ordered = _sorted([*blockers, *extra])
     reason = next(d.code for d in ordered if d.code not in _DIAGNOSTIC_ONLY)
     return BindEvaluation(
         state=BindState.UNKNOWN, basis=None, reason=reason,
         subject_ref=subject.ref if subject else None,
         subject_locator=subject.locator if subject else None,
-        diagnostics=ordered,
+        diagnostics=ordered, document_id=document_id,
     )
 
 
@@ -318,7 +325,7 @@ def evaluate_bind(scope: ScopeIdentity, record: Optional[SbomRecord]) -> BindEva
 
     subject, blockers = _select_subject(record)
     if subject is None:
-        return _unknown(blockers)
+        return _unknown(blockers, document_id=record.doc_id)
 
     diagnostics: list[BindDiagnostic] = []
     scope_pairs: list[tuple[str, str]] = []
@@ -351,7 +358,7 @@ def evaluate_bind(scope: ScopeIdentity, record: Optional[SbomRecord]) -> BindEva
         conflicts.append(BindDiagnostic(BindCode.SUBJECT_DIGEST_SELF_CONFLICT,
                                         f"the subject states different values for: {', '.join(subject_conflicts)}"))
     if conflicts:
-        return _unknown(conflicts, diagnostics, subject)
+        return _unknown(conflicts, diagnostics, subject, record.doc_id)
 
     common = sorted(set(scope_digests) & set(subject_digests))
     if common:  # B2: the digest path decides; product and version is not consulted
@@ -363,7 +370,7 @@ def evaluate_bind(scope: ScopeIdentity, record: Optional[SbomRecord]) -> BindEva
                 [BindDiagnostic(BindCode.DIGEST_CONFLICT,
                                 f"digests agree for {', '.join(a.split(':')[0] for a in agreeing)} "
                                 f"but disagree for {', '.join(disagreeing)}")],
-                diagnostics, subject,
+                diagnostics, subject, record.doc_id,
             )
         if agreeing:
             state, reason = BindState.MATCHED, BindCode.DIGEST_MATCH
@@ -373,15 +380,16 @@ def evaluate_bind(scope: ScopeIdentity, record: Optional[SbomRecord]) -> BindEva
             state=state, basis=BindBasis.DIGEST, reason=reason,
             subject_ref=subject.ref, subject_locator=subject.locator,
             agreeing_digests=agreeing, disagreeing_algorithms=disagreeing,
-            diagnostics=_sorted(diagnostics),
+            diagnostics=_sorted(diagnostics), document_id=record.doc_id,
         )
 
     failures = _fallback_failures(scope, subject.component)
     if failures:
-        return _unknown(failures, diagnostics, subject)
+        return _unknown(failures, diagnostics, subject, record.doc_id)
     return BindEvaluation(
         state=BindState.MATCHED, basis=BindBasis.PRODUCT_VERSION, reason=BindCode.PRODUCT_VERSION_MATCH,
         subject_ref=subject.ref, subject_locator=subject.locator, diagnostics=_sorted(diagnostics),
+        document_id=record.doc_id,
     )
 
 

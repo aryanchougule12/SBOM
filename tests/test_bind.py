@@ -457,6 +457,45 @@ def test_profile_assertions_and_scope_equality_do_not_bind():
     assert evaluate_bind_for_profile(profile, [primary]).state is BindState.UNKNOWN
 
 
+# ---- document identity ------------------------------------------------------------------------------------------
+
+def test_every_evaluated_result_names_the_document_it_came_from():
+    cyclonedx = cdx()
+    pv_record = with_hashes(cdx({"purl": PURL}), [])
+    fallback_fail = with_hashes(cdx(), [])
+    no_subject = cdx(drop_subject=True)
+    multi = load_spdx(FIXTURES / "spdx" / "subjects.json")
+    cases = [
+        (evaluate_bind(scope(digests=[f"sha256:{X}"]), cyclonedx), cyclonedx),          # digest match
+        (evaluate_bind(scope(digests=[f"sha256:{Y}"]), cyclonedx), cyclonedx),          # digest mismatch
+        (evaluate_bind(scope(), pv_record), pv_record),                                  # product/version match
+        (evaluate_bind(scope(product_id="unrelated"), fallback_fail), fallback_fail),    # unknown: fallback failure
+        (evaluate_bind(scope(), no_subject), no_subject),                                # unknown: no subject
+        (evaluate_bind(scope(), multi), multi),                                          # unknown: subject blockers
+        (evaluate_bind(scope(digests=[f"sha256:{X}", f"sha256:{Y}"]), cyclonedx), cyclonedx),  # unknown: self-conflict
+    ]
+    for result, record in cases:
+        assert result.document_id == record.doc_id and record.doc_id.startswith(("cyclonedx:", "spdx:"))
+    assert {r.state for r, _ in cases} == {BindState.MATCHED, BindState.MISMATCHED, BindState.UNKNOWN}
+
+
+def test_no_record_has_no_document_identity_and_the_profile_helper_uses_the_record_id():
+    assert evaluate_bind(scope(), None).document_id is None
+    primary = cdx()
+    profile = profile_for(primary.doc_id)
+    assert evaluate_bind_for_profile(profile, [primary]).document_id == primary.doc_id
+    assert evaluate_bind_for_profile(profile, []).document_id is None
+    assert evaluate_bind_for_profile(profile, [primary, copy.deepcopy(primary)]).document_id is None
+
+
+def test_document_id_is_validated_and_does_not_change_the_state_or_basis():
+    for bad in ("", "  ", 5):
+        with pytest.raises(ValueError):
+            BindEvaluation(BindState.MATCHED, BindBasis.DIGEST, C.DIGEST_MATCH, document_id=bad)
+    result = evaluate_bind(scope(digests=[f"sha256:{X}"]), cdx())
+    assert (result.state, result.basis, result.reason) == (BindState.MATCHED, BindBasis.DIGEST, C.DIGEST_MATCH)
+
+
 # ---- ordering invariance and purity ---------------------------------------------------------------------------------
 
 def test_result_does_not_depend_on_hash_or_cpe_order():

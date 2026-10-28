@@ -186,7 +186,7 @@ Each row: affected sections/tests, issue, proposed fix, whether it changes resea
 - **Issue:** nothing distinguishes a full component list from a direct-dependencies-only list; the state for an empty list is undefined; "dangling" is detectable only relative to the parser's registry. Valid endpoints can be unregistered: SPDX `NOASSERTION`/`NONE`, `DocumentRef-...:` external-document endpoints (`externalDocumentRefs` is not extracted), and anything the CycloneDX schema-location table in `sbom_parser/cyclonedx.py` does not cover. The CycloneDX docstring says the official schemas were not available offline while the in-code comment says the table was verified against the upstream schema; that claim was not re-verified in the audit. Resolving a reference (subject, document node, service, nested component) never adds an inventory component and never shows a target component present.
 - **Proposed fix:** decide a "full list" criterion and the empty-list state; decide how unregistered endpoints may feed an INV `Contradictory` state.
 - **Changes research semantics:** yes. **Blocks:** INV Present/Contradictory.
-- **Status:** **Open.** Slice 1 exposes the inventory through the adapter and emits INV `Unknown` (`INV_FULL_LIST_NOT_ESTABLISHED`). Reference lookups return the neutral `resolved` / `not_in_registry`; neither is called "missing" or "dangling".
+- **Status:** **Open.** Slice 1 exposes the inventory through the adapter and emits INV `Unknown` (`INV_FULL_LIST_NOT_ESTABLISHED`). Reference lookups return the neutral `resolved` / `not_in_registry`; neither is called "missing" or "dangling". An isolated INV derivation (`evidence/inv.py`) now exists that takes the structural-check results, interpretability and emptiness as **explicit caller inputs**; it implements no classifier, defines no component or member, and is not wired into extraction or the engine. G11 Q2 (the member definition, full-depth interpretation and the empty-list state) and Q4 (the dangling-reference classifier) remain open.
 
 ### G13: MATCH criteria
 - **Affects:** spec §4.1 MATCH, N1, N8, N9, N17, NT5, NT13, NT18, NT19.
@@ -307,6 +307,31 @@ Choices in `evidence/bind.py` where B1-B5 are silent. They need explicit confirm
 6. When several conditions apply, the first in `BindCode` declaration order is the reason and the rest are diagnostics. `BindState` is reused from `evidence.cnp_rules` (the engine does not import the evaluator).
 7. `evaluate_bind_for_profile` finds the profile's primary document by `doc_id` among the supplied SBOM records; none gives `UNKNOWN` and several give `UNKNOWN` (`BIND_PRIMARY_SBOM_AMBIGUOUS`).
 8. The result records its basis (`DIGEST` or `PRODUCT_VERSION`) so that a later provenance stage can distinguish a digest binding (P2) from a product/version binding. The evaluator grants no provenance level.
+9. `BindEvaluation.document_id` records the `doc_id` of the evaluated SBOM record (`None` when no record was evaluated, for example no or several primary records). It was added so that INV derivation can check that a BIND result belongs to the primary document; it changes no B1-B5 outcome.
+
+## Approved INV derivation principle and the isolated derivation (`evidence/inv.py`)
+
+**[R]** The following principle was approved for the INV derivation (stated in the instruction for this slice). It is project policy, not specification text; the specification gives only "INV: the full component list for S" and rules N2/N4.
+
+- The evaluator-entered profile assertion never sets an evidence state by itself.
+- INV `Present` requires BIND `MATCHED`, a usable assertion, all required structural checks performed, no applicable contradiction, and an interpretable, non-empty inventory.
+- INV `Contradictory` requires BIND `MATCHED` and a contradiction demonstrably relevant to S. A defect in an unbound document is a document-level diagnostic. BIND `UNKNOWN` or `MISMATCHED` prevents `Present`.
+- An unperformed required check is never a successful check. `Absent`, `Incomplete` and `Ambiguous` are not produced while G18 is open.
+
+`evidence.inv.derive_inv(profile, bind, assessment)` implements it as a pure function. It is **not wired** into extraction, BIND evaluation or the CNP engine (tests in `tests/test_inv.py`). It does not compute scope binding, run a structural classifier (G11 Q4) or define a component, member, full-depth interpretation or empty-list state (G11 Q2); C3 duplicate identifiers may be passed only as notes that never change the state. It grants no provenance level and produces no verdict. G10, G13, G18 and the open part of G3c are unchanged.
+
+## Implementation conventions made in the INV derivation slice (unconfirmed; not approved semantic decisions)
+
+Choices in `evidence/inv.py` where the approved principle is silent. They need explicit confirmation:
+
+1. **Explicit inputs.** The structural-check results, "interpretable" and "non-empty" are statements by the caller (`InventoryAssessment`); a missing assessment gives `Unknown`. A caller that supplies the wrong facts gets the wrong state; the module cannot check them.
+2. **Required checks.** At least one required check must be declared and every required check must be `PASSED`; a vacuous "all required checks passed" over zero checks is **not** accepted, so a caller cannot obtain `Present` by declaring nothing. What counts as a required check is left to the producer of the assessment (G11 Q4).
+3. **Relevance.** A found defect is `RELEVANT_TO_S` only when the check's producer says so; the default is `UNDETERMINED`. With BIND `MATCHED`, a found defect with undetermined relevance gives `Unknown` (the absence of an applicable contradiction cannot be claimed). No value means "demonstrably not relevant", because no criterion for that exists.
+4. **Precedence.** With BIND `MATCHED`, a relevant contradiction gives `Contradictory` whether or not a usable assertion, a complete assessment or a non-empty inventory exists. A contradiction found by an optional check counts.
+5. **Empty and uninterpretable inventories** give `Unknown` with their own reason codes. `Unknown` for an empty list is not a ruling on G11 Q2.
+6. **Assertion status.** `USABLE` (a usable assertion for the primary document), `UNUSABLE` (assertions were entered but none is usable, including one naming another document; the profile's diagnostics are kept unchanged) and `MISSING` (none entered).
+7. **Document identity.** The BIND result (`BindEvaluation.document_id`, the `doc_id` of the SBOM record it was derived from) and the assessment (`InventoryAssessment.document_id`, stated by the caller) must each equal the profile's single `primary_sbom` document id, by exact string equality. A subject reference or locator is document-relative and is not an identity. A missing or different identity is not an input error: it is a stable reason (`INV_DERIVATION_BIND_DOCUMENT_MISSING` / `_MISMATCH`, `INV_DERIVATION_ASSESSMENT_DOCUMENT_MISSING` / `_MISMATCH`), the state is `Unknown`, and `identity_verified` is false. A BIND result with a wrong identity counts as no BIND for the primary document, so its defects stay `UNBOUND_DOCUMENT_DEFECT` diagnostics; an assessment with a wrong identity is ignored entirely and its defects become `FOREIGN_DOCUMENT_DEFECT` diagnostics, never an INV contradiction. `Present` and `Contradictory` require `identity_verified`, which means exact document-id consistency only: it is not proof of artifact identity (BIND is a separate, self-asserted comparison), of the truth of the assessment, or of the document's authenticity. The module compares identities but cannot verify that a caller-stated assessment identity is true.
+8. Reason codes are `INV_DERIVATION_*`; when several prerequisites are unmet the first in declaration order is the reason and all are listed.
 
 ## Cross-reference: resolved prerequisite changes
 
