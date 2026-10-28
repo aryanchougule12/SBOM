@@ -271,8 +271,9 @@ def test_no_extracted_item_is_ever_present_or_absent():
 
 
 @pytest.mark.skip(
-    reason="pending: MATCH with a resolved C, full-list INV, DECL selection, BIND, GEN beyond 'method absent', "
-    "LOCUS/ENTRY/HAZ/CFG and K1-K3 are blocked on open issues G1r, G6, G11, G13, G14, G15, G17 "
+    reason="pending for the legacy extract() API only: MATCH with a resolved C, full-list INV, DECL selection, BIND and "
+    "GEN beyond 'method absent' are computed by the integrated CNP pipeline (evidence.evaluator), and LOCUS/ENTRY/HAZ/CFG "
+    "and K1-K3 by the reachability pipeline (evidence.reach_evaluator), not by extract() "
     "(see docs/open_issues_register.md)"
 )
 def test_remaining_evidence_dimensions():

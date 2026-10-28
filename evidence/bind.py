@@ -326,7 +326,17 @@ def evaluate_bind(scope: ScopeIdentity, record: Optional[SbomRecord]) -> BindEva
     subject, blockers = _select_subject(record)
     if subject is None:
         return _unknown(blockers, document_id=record.doc_id)
+    return evaluate_subject_bind(scope, subject, record.doc_id)
 
+
+def evaluate_subject_bind(scope: ScopeIdentity, subject: DocumentSubject, document_id: str) -> BindEvaluation:
+    """B2-B5 for one already selected ``subject`` of document ``document_id``.
+
+    ``evaluate_bind`` selects the subject of an SBOM (B1) and delegates here. The reachability
+    pipeline (``evidence.reach_derivation``) uses the same comparison for the artifact a
+    reachability document declares it analysed, so that the digest and product/version policy is
+    one policy and not two. Pure; nothing is mutated.
+    """
     diagnostics: list[BindDiagnostic] = []
     scope_pairs: list[tuple[str, str]] = []
     for text in scope.artifact_digests:
@@ -358,7 +368,7 @@ def evaluate_bind(scope: ScopeIdentity, record: Optional[SbomRecord]) -> BindEva
         conflicts.append(BindDiagnostic(BindCode.SUBJECT_DIGEST_SELF_CONFLICT,
                                         f"the subject states different values for: {', '.join(subject_conflicts)}"))
     if conflicts:
-        return _unknown(conflicts, diagnostics, subject, record.doc_id)
+        return _unknown(conflicts, diagnostics, subject, document_id)
 
     common = sorted(set(scope_digests) & set(subject_digests))
     if common:  # B2: the digest path decides; product and version is not consulted
@@ -370,7 +380,7 @@ def evaluate_bind(scope: ScopeIdentity, record: Optional[SbomRecord]) -> BindEva
                 [BindDiagnostic(BindCode.DIGEST_CONFLICT,
                                 f"digests agree for {', '.join(a.split(':')[0] for a in agreeing)} "
                                 f"but disagree for {', '.join(disagreeing)}")],
-                diagnostics, subject, record.doc_id,
+                diagnostics, subject, document_id,
             )
         if agreeing:
             state, reason = BindState.MATCHED, BindCode.DIGEST_MATCH
@@ -380,16 +390,16 @@ def evaluate_bind(scope: ScopeIdentity, record: Optional[SbomRecord]) -> BindEva
             state=state, basis=BindBasis.DIGEST, reason=reason,
             subject_ref=subject.ref, subject_locator=subject.locator,
             agreeing_digests=agreeing, disagreeing_algorithms=disagreeing,
-            diagnostics=_sorted(diagnostics), document_id=record.doc_id,
+            diagnostics=_sorted(diagnostics), document_id=document_id,
         )
 
     failures = _fallback_failures(scope, subject.component)
     if failures:
-        return _unknown(failures, diagnostics, subject, record.doc_id)
+        return _unknown(failures, diagnostics, subject, document_id)
     return BindEvaluation(
         state=BindState.MATCHED, basis=BindBasis.PRODUCT_VERSION, reason=BindCode.PRODUCT_VERSION_MATCH,
         subject_ref=subject.ref, subject_locator=subject.locator, diagnostics=_sorted(diagnostics),
-        document_id=record.doc_id,
+        document_id=document_id,
     )
 
 

@@ -49,11 +49,11 @@ choosing: it is never read as ``SOURCE`` or ``OTHER``, and never as binary/conta
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Callable, Optional
 
+from evidence.rule_core import TriggeredRule, minimum_ceiling, order_triggered, render_rationale
 from model import ArtifactKind, EvidenceState, ProvenanceLevel
 from reports.verdict import RationaleClass, Verdict, VerdictResult
 
@@ -155,15 +155,6 @@ class CnpInputs:
             raise TypeError("provenance_metadata_contradiction must be a bool")
         if self.decl is EvidenceState.PRESENT and self.prov_decl is None:
             raise ValueError("prov_decl (PROV_DECL) is required when decl is Present")
-
-
-@dataclass(frozen=True)
-class TriggeredRule:
-    rule_id: str
-    code: str
-    ceiling: Verdict
-    rationale_class: RationaleClass
-    detail: str
 
 
 @dataclass(frozen=True)
@@ -359,20 +350,6 @@ CNP_RULES: tuple[_Rule, ...] = (
     _Rule("N17", Verdict.INSUFFICIENT, _C, "MATCH_CONTRADICTION", _n17),
 )
 
-_CLASS_RANK = {_C: 0, _K: 1, _B: 2, RationaleClass.NO_RULE_APPLIES: 3}
-_VERDICT_RANK = {Verdict.INSUFFICIENT: 0, Verdict.WEAK: 1, Verdict.SUPPORTED: 2}
-_RULE_ID = re.compile(r"([A-Za-z]+)([0-9]+)")
-
-
-def _output_key(rule: TriggeredRule) -> tuple[int, str, int]:
-    """§3 ordering: class rank, then rule-family prefix, then the numeric suffix as an
-    integer (never the lexicographic order of the whole identifier)."""
-    match = _RULE_ID.fullmatch(rule.rule_id)
-    if match is None:  # unreachable for the committed table
-        raise ValueError(f"malformed rule id {rule.rule_id!r}")
-    return (_CLASS_RANK[rule.rationale_class], match.group(1), int(match.group(2)))
-
-
 # ---- Supported conditions (§4.4) ------------------------------------------------------------------
 
 def _unmet_supported_conditions(c: _Context) -> tuple[str, ...]:
@@ -417,19 +394,6 @@ def _unresolved_dimensions(i: CnpInputs) -> tuple[str, ...]:
     return _uncovered_states(i)
 
 
-# ---- rationale (§3 grammar) ----------------------------------------------------------------------------
-
-def _rationale(rules: tuple[TriggeredRule, ...]) -> str:
-    segments: list[str] = []
-    for rationale_class in (_C, _K, _B):
-        group = [r for r in rules if r.rationale_class is rationale_class]
-        if group:
-            codes = ",".join(r.code for r in group)
-            text = "; ".join(f"{r.rule_id}: {r.detail}" for r in group)
-            segments.append(f"{rationale_class.value}[{codes}]: {text}")
-    return " | ".join(segments)
-
-
 # ---- evaluation ------------------------------------------------------------------------------------------
 
 def evaluate_cnp(inputs: CnpInputs) -> CnpEvaluation:
@@ -440,16 +404,11 @@ def evaluate_cnp(inputs: CnpInputs) -> CnpEvaluation:
     context = _context(inputs)
 
     # Step 3: every rule is evaluated; nothing short-circuits.
-    triggered = tuple(
-        sorted(
-            (
-                TriggeredRule(rule.rule_id, rule.code, rule.ceiling, rule.rationale_class, detail)
-                for rule in CNP_RULES
-                for detail in (rule.applies(context),)
-                if detail is not None
-            ),
-            key=_output_key,
-        )
+    triggered = order_triggered(
+        TriggeredRule(rule.rule_id, rule.code, rule.ceiling, rule.rationale_class, detail)
+        for rule in CNP_RULES
+        for detail in (rule.applies(context),)
+        if detail is not None
     )
     unmet = _unmet_supported_conditions(context)
 
@@ -457,8 +416,8 @@ def evaluate_cnp(inputs: CnpInputs) -> CnpEvaluation:
     unresolved = _unresolved_dimensions(inputs)
     if triggered:
         ceilings = [r.ceiling for r in triggered] + ([Verdict.INSUFFICIENT] if unresolved else [])
-        verdict = min(ceilings, key=_VERDICT_RANK.__getitem__)
-        result = VerdictResult(verdict, _rationale(triggered), tuple(r.code for r in triggered), unresolved)
+        verdict = minimum_ceiling(ceilings)
+        result = VerdictResult(verdict, render_rationale(triggered), tuple(r.code for r in triggered), unresolved)
     elif not unmet:
         result = VerdictResult(Verdict.SUPPORTED, "", ())
     else:

@@ -39,7 +39,6 @@ specification (section 3 Step 4, addendum v0.2.2); there is no second, conflicti
 
 from __future__ import annotations
 
-import dataclasses
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Mapping, Optional, Sequence, Union
@@ -71,6 +70,7 @@ from evidence.items import (
 from evidence.match import MatchDerivation, derive_match
 from evidence.pipeline_inputs import AssemblyDiagnostic, AssemblyError, assemble
 from evidence.profile import ProfileError, ValidatedProfile
+from evidence.rule_core import jsonable as _jsonable
 from evidence.stage1_records import Stage1Index
 from evidence.verification import VerificationConfig
 from model import ArtifactKind, Disposition, EvidenceItem, EvidenceState, Finding, JustificationType, ProvenanceLevel
@@ -85,6 +85,9 @@ class RefusalCode(str, Enum):
     JUSTIFICATION_NOT_SUPPORTED = "EVAL_JUSTIFICATION_NOT_SUPPORTED"
     ARTIFACT_KIND_UNRESOLVED = "EVAL_ARTIFACT_KIND_UNRESOLVED"
     ITEM_INTEGRITY_FAILED = "EVAL_ITEM_INTEGRITY_FAILED"
+    # used by the evidence.reach_evaluator path and by evidence.sufficiency routing (additive)
+    REACH_INPUT_INVALID = "EVAL_REACH_INPUT_INVALID"
+    REACH_INPUT_NOT_APPLICABLE = "EVAL_REACH_INPUT_NOT_APPLICABLE"
 
 
 @dataclass(frozen=True)
@@ -146,23 +149,6 @@ class EvaluationOutcome:
 
     def to_dict(self) -> dict[str, Any]:
         return _jsonable(self)
-
-
-def _jsonable(value: Any) -> Any:
-    """A deterministic JSON-compatible view of nested frozen records, enums and tuples."""
-    if isinstance(value, Enum):
-        return value.value
-    if dataclasses.is_dataclass(value) and not isinstance(value, type):
-        return {f.name: _jsonable(getattr(value, f.name)) for f in dataclasses.fields(value)}
-    if isinstance(value, Mapping):
-        return {str(k): _jsonable(v) for k, v in sorted(value.items(), key=lambda kv: str(kv[0]))}
-    if isinstance(value, (list, tuple)):
-        return [_jsonable(v) for v in value]
-    if isinstance(value, (set, frozenset)):
-        return sorted(_jsonable(v) for v in value)
-    if hasattr(value, "isoformat"):
-        return value.isoformat()
-    return value
 
 
 def _refuse(code: RefusalCode, detail: str, cause: Optional[str] = None) -> EvaluationRefusal:

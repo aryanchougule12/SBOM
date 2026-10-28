@@ -6,7 +6,11 @@
   result or BIND result, in one place, on the evaluation's own document copy;
 * the profile cannot carry generation assertions, verdicts, states or levels (decision D10 is
   deferred; the profile never supplies states);
-* no module of the pipeline implements corroboration, reachability or C3 classification.
+* no module of the CNP pipeline implements corroboration, reachability or C3 classification, and none
+  imports the reachability modules: the two predicates share modules, never state (the reachability
+  pipeline has its own guards below);
+* the reachability pipeline imports no cryptography or network library either, and its input can never
+  carry a state, a provenance level, a BIND result or a verdict.
 """
 
 import ast
@@ -25,6 +29,7 @@ PIPELINE = [
 ]
 FORBIDDEN_IMPORTS = {"hashlib", "hmac", "ssl", "socket", "urllib", "http", "requests", "cryptography", "nacl",
                      "OpenSSL", "Crypto", "subprocess", "secrets"}
+REACH_PIPELINE = ["reach_derivation", "reach_evaluator", "reach_inputs", "reach_items", "reach_rules", "rule_core"]
 INTEGRITY_FIELDS = {"signature_verified", "trust_anchor_id", "established_coverage", "artifact_digest_binding"}
 
 
@@ -96,3 +101,40 @@ def test_corroborating_documents_are_refused_by_the_profile_not_ignored():
     with pytest.raises(ProfileError) as error:
         parse_profile(data)
     assert error.value.code is PE.ROLE_UNSUPPORTED
+
+
+@pytest.mark.parametrize("module", REACH_PIPELINE)
+def test_the_reachability_modules_import_no_cryptography_or_network_library(module):
+    assert not (_imports(_tree(f"evidence/{module}.py")) & FORBIDDEN_IMPORTS)
+
+
+def _evidence_imports(module):
+    found = set()
+    for node in ast.walk(_tree(f"evidence/{module}.py")):
+        if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith("evidence."):
+            found.add(node.module.split(".", 1)[1])
+    return found
+
+
+@pytest.mark.parametrize("module", PIPELINE + ["cnp_rules", "bind", "aggregation", "inv", "inventory_observations"])
+def test_no_cnp_module_imports_the_reachability_modules(module):
+    assert not {m for m in _evidence_imports(module) if m.startswith("reach")}, module
+
+
+def test_the_shared_core_imports_no_predicate_specific_module():
+    assert _evidence_imports("rule_core") == set()
+
+
+def test_the_reachability_input_cannot_carry_states_levels_bind_results_or_verdicts():
+    from evidence.reach_inputs import ReachInputError, ReachInputErrorCode, parse_reachability
+    for key in ("verdict", "state", "provenance_level", "bind_state", "prov_reach", "ep"):
+        with pytest.raises(ReachInputError) as error:
+            parse_reachability({"schema_version": "1", key: "x"})
+        assert error.value.code is ReachInputErrorCode.FORBIDDEN_FIELD
+
+
+def test_the_parsers_still_extract_no_reachability_facts():
+    """K1-K3, entry points, hazards and configurations enter only through the reachability input."""
+    for name in ("cyclonedx", "spdx", "openvex"):
+        names = {n.id for n in ast.walk(_tree(f"sbom_parser/{name}.py")) if isinstance(n, ast.Name)}
+        assert not any(word in n.lower() for n in names for word in ("callgraph", "hazard", "entry_point"))

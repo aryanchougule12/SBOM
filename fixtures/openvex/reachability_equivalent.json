@@ -1,0 +1,29 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://example.com/vex/reachability-equivalent",
+  "author": "Example Security Team",
+  "role": "Document Creator",
+  "timestamp": "2026-01-15T10:00:00Z",
+  "version": 1,
+  "tooling": "example-vex-tool 0.3.0",
+  "statements": [
+    {
+      "vulnerability": {"name": "CVE-2026-0001"},
+      "products": [
+        {
+          "@id": "pkg:oci/example-app@sha256%3Aabc",
+          "identifiers": {"purl": "pkg:oci/example-app@sha256%3Aabc"},
+          "hashes": {"sha-256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"},
+          "subcomponents": [
+            {"@id": "pkg:npm/lib-b@2.0", "identifiers": {"purl": "pkg:npm/lib-b@2.0"}}
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "The vulnerable function of lib-b is not on any execute path.",
+      "timestamp": "2026-01-15T10:05:00Z",
+      "supplier": "Example Supplier"
+    }
+  ]
+}

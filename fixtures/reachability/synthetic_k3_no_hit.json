@@ -1,0 +1,105 @@
+{
+  "schema_version": "1",
+  "documents": [
+    {
+      "doc_id": "k3-trace",
+      "kind": "K3",
+      "finding": "negative",
+      "producer": "synthetic-lab",
+      "producer_class": "tool",
+      "tool_name": "synthetic-analyser",
+      "tool_version": "0.0.1",
+      "created": "2026-01-16T09:00:00Z",
+      "artifact": {
+        "purl": "pkg:oci/example-app@sha256%3Aabc",
+        "version": "2.0.0",
+        "hashes": [
+          "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      },
+      "target": {
+        "purl": "pkg:npm/lib-b@2.0"
+      },
+      "analyzed_configurations": [
+        "prod"
+      ]
+    },
+    {
+      "doc_id": "reflection-basis",
+      "kind": "hazard_basis",
+      "producer": "synthetic-lab",
+      "producer_class": "tool",
+      "tool_name": "synthetic-analyser",
+      "tool_version": "0.0.1",
+      "created": "2026-01-16T09:00:00Z",
+      "artifact": {
+        "purl": "pkg:oci/example-app@sha256%3Aabc",
+        "version": "2.0.0",
+        "hashes": [
+          "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ]
+      },
+      "target": {
+        "purl": "pkg:npm/lib-b@2.0"
+      }
+    }
+  ],
+  "locus": {
+    "symbols": [
+      "org.example.LibB.parse"
+    ],
+    "granularity": "function",
+    "locus_source": "synthetic-advisory",
+    "approximation": "over_approximation",
+    "entered_by": "synthetic-evaluator"
+  },
+  "hazards": [
+    {
+      "class": "REFLECTION",
+      "disposition": "excluded_by_evidence",
+      "basis_ref": "reflection-basis"
+    },
+    {
+      "class": "DYNAMIC_LOADING",
+      "disposition": "excluded_by_evidence",
+      "basis_ref": "reflection-basis"
+    },
+    {
+      "class": "CONFIGURATION_DEPENDENT_PATHS",
+      "disposition": "excluded_by_evidence",
+      "basis_ref": "reflection-basis"
+    },
+    {
+      "class": "NATIVE_FFI",
+      "disposition": "excluded_by_evidence",
+      "basis_ref": "reflection-basis"
+    },
+    {
+      "class": "SERIALIZATION_GADGETS",
+      "disposition": "excluded_by_evidence",
+      "basis_ref": "reflection-basis"
+    },
+    {
+      "class": "GENERATED_CODE",
+      "disposition": "excluded_by_evidence",
+      "basis_ref": "reflection-basis"
+    },
+    {
+      "class": "INTER_PROCESS_CALLS",
+      "disposition": "excluded_by_evidence",
+      "basis_ref": "reflection-basis"
+    },
+    {
+      "class": "BUILD_TIME_PRUNING",
+      "disposition": "excluded_by_evidence",
+      "basis_ref": "reflection-basis"
+    }
+  ],
+  "configuration": {
+    "deployment_config_id": "prod"
+  },
+  "entry_points": {
+    "complete": true,
+    "entered_by": "synthetic-evaluator"
+  }
+}

@@ -8,10 +8,14 @@ A research prototype for judging whether the *recorded evidence* behind a VEX
 The committed specification is the sole source of truth:
 
 - `docs/formal_specification_v0.2.md`
-- `docs/spec_addendum_v0.2.1.md`
+- `docs/spec_addendum_v0.2.1.md`, `docs/spec_addendum_v0.2.2.md`, `docs/spec_addendum_v0.2.3.md`
 
-Both are fixed at commit `e0d5bfadf9bd45e753051d7e7c8654f656ddb8ef` and are not
-modified by this project's code stages.
+The specification and addendum v0.2.1 were fixed at commit
+`e0d5bfadf9bd45e753051d7e7c8654f656ddb8ef`. Later clarifications are changelogged in the
+numbered addenda (v0.2.2: the §3 Step 4 unresolved-dimension ceiling; v0.2.3: the same ceiling for
+the reachability predicate, RT12-RT13, and the readings of §5 the implementation relies on) and are
+present in the specification file. Open questions and decisions live in
+`docs/open_issues_register.md`.
 
 ## Research scope
 
@@ -27,25 +31,38 @@ Whether a verdict is acceptable to a downstream consumer is a policy question ou
 the formal procedure (D-5). The provenance ladder P0–P3 and the P3 threshold are this
 prototype's proposed profile, not a classification defined by CISA (P-4).
 
-## Current status: Stage 0 scaffold only
+## Current status
 
-This repository currently contains the module layout and typed data model. **No
-parsing, evidence extraction, predicate logic, verdict calculation or report rendering
-is implemented.** Unimplemented functions raise `NotImplementedError`. Nothing here
-is validated.
+Both predicates are implemented and integrated end to end; nothing here is validated against
+ground truth, and every fixture is synthetic.
+
+* `Req(component_not_present)` (§4, N1-N17, NT1-NT25): the integrated CNP pipeline
+  (`evidence/evaluator.py`), documented in `docs/open_issues_register.md`.
+* `Req(vulnerable_code_not_in_execute_path)` (§5, R1-R13, RT1-RT13): the reachability pipeline
+  (`evidence/reach_evaluator.py`), documented in `docs/reachability_implementation.md` (contracts,
+  rule-to-implementation matrix, limitations). Reachability follows the specification: it rests on
+  call-graph or equivalent analysis evidence (K1-K3) supplied through the project's own reachability
+  input schema; an SBOM dependency graph (K4) is read but is never reachability (A5).
+* One documented entry point, `evidence.sufficiency.evaluate_finding(profile, findings, index,
+  verification=None, reachability=None)`, routes by the finding's justification. A run evaluates one
+  predicate; no combined-predicate verdict exists.
+* Not implemented: cryptographic verification (a trusted external `VerificationResult` is consumed),
+  GEN assertions, corroborating documents, C3 duplicate classification, parsing of real analyser
+  output formats, rendering (`render_verdict`).
 
 ## Module structure
 
 | Path | Role |
 |---|---|
-| `model.py` | Typed dataclasses and enums for F = (C, V, D, J, E), scope S, source-document provenance and evidence items. Data only. |
-| `sbom_parser/cyclonedx.py`, `spdx.py`, `openvex.py` | Parser interfaces (stubs). No schema version is claimed as supported. |
-| `evidence/extraction.py` | Evidence extraction interface (stub). |
-| `evidence/requirements.py` | Entry points for the two predicates (stubs). |
-| `evidence/sufficiency.py` | Entry point for the spec §3 decision procedure (stub). |
-| `reports/verdict.py` | Verdict and rationale-class types; rendering stub. |
-| `tests/` | Smoke and structure tests; future behaviour is listed as skipped. |
-| `fixtures/` | Empty (`.gitkeep`); fixtures belong to a later approved stage. |
+| `model.py` | Typed dataclasses and enums for F = (C, V, D, J, E), scope S, source-document provenance and evidence items. |
+| `sbom_parser/` | CycloneDX, SPDX and OpenVEX parsers. |
+| `evidence/stage1_records.py`, `profile.py`, `verification.py` | Typed parser output, the evaluator profile, the external verification input. |
+| `evidence/cnp_rules.py`, `evaluator.py` and the INV/DECL/MATCH/GEN/BIND modules | The `component_not_present` engine and pipeline. |
+| `evidence/reach_rules.py`, `reach_inputs.py`, `reach_derivation.py`, `reach_items.py`, `reach_evaluator.py` | The `vulnerable_code_not_in_execute_path` engine and pipeline. |
+| `evidence/rule_core.py` | What both predicates share (ordering, rationale rendering, minimum ceiling). |
+| `evidence/requirements.py`, `sufficiency.py` | The pure predicates and the documented entry point. |
+| `tests/` | The test suite, including `tests/conformance.py`, the rule-conformance harness. |
+| `fixtures/` | Parser fixtures; `fixtures/reachability/` holds synthetic reachability evidence. |
 
 ## Running the tests
 
@@ -53,13 +70,14 @@ From the repository root:
 
 ```
 python -m pytest -v -rs
+python -m tests.conformance
 ```
 
-`python -m` is used so the repository root is on the import path. Install the
-dependencies first with `pip install -r requirements.txt`. At Stage 0 the parsing
-libraries listed there are not yet imported by any module; only `pytest` is needed to
-run the tests. Skipped tests are placeholders for functionality that does not exist
-yet, and `-rs` prints their reasons.
+`python -m` is used so the repository root is on the import path. Install the dependencies first
+with `pip install -r requirements.txt`. `python -m tests.conformance` prints the rule-conformance
+summary for both predicates (synthetic cases only) and exits non-zero on any gap or failure; it also
+runs under pytest. Skipped tests are placeholders for functionality that does not exist yet, and `-rs`
+prints their reasons.
 
 ## Mapping to FR-01–FR-09
 
