@@ -177,6 +177,10 @@ class ReachabilityEvidence:
     # Every analyzer artifact that was ingested for this evaluation, including those that produced no
     # document (their diagnostics and limitations are part of the explanation). Python-level only.
     analysis_sources: tuple[SourceRef, ...] = ()
+    # Documents of the worst case in which every *undecidable* observation of an analyzer artifact is a
+    # path (see evidence.analysis_binding). The evaluator compares the outcome without and with them
+    # and refuses when they differ. Python-level only.
+    worst_case_documents: tuple[ReachDocument, ...] = ()
 
     def document(self, doc_id: str) -> Optional[ReachDocument]:
         return next((d for d in self.documents if d.doc_id == doc_id), None)

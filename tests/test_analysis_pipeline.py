@@ -1,6 +1,6 @@
 """End-to-end tests: raw analyzer artifact -> adapter -> binding/provenance -> reachability evaluator -> outcome or refusal.
 
-Fixtures are upstream files (category A) or SYNTHETIC (category B); no live analyzer was run (fixtures/analysis/README.md)."""
+Fixtures are upstream files (category A), SYNTHETIC (category B) or live CodeQL output (category L); see fixtures/analysis/README.md."""
 
 import copy
 import json
@@ -188,6 +188,9 @@ def test_a_derived_path_can_only_lower_a_supported_verdict_and_a_non_path_artifa
         if "invalid" in path.name or path.name == "codeql-action__tool-names.sarif":
             continue
         with_artifact = evaluate(path, base=supported_base(), verification=V_K1)
+        if isinstance(with_artifact, EvaluationRefusal):  # an unresolved relevant record that could change the verdict: no verdict at all
+            assert with_artifact.code is RefusalCode.ANALYSIS_EVIDENCE_UNDECIDABLE, path.name
+            continue
         assert RANK[with_artifact.result.verdict] <= RANK[without.result.verdict], path.name
         positive = any(s.traces for s in with_artifact.analysis)
         assert (with_artifact.result.verdict is Verdict.INSUFFICIENT) is positive, path.name

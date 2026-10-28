@@ -1,5 +1,5 @@
 """Helpers for the analyzer-artifact tests. Fixtures under fixtures/analysis are either upstream files or
-SYNTHETIC (see fixtures/analysis/README.md); nothing here is a live analyzer run."""
+SYNTHETIC or, under authentic/, live CodeQL output (see fixtures/analysis/README.md)."""
 
 import json
 

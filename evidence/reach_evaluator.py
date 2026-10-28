@@ -40,6 +40,7 @@ supply a state, a provenance level or a verification result.
 from __future__ import annotations
 
 import copy
+import dataclasses
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional, Sequence, Union
 
@@ -140,7 +141,47 @@ def evaluate_reachability(
 
     ``reachability`` ``None`` means no reachability evidence was supplied: every evidence-dependent
     dimension is then ``Unknown``. Nothing the caller passes in is mutated.
+
+    **Undecidable analyzer evidence.** If an ingested analyzer artifact records flows or call edges that
+    might touch the locus but cannot be resolved (``evidence.worst_case_documents``), the evaluation is
+    run twice: as given, and in the worst case in which each of them is a path. If the two verdicts
+    are the same, the first outcome is returned with the situation stated in its limitations and
+    diagnostics. If they differ, the unresolved records could change the verdict, no verdict is
+    justified, and an ``EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE`` refusal is returned: an unresolved record is
+    never allowed to be overridden by a supplied absence. No new state or verdict is involved.
     """
+    outcome = _evaluate_once(profile, findings, index, reachability, verification)
+    if not isinstance(reachability, ReachabilityEvidence) or not reachability.worst_case_documents \
+            or isinstance(outcome, EvaluationRefusal):
+        return outcome
+    replaced = {d.doc_id for d in reachability.worst_case_documents}
+    worst_evidence = dataclasses.replace(
+        reachability,
+        documents=tuple(d for d in reachability.documents if d.doc_id not in replaced) + reachability.worst_case_documents,
+        worst_case_documents=())
+    worst = _evaluate_once(profile, findings, index, worst_evidence, verification)
+    if isinstance(worst, EvaluationRefusal):
+        return worst
+    undecidable = [(s.artifact.doc_id, u) for s in reachability.analysis_sources for u in s.undecidable]
+    names = "; ".join(f"{doc} {u.locator} ({u.reason})" for doc, u in undecidable)
+    if outcome.result.verdict is not worst.result.verdict:
+        return _refuse(RefusalCode.ANALYSIS_EVIDENCE_UNDECIDABLE,
+                       f"{len(undecidable)} recorded flow(s)/call edge(s) may touch the locus but cannot be resolved, and counting them as "
+                       f"paths would change the verdict from {outcome.result.verdict.value} to {worst.result.verdict.value}: {names}",
+                       "UNRESOLVED_RELEVANT_EVIDENCE")
+    note = (f"UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the {len(undecidable)} undecidable observation(s) as paths "
+            f"gives the same verdict ({outcome.result.verdict.value})")
+    return dataclasses.replace(outcome, limitations=tuple(dict.fromkeys(outcome.limitations + (note,))),
+                               diagnostics=outcome.diagnostics + (f"{note}: {names}",))
+
+
+def _evaluate_once(
+    profile: ValidatedProfile,
+    findings: Sequence[Finding],
+    index: Stage1Index,
+    reachability: Optional[ReachabilityEvidence] = None,
+    verification: Optional[VerificationConfig] = None,
+) -> Union[ReachOutcome, EvaluationRefusal]:
     if not isinstance(profile, ValidatedProfile):
         return _refuse(RefusalCode.PROFILE_INVALID, "the profile must be a ValidatedProfile")
     if verification is not None and not isinstance(verification, VerificationConfig):

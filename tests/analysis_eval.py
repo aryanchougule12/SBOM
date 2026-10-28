@@ -13,11 +13,11 @@ cases that depend on a still-open semantic question, and agreement with the expe
 What the numbers mean
 ---------------------
 They are **controlled conformance results**. Category B fixtures are synthetic. Category A files are
-upstream test data / documentation examples of the formats, copied byte-for-byte; no file was
-produced by a live analyzer run in this project, and none is a labelled ground-truth set for any
-security question. The report therefore contains **no accuracy, precision, recall or false-positive
+upstream test data / documentation examples of the formats, copied byte-for-byte; category L files are
+unedited output of live CodeQL runs made for this repository (fixtures/analysis/authentic/codeql/REPRODUCE.md);
+none is a labelled ground-truth set for any security question, and no authentic Joern output was obtained. The report therefore contains **no accuracy, precision, recall or false-positive
 rate**; "agreement" is the fraction of cases whose output equals the reviewed expectation, reported
-separately for the two categories and never merged into one score.
+separately for the categories and never merged into one score.
 
 Run::
 
@@ -168,11 +168,44 @@ def check_fixture(case: dict) -> list[str]:
             problems.append("category A must not be synthetic or handwritten")
         if not (case["file"].startswith("upstream/") and source.get("commit") and source.get("origin") and source.get("license")):
             problems.append("category A needs origin, commit and license")
+    elif case["category"] == "L":
+        problems.extend(_check_live(case, path))
     elif not source.get("synthetic"):
         problems.append("category B must be flagged synthetic")
-    if source.get("live_run"):
-        problems.append("no fixture in this corpus is a live analyzer run")
+    if source.get("live_run") and case["category"] != "L":
+        problems.append("only category L may be a live analyzer run")
     return problems
+
+
+def _check_live(case: dict, path: Path) -> list[str]:
+    """Category L (output of a real analyzer run made for this repository) must carry its full provenance and match the file."""
+    source = case["source"]
+    problems = []
+    if source.get("synthetic") or source.get("handwritten_here") or not source.get("live_run"):
+        problems.append("category L must be a live run: not synthetic, not handwritten, live_run true")
+    for key in ("tool_version", "bundle_sha256", "bundle_url", "query", "query_pack", "project", "retrieved_or_run", "license"):
+        if not source.get(key):
+            problems.append(f"category L needs {key}")
+    if not case["file"].startswith("authentic/"):
+        problems.append("category L files live under authentic/")
+    try:
+        driver = json.loads(path.read_bytes())["runs"][0]["tool"]["driver"]
+    except (ValueError, KeyError, IndexError, TypeError):
+        return problems + ["category L file is not a SARIF log with a tool driver"]
+    if driver.get("semanticVersion") != source.get("tool_version"):
+        problems.append(f"driver semanticVersion {driver.get('semanticVersion')!r} does not match the recorded tool_version")
+    if "codeql" not in str(driver.get("name", "")).lower():
+        problems.append("driver name is not CodeQL")
+    return problems
+
+
+CATEGORY_LABELS = {
+    "A": "upstream format examples / test data (byte-for-byte)",
+    "B": "synthetic controlled fixtures",
+    "L": "authentic CodeQL output (live runs made for this repository)",
+}
+AUTHENTIC_JOERN = ("authentic Joern output: 0 artifacts. Not obtained: the Joern distribution is about 1.7 GB and was not installed "
+                   "for this task; every Joern GraphML here is category B (synthetic), checked against the exporter source and CPG schema only.")
 
 
 def _distribution(values) -> dict:
@@ -193,14 +226,15 @@ def build_report() -> dict:
     report: dict[str, Any] = {
         "kind": "controlled-conformance-results",
         "disclaimer": ("Controlled conformance against hand-reviewed expectations. Category B is synthetic; category A files are upstream "
-                       "format examples/test data, not live analyzer runs. No accuracy, precision, recall or false-positive rate is "
+                       "format examples/test data, not live analyzer runs; category L files are live CodeQL runs made for this repository. No accuracy, precision, recall or false-positive rate is "
                        "reported because no labelled ground truth exists."),
         "manifest_schema": manifest["schema"],
         "totals": {"cases": len(rows), "agree": sum(r["agree"] for r in rows), "disagree": sum(not r["agree"] for r in rows),
                    "fixture_problems": sum(bool(r["fixture_problems"]) for r in rows)},
         "categories": {},
+        "not_obtained": {"authentic_joern": AUTHENTIC_JOERN},
     }
-    for category in ("A", "B"):
+    for category in ("A", "B", "L"):
         part = [r for r in rows if r["category"] == category]
         evaluated = [r for r in part if r["actual"]["outcome"] == "evaluated"]
         by_format = {}
@@ -214,7 +248,7 @@ def build_report() -> dict:
                 "agree": sum(r["agree"] for r in of_format),
             }
         report["categories"][category] = {
-            "label": "upstream format examples / test data (byte-for-byte)" if category == "A" else "synthetic controlled fixtures",
+            "label": CATEGORY_LABELS[category],
             "cases": len(part), "agree": sum(r["agree"] for r in part),
             "by_format": by_format,
             "refusals_by_cause": _distribution(r["actual"]["cause"] for r in part if r["actual"]["outcome"] == "refused"),
@@ -269,6 +303,7 @@ def render_summary(report: dict) -> str:
             lines.append(f"  {fmt}: artifacts {row['artifacts']}, evaluated {row['evaluated']}, refused {row['refused']}, agree {row['agree']}/{row['cases']}")
         lines.append(f"  REACH states {part['reach_state_distribution']}; verdicts {part['verdict_distribution']}; refusals {part['refusals_by_cause']}")
         lines.append(f"  unbound {len(part['cases_unbound'])}, positive path {len(part['cases_with_positive_path'])}, open semantics {len(part['cases_open_semantics'])}")
+    lines.append("\n" + report["not_obtained"]["authentic_joern"])
     cov = report["rule_coverage"]
     lines.append(f"\nrules triggered in this corpus: {sum(1 for v in cov['triggered'].values() if v)}/{len(RULE_IDS)}; never: {', '.join(cov['never_triggered']) or '-'}")
     for r in report["cases"]:

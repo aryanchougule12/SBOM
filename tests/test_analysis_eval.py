@@ -22,12 +22,14 @@ def manifest():
 
 def test_every_case_agrees_with_its_reviewed_expectation_and_every_attribution_checks(report):
     assert report["totals"]["disagree"] == 0 and report["totals"]["fixture_problems"] == 0, analysis_eval.render_summary(report)
-    assert report["totals"]["cases"] == len(analysis_eval.load_manifest()["cases"]) >= 70
+    assert report["totals"]["cases"] == len(analysis_eval.load_manifest()["cases"]) >= 100
 
 
 def test_the_report_keeps_upstream_and_synthetic_results_apart_and_reports_no_accuracy_metric(report):
-    assert set(report["categories"]) == {"A", "B"}
+    assert set(report["categories"]) == {"A", "B", "L"}
     assert report["categories"]["A"]["label"].startswith("upstream") and report["categories"]["B"]["label"].startswith("synthetic")
+    assert report["categories"]["L"]["label"].startswith("authentic CodeQL")
+    assert "0 artifacts" in report["not_obtained"]["authentic_joern"]
     assert report["kind"] == "controlled-conformance-results" and "No accuracy" in report["disclaimer"]
     assert {r["category"] for r in report["cases"] if r["id"].startswith("A")} == {"A"}
     forbidden = {"accuracy", "precision", "recall", "f1", "false_positive_rate", "score"}
@@ -45,10 +47,12 @@ def test_the_report_keeps_upstream_and_synthetic_results_apart_and_reports_no_ac
 def test_formats_artifacts_refusals_and_distributions_are_reported_per_category(report):
     a, b = report["categories"]["A"], report["categories"]["B"]
     assert a["by_format"]["sarif"]["artifacts"] == 9 and set(a["by_format"]) == {"sarif"}
-    assert {"sarif", "joern-graphml", "none"} == set(b["by_format"]) and b["by_format"]["joern-graphml"]["refused"] == 9
+    assert {"sarif", "joern-graphml", "none"} == set(b["by_format"]) and b["by_format"]["joern-graphml"]["refused"] == 11
     assert sum(b["refusals_by_cause"].values()) == b["by_format"]["sarif"]["refused"] + b["by_format"]["joern-graphml"]["refused"]
     assert set(a["verdict_distribution"]) == {"Insufficient"} and "Supported" in b["verdict_distribution"]
     assert b["cases_open_semantics"] and b["cases_unbound"] and b["cases_with_positive_path"]
+    ell = report["categories"]["L"]
+    assert set(ell["by_format"]) == {"sarif"} and ell["by_format"]["sarif"]["artifacts"] == 5 and ell["cases"] == 5
     assert any("B11" in c or "B13" in c for c in b["cases_with_incomplete_or_unverified_run_info"])
 
 
@@ -130,7 +134,23 @@ def test_attribution_checks_catch_a_changed_file_and_a_mislabelled_category(mani
     assert any("category B must be flagged synthetic" in p for p in check_fixture(synthetic))
     live = _case(manifest, "B01-sarif-path-bound")
     live["source"]["live_run"] = True
-    assert any("live analyzer run" in p for p in check_fixture(live))
+    assert any("only category L may be a live analyzer run" in p for p in check_fixture(live))
+    # category L: complete provenance, a matching tool version and a real driver are required
+    authentic = _case(manifest, "L01-live-codeql-flow-through-vendored-lib")
+    assert check_fixture(authentic) == []
+    for key in ("tool_version", "bundle_sha256", "query", "project", "license"):
+        stripped = copy.deepcopy(authentic)
+        stripped["source"].pop(key)
+        assert any(key in p for p in check_fixture(stripped)), key
+    wrong_version = copy.deepcopy(authentic)
+    wrong_version["source"]["tool_version"] = "2.0.0"
+    assert any("semanticVersion" in p for p in check_fixture(wrong_version))
+    relabelled = _case(manifest, "B01-sarif-path-bound")
+    relabelled["category"] = "L"
+    assert any("category L" in p for p in check_fixture(relabelled))
+    handwritten = copy.deepcopy(authentic)
+    handwritten["source"]["handwritten_here"] = True
+    assert any("must be a live run" in p for p in check_fixture(handwritten))
 
 
 # ---- corpus design requirements ----------------------------------------------------------------------------------------------------
@@ -147,6 +167,16 @@ REQUIRED = {
     "unresolved references": ["B-refuse-sarif-unresolved-index", "C-refuse-graphml-unresolved-endpoint"],
     "multiple candidate targets": ["B08-sarif-two-components-one-matches", "C09-graphml-duplicate-locus-name"],
     "ambiguous identity": ["B05-sarif-abbreviated-revision", "B06-sarif-conflicting-revisions", "B19-sarif-absolute-uris"],
+    "unresolved relevant location next to a K1 absence": ["G01-unresolved-relevant-flow-beside-k1-absence", "G02-unknown-uri-base-beside-k1-absence",
+                                                           "G03-path-escaping-root-beside-k1-absence", "G19-graph-uncontained-call-beside-k1-absence"],
+    "unresolved irrelevant location next to a K1 absence": ["G06-unresolved-irrelevant-flow-beside-k1-absence", "G20-graph-uncontained-call-irrelevant-beside-k1-absence"],
+    "mixed thread flows, one unresolved": ["G07-mixed-threadflows-one-unresolved-beside-k1-absence"],
+    "multiple source roots": ["G08-two-source-roots-default-root", "G09-two-source-roots-other-root"],
+    "empty or missing code flows are not absence": ["G11-empty-codeflows-array", "G12-empty-codeflows-beside-k1-absence", "G13-run-without-results-array"],
+    "schema-valid but unsupported meaning": ["G10-locus-step-marked-unreachable", "G14-property-bag-claims-complete-coverage"],
+    "invalid invocation metadata": ["G16-invalid-invocation-time", "G17-invalid-notification-level"],
+    "authentic CodeQL output": ["L01-live-codeql-flow-through-vendored-lib", "L02-live-codeql-empty-results", "L03-live-codeql-flow-not-touching-the-locus",
+                                "L04-live-codeql-flow-beside-k1-absence"],
     "contradictory / conflicting evidence": ["D02-path-contradicts-supplied-k1-absence", "B-refuse-sarif-index-uri-conflict", "C-refuse-graphml-call-site-in-two-methods"],
     "valid and invalid provenance": ["B01-sarif-path-bound", "B14-sarif-unknown-tool-no-version", "E01-verified-covering-cannot-reach-p3", "E03-verification-untrusted-anchor"],
     "graph with several relation types": ["C01-graphml-path-bound", "C06-graphml-cfg-edges-only"],
@@ -166,18 +196,19 @@ def test_the_corpus_covers_each_required_case_category(requirement, manifest):
 def test_every_case_states_why_its_expectation_follows_from_the_rules(manifest):
     for case in manifest["cases"]:
         assert len(case["why"]) > 40 and case["id"] and case["expected"]["outcome"] in ("evaluated", "refused")
-        assert "source" in case and case["category"] in ("A", "B")
+        assert "source" in case and case["category"] in ("A", "B", "L")
 
 
 def test_every_corpus_file_is_listed_in_the_manifest_and_vice_versa(manifest):
     listed = {c["file"] for c in manifest["cases"] if c.get("file")}
     on_disk = {str(p.relative_to(ANALYSIS_DIR)) for sub in ("upstream", "sarif", "joern-graphml") for p in (ANALYSIS_DIR / sub).iterdir() if p.is_file()}
+    on_disk |= {str(p.relative_to(ANALYSIS_DIR)) for p in (ANALYSIS_DIR / "authentic" / "codeql").glob("*.sarif")}
     assert listed == on_disk
 
 
-def test_no_fixture_claims_to_be_a_live_run_and_no_joern_file_claims_to_be_upstream(manifest):
+def test_only_category_l_is_a_live_run_and_no_joern_file_claims_to_be_upstream_or_live(manifest):
     for case in manifest["cases"]:
-        assert not case["source"].get("live_run")
+        assert bool(case["source"].get("live_run")) is (case["category"] == "L"), case["id"]
         if case["format"] == "joern-graphml":
             assert case["category"] == "B" and case["source"]["synthetic"]
 

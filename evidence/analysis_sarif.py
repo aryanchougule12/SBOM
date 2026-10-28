@@ -137,13 +137,31 @@ def _location_key(location: Mapping[str, Any], locator: str) -> tuple[Optional[s
     return uri, base, index
 
 
-def resolve_artifact_location(
+_AUTHORITY = re.compile(r"^[A-Za-z][A-Za-z0-9+.\-]*://[^/]*")
+_DRIVE = re.compile(r"^[A-Za-z]:(?=/)")
+_OTHER_SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.\-]*:")
+
+
+def loose_path(uri: Optional[str]) -> Optional[str]:
+    """The path a URI reference spells, with any scheme, authority and drive letter removed and the
+    separators normalized, but **not** anchored to the analysis root (leading ``..`` segments are
+    kept). It is used only to decide whether an unresolved location could possibly be a given file;
+    it is never evidence that it is. ``None`` for a missing or empty URI."""
+    if uri is None or not uri.strip():
+        return None
+    text = (percent_decode(uri) or uri).replace("\\", "/")
+    text = _AUTHORITY.sub("", text)
+    text = _DRIVE.sub("", text)
+    text = _OTHER_SCHEME.sub("", text)
+    normalized = posixpath.normpath(text) if text else "."
+    return None if normalized in (".", "") else normalized
+
+
+def resolve_location_detail(
     location: Any, artifacts: list, locator: str
-) -> tuple[Optional[str], Optional[str]]:
-    """Resolve an ``artifactLocation`` (``uri`` and/or ``index`` into ``run.artifacts``) to a
-    normalized path, or ``(None, reason)``. An ``index`` outside ``run.artifacts`` is a
-    ``REFERENCE_UNRESOLVED`` error; an ``index`` whose artifact disagrees with an explicit ``uri``
-    is a ``CONTRADICTORY`` error."""
+) -> tuple[Optional[str], Optional[str], Optional[str]]:
+    """Like ``resolve_artifact_location`` but also returns the ``loose_path`` of the location (for an
+    unresolved one, so that its relevance can still be judged)."""
     loc = _obj(location, locator, "artifactLocation")
     uri, base, index = _location_key(loc, locator)
     if index is not None and index >= 0:
@@ -159,8 +177,20 @@ def resolve_artifact_location(
         if uri is None:
             uri, base = t_uri, t_base
     if uri is None:
-        return None, "no uri and no resolvable index"
-    return normalize_relative_path(uri, base)
+        return None, "no uri and no resolvable index", None
+    path, reason = normalize_relative_path(uri, base)
+    return path, reason, loose_path(uri)
+
+
+def resolve_artifact_location(
+    location: Any, artifacts: list, locator: str
+) -> tuple[Optional[str], Optional[str]]:
+    """Resolve an ``artifactLocation`` (``uri`` and/or ``index`` into ``run.artifacts``) to a
+    normalized path, or ``(None, reason)``. An ``index`` outside ``run.artifacts`` is a
+    ``REFERENCE_UNRESOLVED`` error; an ``index`` whose artifact disagrees with an explicit ``uri``
+    is a ``CONTRADICTORY`` error."""
+    path, reason, _ = resolve_location_detail(location, artifacts, locator)
+    return path, reason
 
 
 def _tool(run: Mapping[str, Any], locator: str) -> ToolIdentity:
@@ -195,6 +225,8 @@ def _invocations(run: Mapping[str, Any], locator: str, diagnostics: list[Analysi
         for n, note in enumerate(_list(invocation, "toolExecutionNotifications", here)):
             level = _opt_str(_obj(note, f"{here}/toolExecutionNotifications/{n}", "notification"), "level",
                              f"{here}/toolExecutionNotifications/{n}") or "warning"
+            if level not in ("none", "note", "warning", "error"):
+                raise _invalid(f"notification level {level!r} is not a SARIF level", f"{here}/toolExecutionNotifications/{n}/level")
             if level == "error":
                 errors += 1
             elif level == "warning":
@@ -249,9 +281,13 @@ def parse_sarif(raw: bytes) -> NormalizedAnalysis:
             _obj(artifact, f"{here}/artifacts/{ai}", "artifact")
         successful, errors, warnings, started = _invocations(run, here, diagnostics)
         results = _list(run, "results", here)
+        if "results" not in run:
+            diagnostics.append(AnalysisDiagnostic(
+                "RUN_WITHOUT_RESULTS_ARRAY", "no `results` array: SARIF allows this only for a run that exports rule metadata, "
+                "not an actual scan; it records nothing about the analysed code", f"{here}/results"))
         runs.append(RunFacts(locator=here, tool=tool, started=started, execution_successful=successful,
                              error_notifications=errors, warning_notifications=warnings, vcs=_vcs(run, here),
-                             result_count=len(results)))
+                             result_count=len(results), results_present="results" in run))
         for xi, result_raw in enumerate(results):
             rloc = f"{here}/results/{xi}"
             result = _obj(result_raw, rloc, "result")
@@ -285,20 +321,23 @@ def parse_sarif(raw: bytes) -> NormalizedAnalysis:
                     for li, step_raw in enumerate(locations):
                         sloc = f"{tloc}/locations/{li}"
                         step = _obj(step_raw, sloc, "threadFlowLocation")
+                        kinds = step.get("kinds", [])
+                        if not isinstance(kinds, list) or not all(isinstance(k, str) for k in kinds):
+                            raise _invalid("kinds must be an array of strings", f"{sloc}/kinds")
                         location = _obj(step.get("location", {}), f"{sloc}/location", "location")
                         physical = location.get("physicalLocation")
                         if physical is None:
-                            steps.append(PathStep(f"{sloc}/location", None, "no physicalLocation"))
+                            steps.append(PathStep(f"{sloc}/location", None, "no physicalLocation", kinds=tuple(kinds)))
                             continue
                         physical = _obj(physical, f"{sloc}/location/physicalLocation", "physicalLocation")
                         if "artifactLocation" not in physical:
-                            steps.append(PathStep(f"{sloc}/location", None, "no artifactLocation"))
+                            steps.append(PathStep(f"{sloc}/location", None, "no artifactLocation", kinds=tuple(kinds)))
                             continue
-                        path, reason = resolve_artifact_location(
+                        path, reason, loose = resolve_location_detail(
                             physical["artifactLocation"], artifacts, f"{sloc}/location/physicalLocation/artifactLocation")
                         region = physical.get("region")
                         line = region.get("startLine") if isinstance(region, dict) and isinstance(region.get("startLine"), int) else None
-                        steps.append(PathStep(f"{sloc}/location", path, reason, line))
+                        steps.append(PathStep(f"{sloc}/location", path, reason, line, loose, tuple(kinds)))
                     candidates.append(FlowCandidate(
                         candidate_id=f"r{ri}.x{xi}.c{ci}.t{ti}", locator=tloc,
                         run_index=ri, rule_id=_opt_str(result, "ruleId", rloc), steps=tuple(steps),

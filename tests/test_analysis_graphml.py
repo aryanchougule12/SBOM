@@ -57,11 +57,16 @@ def test_a_graph_without_call_edges_is_reported_as_not_a_call_graph_export():
     assert any(d.code == "NO_CALL_EDGES" for d in parsed.diagnostics)
 
 
-def test_contains_is_read_independently_of_its_edge_direction():
+def test_contains_is_read_in_the_exporter_direction_only_and_a_reversed_edge_is_never_silently_lost():
+    """semanticcpg reads ``method._containsOut`` (METHOD -> node); an edge written the other way is not used, but it is
+    reported and the call edges it would have placed become undecidable instead of vanishing."""
     forward = raw("synthetic_path_bound.graphml")
     reversed_ = forward.replace(b'<edge source="10" target="20">', b'<edge source="20" target="10">')
     assert reversed_ != forward
-    assert parse_joern_graphml(reversed_).call_graph.edges == parse_joern_graphml(forward).call_graph.edges
+    parsed = parse_joern_graphml(reversed_)
+    assert any(d.code == "CONTAINS_EDGE_REVERSED" for d in parsed.diagnostics)
+    assert parsed.call_graph.edges != parse_joern_graphml(forward).call_graph.edges
+    assert {u.call_node for u in parsed.call_graph.uncontained} == {"20"}
 
 
 def test_a_call_edge_whose_call_site_has_no_container_is_not_usable_and_is_reported():

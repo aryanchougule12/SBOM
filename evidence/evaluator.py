@@ -91,6 +91,7 @@ class RefusalCode(str, Enum):
     # used by evidence.analysis_ingest (analyzer artifacts)
     ANALYSIS_ARTIFACT_INVALID = "EVAL_ANALYSIS_ARTIFACT_INVALID"
     ANALYSIS_SUBJECT_INVALID = "EVAL_ANALYSIS_SUBJECT_INVALID"
+    ANALYSIS_EVIDENCE_UNDECIDABLE = "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
 
 
 @dataclass(frozen=True)

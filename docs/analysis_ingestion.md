@@ -1,4 +1,4 @@
-# Analyzer-artifact ingestion (Milestone 3)
+# Analyzer-artifact ingestion (Milestones 3 and 4)
 
 Flow:
 
@@ -72,8 +72,10 @@ format that declares coverage). This is a finding about the evidence, not a limi
   recorded as claims, never as coverage.
 * Unresolved or absolute locations, unknown `uriBaseId`, `..` escapes, other-component paths with the
   same file name, other-component methods with the same `FULL_NAME`, and flows of one location are never
-  matched. They are reported (`UNRESOLVED_LOCATIONS_NOT_MATCHED` states that a path through them would
-  not be seen).
+  matched as locus files. A flow with such a location that **might** be the locus (its path ends with
+  `<target source root>/<locus file>`, or it has no usable path) is never discarded: it is kept as
+  *undecidable* and handled by the procedure below. Only a location that cannot be the locus is excluded
+  (`UNRESOLVED_LOCATIONS_EXCLUDED`).
 
 ## Evaluation and reproduction
 
@@ -87,18 +89,97 @@ python -m pytest -q                      # everything
 `evaluation_results/analysis_corpus.json` and `analysis_corpus_cases.csv` are byte-stable. They are
 **controlled conformance results**: agreement of the pipeline with hand-reviewed expectations, reported
 separately for category A (upstream examples) and category B (synthetic). No accuracy, precision, recall
-or false-positive rate is computed: there is no labelled ground truth, no fixture is a live analyzer run,
-and the corpus has no Joern-generated file.
+or false-positive rate is computed: there is no labelled ground truth, only the category L files are live analyzer runs (CodeQL 2.27.3, `fixtures/analysis/authentic/codeql/REPRODUCE.md`),
+and the corpus has no Joern-generated file. Category L (authentic CodeQL output) is reported separately from A (upstream) and B (synthetic); authentic Joern output is reported as 0 (not obtained).
+
+## Unresolved locations: the undecidable-evidence procedure (Milestone 4)
+
+**Defect found.** A flow whose locations cannot be resolved against the analysis root (absolute `file://` URI,
+unknown `uriBaseId`, `..` escape, logical-only locations) used to be dropped. Next to a verified K1 absence
+(Supported on its own) the dropped flow could have been the very path that contradicts the absence, so the
+verdict was Supported although recorded analysis evidence might have shown the code reachable: an
+absence assertion overrode unresolved positive evidence (spec M-4, P-1, P-3).
+
+**Repair (no rule change, no new verdict or state).**
+
+1. Every recorded flow (SARIF `threadFlow`) or call edge (GraphML) is classified:
+   *established* (a resolved path touches the locus), *irrelevant* (every location resolved elsewhere, or
+   each unresolved location demonstrably cannot be the locus: `could_be_locus` is a necessary-condition
+   filter on the decoded path suffix `<target source root>/<locus file>`, case-insensitively), or
+   *undecidable* (some location, or the caller of a call edge, cannot be resolved and cannot be excluded).
+2. Only *established* flows become observations. Undecidable ones are kept (`SourceRef.undecidable`, a
+   locator and a reason each, diagnostics `UNDECIDABLE_FLOW` / `UNDECIDABLE_CALL_EDGE`).
+3. `evaluate_reachability` evaluates twice: as classified (best case) and with every undecidable flow
+   counted as a path (worst case). Equal verdicts: the best-case outcome is returned with the limitation
+   `UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT`. Different verdicts: the formal rules define no verdict for
+   an input whose relevance is unknown, so the evaluation is a structured refusal
+   `EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE` (cause `UNRESOLVED_RELEVANT_EVIDENCE`), not a fourth verdict.
+4. A call edge whose call site has no containing METHOD (`CALL_SITE_WITHOUT_CONTAINING_METHOD`) is
+   undecidable only if its callee can reach the locus method over known edges.
+
+Example (corpus G01 / G06): K1 absence + an absolute-URI flow ending in `node_modules/lib-b/src/parse.js` →
+refusal; the same absence + an absolute-URI flow ending in `lib/more.js` → Supported with
+`UNRESOLVED_LOCATIONS_EXCLUDED`. Without a K1 absence the verdict is Insufficient either way, so the
+flow is reported and nothing is refused.
+
+## What SARIF code flows establish (field-by-field normative mapping)
+
+Sources: SARIF 2.1.0 (OASIS) §3.36 `codeFlow`, §3.37 `threadFlow`, §3.38 `threadFlowLocation`, §3.27 `result`,
+§3.14 `run`, §3.20 `invocation`; GitHub docs "SARIF support for code scanning" (CodeQL `path-problem`: a
+code flow is the query-defined data-flow path from source to sink). A SARIF *validity* check (schema) says
+the file is well formed; *evidence validity* is the table below.
+
+| Field | Meaning (SARIF) | Observation we derive | Preconditions | Does **not** establish | Facts required | Rule | Tests |
+|---|---|---|---|---|---|---|---|
+| `result.codeFlows[].threadFlows[].locations[]` | The locations a tool visited, in execution order, while producing the result | Each resolved location in the locus file under the target source root → path/execution observation (R1) | locations resolved to analysis-root-relative paths; run bound (else R6) | a call path (a data-flow trace is not a call graph); that the code runs in the deployment; absence elsewhere | repository+revision (bind), tool+version+start (P1) | §5.1 step 1; R1/R3/R6/R13 | G07, G15, L01, L04 |
+| empty or missing `codeFlows` | no flow recorded | none | — | **not** absence of a path (the result may lack flow detail; the producer may not emit flows) | — | R2 (Unknown) | G11, G12, L02 |
+| `result.locations` (primary location) | where the result is reported | none (never a path) | — | execution of that location | — | — | `test_the_primary_result_location_is_not_a_path` |
+| `threadFlowLocation.kinds` contains `unreachable` | the location is *not* visited | none; recorded as `LOCUS_STEP_MARKED_UNREACHABLE` | — | an absence either (a tool note on one step) | — | R2 | G10 |
+| `artifactLocation.uri` / `uriBaseId` / `index` | where the location is | resolution only: relative URI against `%SRCROOT%`/`SRCROOT`/none; `index` through `run.artifacts` and checked against `uri` | analysis-root mapping known | file identity of an absolute or unknown-base URI | root declaration (subject) | undecidable procedure | G01–G04, B19–B21 |
+| `versionControlProvenance` | repository/revision analysed | bind blockers on mismatch/abbreviation/absence | full revision equal | the artifact analysed == the assessed artifact (subject link is evaluator-asserted) | | R6 | B02–B06, L01 |
+| `invocations[].executionSuccessful`, notifications | run status claimed by the tool | limitations only | schema-valid enums/date-times (else refusal) | complete coverage | | R2/R5/R11, P0/P1 | B11–B13, G16, G17 |
+| `result.kind`, `baselineState`, `suppressions` | result disposition | only `fail`/`review`/`open` and not `absent` count; suppressed results are counted and disclosed | | that a suppressed finding is not a path | | | B15–B17 |
+| `run.results` absent | rule-metadata export, not a scan | none (`RUN_WITHOUT_RESULTS_ARRAY`) | | absence | | R2 | G13 |
+| `run.properties` (property bag) | producer-specific, no defined semantics | none | | a coverage claim | | | G14 |
+| a producer other than CodeQL | schema-valid | same mapping; CodeQL semantics are **not** assumed | | CodeQL's data-flow meaning | tool identity | | A-category tutorial files |
+
+## Joern GraphML contract (audit)
+
+Verified from source (flatgraph `GraphMLExporter`, codepropertygraph schema, semanticcpg), without installing
+Joern (about 1.7 GB; not needed for a contract audit):
+
+* Nodes: `labelV` key + `node__<LABEL>__<PROP>` data keys. Edges: `labelE`, directed `<graph id="G">`; ids are
+  node ids, edge order is document order. Only `META_DATA`, `METHOD`, `CALL` nodes and `CALL`, `CONTAINS` edges
+  are consumed; AST, CFG, REACHING_DEF, ARGUMENT, … are never turned into call edges.
+* `CALL` edge: call site → callee `METHOD`. The caller is the METHOD containing the call site via `CONTAINS`
+  (METHOD → node, the direction `method._containsOut` reads). A reversed `CONTAINS` edge is **not** used
+  (`CONTAINS_EDGE_REVERSED`) and the call edges that lose their container become undecidable edges, not silent losses.
+* `--repr all` writes one file with all CALL edges; `--repr cpg` splits per method and drops cross-method CALL
+  edges: such an export under-reports calls, which is why a missing path is never an absence.
+* List properties are dropped by the exporter (no tool name, no pass list): the export is P0 and states no coverage.
+* No authentic GraphML was obtained: all Joern fixtures are synthetic (category B).
+
+## Identity and source binding (audit)
+
+| Assertion (input) | Verification (binding) | Failure behaviour |
+|---|---|---|
+| `AnalysisSubject`: artifact purl/version, target, repository, revision, content hash, target source root, entry methods | SARIF: equal repository and full (not abbreviated) revision for every contributing run; GraphML: equal declared hash | observation kept; BIND `Unknown` (R6); never an improvement |
+| source root | the explicit `target_source_root`; two roots with the same relative file are two different locations | wrong root → no match, not another candidate |
+| tool, version, start time | read from the artifact | missing → P0; never P2/P3 from declarations |
+
+A mismatching revision, repository, hash or root can never produce a better verdict than the matching subject
+(`tests/test_analysis_soundness.py`, G08/G09).
 
 ## Limitations
 
-* No live CodeQL or Joern run; the GraphML fixtures follow the exporter's source, not a real export.
+* Live CodeQL 2.27.3 output exists (category L, three files, JavaScript queries); no authentic Joern output
+  was obtained, and the GraphML fixtures follow the exporter's source, not a real export.
 * A code flow is a static data-flow trace; counting it as a path observation is a convention (register
-  AI-D3). Suppressed results are counted. A flow of one location is not a path. Abbreviated revisions
-  never bind.
-* Locations that cannot be resolved against the analysis root are not matched, so a path through them is
-  not seen; this can only hide a positive observation next to a supplied K1 absence (documented, not
-  closed: needs an approved root mapping).
+  AI-D3). Suppressed results are counted. A flow of one location counts (SARIF: a visited location).
+  Abbreviated revisions never bind. Real CodeQL logs carry no `versionControlProvenance`, so they bind Unknown.
+* Locations that cannot be resolved against the analysis root are not matched as locus files; if they might
+  be the locus the evaluation is refused when that could change the verdict (see the procedure above). An
+  approved absolute-URI-to-root mapping would reduce refusals; it is not invented.
 * Entry points for call graphs are evaluator-declared; entry-point completeness is not derived.
-* `CONTAINS` direction is not relied on (the CPG schema comment and the semanticcpg code word it
-  oppositely); `IS_EXTERNAL` is recorded, not used.
+* `CONTAINS` is read in the semanticcpg direction (METHOD → node) only; a reversed edge is reported and not used;
+  `IS_EXTERNAL` is recorded, not used.

@@ -1045,29 +1045,23 @@
    },
    "expected": {
     "outcome": "evaluated",
-    "reach": "Unknown",
+    "reach": "Present",
     "verdict": "Insufficient",
     "rules": [
-     "R2",
+     "R1",
      "R5",
-     "R11"
+     "R11",
+     "R12",
+     "R13"
     ],
     "bind": "matched",
-    "observations": 0,
-    "prov_reach": null,
+    "observations": 1,
+    "prov_reach": "P1",
     "blockers": [],
-    "diagnostics_include": [
-     "SINGLE_LOCATION_FLOW"
-    ],
-    "limitations_include": [],
-    "result_limitations": [
-     "CFG=not_compared"
-    ]
+    "diagnostics_include": [],
+    "limitations_include": []
    },
-   "why": "A flow of a single location records a point, not a path from one location to another; no positive observation is derived from it.",
-   "open_questions": [
-    "minimum length of a flow that counts as a path (not defined)"
-   ]
+   "why": "A threadFlow is the sequence of locations the tool visited while producing the result (SARIF threadFlow description); one visited location in the locus file already asserts an execution of the locus, which \u00a75.1 step 1 counts (\"observes or asserts a path or execution of the locus\"). Counting it can only lower the verdict."
   },
   {
    "id": "B19-sarif-absolute-uris",
@@ -1096,18 +1090,19 @@
     "prov_reach": null,
     "blockers": [],
     "diagnostics_include": [
-     "FLOWS_WITH_UNRESOLVED_LOCATIONS"
+     "UNDECIDABLE_FLOW"
     ],
     "limitations_include": [
-     "UNRESOLVED_LOCATIONS_NOT_MATCHED"
+     "UNDECIDABLE_EVIDENCE",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
     ],
     "result_limitations": [
      "CFG=not_compared"
     ]
    },
-   "why": "file:// URIs cannot be resolved against the analysis root without a declared mapping: never matched on the file name alone. The limitation states that a path through such locations would not be seen.",
+   "why": "file:// URIs cannot be resolved against the analysis root without a declared mapping, but their paths end with <target root>/<locus file>, so they might be the locus: the flow is undecidable, kept with its locators, never matched on the file name alone. With no supplied absence, counting it as a path would not change the verdict (Insufficient), so the outcome is reported with that stated; see G01 for the case where it would.",
    "open_questions": [
-    "handling of absolute artifact URIs (no approved root mapping)"
+    "no approved mapping from an absolute URI to the analysis root"
    ]
   },
   {
@@ -1137,16 +1132,17 @@
     "prov_reach": null,
     "blockers": [],
     "diagnostics_include": [
-     "FLOWS_WITH_UNRESOLVED_LOCATIONS"
+     "UNDECIDABLE_FLOW"
     ],
     "limitations_include": [
-     "UNRESOLVED_LOCATIONS_NOT_MATCHED"
+     "UNDECIDABLE_EVIDENCE",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
     ],
     "result_limitations": [
      "CFG=not_compared"
     ]
    },
-   "why": "uriBaseId '%OTHER%' is not the analysis root; the location is unresolved."
+   "why": "uriBaseId '%OTHER%' is not the analysis root; the relative path ends with the locus path, so the location is undecidable (not discarded)."
   },
   {
    "id": "B21-sarif-path-escapes-root",
@@ -1175,14 +1171,17 @@
     "prov_reach": null,
     "blockers": [],
     "diagnostics_include": [
-     "FLOWS_WITH_UNRESOLVED_LOCATIONS"
+     "UNDECIDABLE_FLOW"
     ],
-    "limitations_include": [],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
     "result_limitations": [
      "CFG=not_compared"
     ]
    },
-   "why": "A location with '..' escaping the root cannot be a file of the analysed tree."
+   "why": "'../node_modules/lib-b/src/parse.js' leaves the analysis root, so it is not a file of the analysed tree as written, but it spells the locus path and could be the locus file under another root: undecidable, not matched and not discarded."
   },
   {
    "id": "B22-sarif-percent-encoded",
@@ -2588,6 +2587,1093 @@
     "results": [
      {
       "doc": "artifact",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G01-unresolved-relevant-flow-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_unresolvable_locations.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "321f9f7361e92cd4cfcfad8496330575b6a035c631c0af79bb3f7234f600ca7d",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "THE REPAIRED DEFECT. A verified K1 absence alone is Supported (D03). The artifact records a flow whose locations are absolute file:// URIs ending in node_modules/lib-b/src/parse.js: it might be the locus, so it is undecidable. Counting it as a path gives REACH Contradictory (\u00a75.1 step 1, R3, Insufficient); not counting it gives Supported. The unresolved record could change the verdict, an absence assertion has no authority to override it (M-4), and no rule defines a verdict for it: no verdict is justified, so the evaluation is refused. (Before the repair this input yielded Supported.)",
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G02-unknown-uri-base-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_unknown_uri_base.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "a6906a109e6f998c6eba0fce08ec1fa3b750ec80a6822dacd145f924fe343945",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "Same hazard through an unknown uriBaseId: undecidable, verdict-sensitive, refused.",
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G03-path-escaping-root-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_path_traversal_location.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "cd23a1f5a94b785ea7593d70b50052bb0e52755154f707c9261fee392d970a50",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "Same hazard through a '..' location that spells the locus path.",
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G04-flow-without-physical-locations-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_flow_without_locations.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "309f3a1a8591208c224cd64e5b71f6c13100b219261e06d09c64249489ba216c",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "A flow made only of logical locations says nothing resolvable about files: its relevance cannot be excluded, so it is undecidable and the evaluation is refused next to a K1 absence.",
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G05-flow-without-physical-locations-alone",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_flow_without_locations.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "309f3a1a8591208c224cd64e5b71f6c13100b219261e06d09c64249489ba216c",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
+    "result_limitations": [
+     "CFG=not_compared"
+    ]
+   },
+   "why": "Without a supplied absence the verdict is Insufficient whether or not the flow is a path, so there is nothing to refuse; the flow stays visible as a diagnostic."
+  },
+  {
+   "id": "G06-unresolved-irrelevant-flow-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_unresolved_irrelevant.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "d2545b972b60464233000bedab593bee8ae89e4ee10f04c2d72ea31a694bfb88",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Supported",
+    "rules": [],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P3",
+    "blockers": [],
+    "diagnostics_include": [
+     "UNRESOLVED_LOCATIONS_EXCLUDED"
+    ],
+    "limitations_include": []
+   },
+   "why": "Unresolved absolute URIs whose paths cannot end with node_modules/lib-b/src/parse.js cannot be the locus: demonstrably irrelevant, so no refusal and the supplied absence stands (Supported).",
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G07-mixed-threadflows-one-unresolved-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_mixed_threadflows_one_unresolved.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "9b5f6b19cc2a4310936308d7f413b7a90e2a95c0dff2b19360b5b1b1a80a9a91",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Contradictory",
+    "verdict": "Insufficient",
+    "rules": [
+     "R3",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ]
+   },
+   "why": "One thread flow establishes a path, the other is unresolved. The established path already makes REACH Contradictory next to the K1 absence (R3); counting the unresolved flow too cannot change that verdict, so no refusal is needed and the unresolved flow is reported.",
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G08-two-source-roots-default-root",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_two_source_roots_same_file.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": []
+   },
+   "why": "The same relative file exists under vendor/lib-b and node_modules/lib-b. Only the declared target root (node_modules/lib-b) matches; the other root is another component's tree, not the first plausible candidate."
+  },
+  {
+   "id": "G09-two-source-roots-other-root",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_two_source_roots_same_file.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": []
+   },
+   "why": "Declaring vendor/lib-b as the target root selects the other flow: the root is an explicit input, never inferred from the data.",
+   "subject": {
+    "target_source_root": "vendor/lib-b"
+   }
+  },
+  {
+   "id": "G10-locus-step-marked-unreachable",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_locus_step_marked_unreachable.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "e238bf3ce470889d05effd60918196a9bd0288175749492e07d60841d6cbc28c",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "LOCUS_STEP_MARKED_UNREACHABLE"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ]
+   },
+   "why": "SARIF defines a threadFlowLocation as a location *visited* by the tool; kind 'unreachable' says the location is not. It is not an observation of the locus, and it is not an absence either: Unknown."
+  },
+  {
+   "id": "G11-empty-codeflows-array",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_empty_codeflows_array.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "120e02c6692e81bb17f13d51e83581966fac50f81d9b7a8739dbb06017d4435b",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "RESULTS_WITHOUT_CODE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ]
+   },
+   "why": "`codeFlows: []` records no flow; it is not evidence that no flow exists."
+  },
+  {
+   "id": "G12-empty-codeflows-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_empty_codeflows_array.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "120e02c6692e81bb17f13d51e83581966fac50f81d9b7a8739dbb06017d4435b",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Supported",
+    "rules": [],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P3",
+    "blockers": [],
+    "diagnostics_include": [
+     "RESULTS_WITHOUT_CODE_FLOW"
+    ],
+    "limitations_include": []
+   },
+   "why": "An empty codeFlows array neither asserts a path nor hides one (there is no record to resolve): the supplied absence is untouched. It also adds no support for it.",
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G13-run-without-results-array",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_run_without_results_array.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "d7427c4327627bc43c6a40e9ed6ce12bedca26fd7730d281a52cdb9bbbd9087d",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "RUN_WITHOUT_RESULTS_ARRAY"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ]
+   },
+   "why": "SARIF allows a run without `results` only for rule-metadata exports; it is not a scan and records nothing."
+  },
+  {
+   "id": "G14-property-bag-claims-complete-coverage",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_property_bag_claims_complete_coverage.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "bdeeeb82ee435b09f19d876b733c214853e533e168f888bb50279c8cc89807e3",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "RUN_STATUS_RECORDED_AS_CLAIMED"
+    ],
+    "result_limitations": [
+     "CFG=not_compared"
+    ]
+   },
+   "why": "Schema-valid, evidence-meaningless: run.properties is an open property bag with no defined semantics; a producer-specific 'complete coverage' string is not the declared full-coverage claim over LOCUS and ENTRY that \u00a75.1 step 2 requires."
+  },
+  {
+   "id": "G15-duplicate-locations",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_duplicate_locations.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "8a4a91e45d83466d01ae5a0068d44c8860aa7856c930131467d8611627d879fb",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": []
+   },
+   "why": "Repeated locations in one flow are one observation."
+  },
+  {
+   "id": "G16-invalid-invocation-time",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_invalid_invocation_time.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "afa79cdd5ae8f2cc9beeec6c0e46b0e95c34149d89d9aa2b68b12099ba72cd72",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_STRUCTURE_INVALID"
+   },
+   "why": "`startTimeUtc` is not a date-time: invalid invocation metadata is refused (the attribution would otherwise rest on garbage)."
+  },
+  {
+   "id": "G17-invalid-notification-level",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_invalid_notification_level.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "dd05df362ead6bb1208f34abf70a6391992c400e827a2f10fb18f9aafa08770e",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_STRUCTURE_INVALID"
+   },
+   "why": "A notification `level` outside none/note/warning/error is not SARIF; the run's error count would be unreliable."
+  },
+  {
+   "id": "G18-graph-uncontained-call-into-locus",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_uncontained_call_into_locus.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "2cec5e9f5d0c2dbbac64e5e12dda971ca06202670db87bd259b1b1a2e46255e3",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_CALL_EDGE",
+     "CALL_SITE_WITHOUT_CONTAINING_METHOD"
+    ],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
+    "result_limitations": [
+     "CFG=not_compared"
+    ]
+   },
+   "why": "A CALL edge into parse has a call site with no containing METHOD, so its caller (which might be reachable from main) is unknown. The fixture removes the known main -> run -> parse call edge, so the unknown-caller edge is the only candidate: it is undecidable and kept, never dropped and never promoted to a path.",
+   "subject": {
+    "target_source_root": "node_modules/lib-b"
+   }
+  },
+  {
+   "id": "G19-graph-uncontained-call-beside-k1-absence",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_uncontained_call_into_locus.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "2cec5e9f5d0c2dbbac64e5e12dda971ca06202670db87bd259b1b1a2e46255e3",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "The same unknown-caller edge next to a K1 absence could turn Supported into Contradictory: refused.",
+   "subject": {
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G20-graph-uncontained-call-irrelevant-beside-k1-absence",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_uncontained_call_irrelevant.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "3b0fae89779ed73740bfe00e2cc3592272b08e51e49909843e3dd69b8a44ab0f",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Supported",
+    "rules": [],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P3",
+    "blockers": [],
+    "diagnostics_include": [
+     "CALL_SITE_WITHOUT_CONTAINING_METHOD"
+    ],
+    "limitations_include": []
+   },
+   "why": "The unknown-caller CALL edge targets a method that cannot reach the locus method over any known edge, so it cannot lie on a path to the locus: irrelevant, no refusal.",
+   "subject": {
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "G21-graph-contains-edges-reversed",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_contains_edges_reversed.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "41491ff0564a9371765b416c0a427c6695676b222de72f647b167035dd2412e2",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "CONTAINS_EDGE_REVERSED",
+     "UNDECIDABLE_CALL_EDGE"
+    ],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
+    "result_limitations": [
+     "CFG=not_compared"
+    ]
+   },
+   "why": "CONTAINS edges in the direction opposite to the one the semanticcpg library reads are not used. Every call site then has an unknown container, the path main -> run -> parse is no longer visible, and the CALL edges into methods that reach parse are undecidable instead of being silently lost.",
+   "subject": {
+    "target_source_root": "node_modules/lib-b"
+   }
+  },
+  {
+   "id": "G22-graph-contains-edges-reversed-beside-k1-absence",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_contains_edges_reversed.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "41491ff0564a9371765b416c0a427c6695676b222de72f647b167035dd2412e2",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "As G21 next to a K1 absence: the lost path could change the verdict, so the evaluation is refused rather than reporting Supported.",
+   "subject": {
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "L01-live-codeql-flow-through-vendored-lib",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/codeql-2.27.3__js-command-injection__flow-via-vendor-lib.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-078/CommandInjection.ql (@kind path-problem)",
+    "project": "project/",
+    "sha256": "7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run made in this project's session; unedited. One js/command-line-injection result with an 8-location code flow from src/app.js into vendor/lib-b/src/parse.js."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_REVISION_UNKNOWN:#/runs/0"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED"
+    ],
+    "result_limitations": []
+   },
+   "why": "The live code flow visits vendor/lib-b/src/parse.js (the locus file under the declared target root): a recorded path touching the locus -> Present (R1). Real CodeQL SARIF has no versionControlProvenance, so the run cannot be bound to the declared revision (BIND Unknown, R6), and it has no invocation start time, so under strict P1 it is unattributed (P0, R13).",
+   "subject": {
+    "target_source_root": "vendor/lib-b"
+   },
+   "open_questions": [
+    "binding a real CodeQL log to a revision (the log carries none)"
+   ]
+  },
+  {
+   "id": "L02-live-codeql-empty-results",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/codeql-2.27.3__js-tainted-path__no-results.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-022/TaintedPath.ql",
+    "project": "project/",
+    "sha256": "4f95a3a8b5b15cb16920740139d14e124e6d39bfd7db21882c5687a692337888",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run made in this project's session; unedited. A successful run with results: []."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "NO_ABSENCE_EVIDENCE"
+    ],
+    "result_limitations": [
+     "CFG=not_compared"
+    ]
+   },
+   "why": "A successful live run with an empty result list says the query found nothing; it is not a coverage claim over the locus and entry points (\u00a75.1 step 2): Unknown, never Absent.",
+   "subject": {
+    "target_source_root": "vendor/lib-b"
+   }
+  },
+  {
+   "id": "L03-live-codeql-flow-not-touching-the-locus",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/codeql-2.27.3__js-command-injection__flow-app-only.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-078/CommandInjection.ql (@kind path-problem)",
+    "project": "project-app-only/",
+    "sha256": "99e022bfe540b6ec260358ff9c0357ac81b2fc9c14061ae6cc51f90e759a6996",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run made in this project's session; unedited. One result whose code flow stays inside src/app.js."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ]
+   },
+   "why": "A genuine flow for a different part of the program (the application, not the vendored library): every visited location is resolved and elsewhere, so it is not an observation of the locus and not an absence either.",
+   "subject": {
+    "target_source_root": "vendor/lib-b"
+   }
+  },
+  {
+   "id": "L04-live-codeql-flow-beside-k1-absence",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/codeql-2.27.3__js-command-injection__flow-via-vendor-lib.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-078/CommandInjection.ql (@kind path-problem)",
+    "project": "project/",
+    "sha256": "7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run made in this project's session; unedited. One js/command-line-injection result with an 8-location code flow from src/app.js into vendor/lib-b/src/parse.js."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Contradictory",
+    "verdict": "Insufficient",
+    "rules": [
+     "R3",
+     "R6",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_REVISION_UNKNOWN:#/runs/0"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": []
+   },
+   "why": "A live CodeQL path through the locus next to a verified K1 absence (Supported on its own): positive + K1 Absent = Contradictory (R3). The path is unbound, so BIND is Unknown (R6).",
+   "subject": {
+    "target_source_root": "vendor/lib-b"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   }
+  },
+  {
+   "id": "L05-live-codeql-app-only-flow-beside-k1-absence",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/codeql-2.27.3__js-command-injection__flow-app-only.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-078/CommandInjection.ql (@kind path-problem)",
+    "project": "project-app-only/",
+    "sha256": "99e022bfe540b6ec260358ff9c0357ac81b2fc9c14061ae6cc51f90e759a6996",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run made in this project's session; unedited. One result whose code flow stays inside src/app.js."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Supported",
+    "rules": [],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P3",
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": []
+   },
+   "why": "The genuine flow that does not touch the locus changes nothing about the supplied absence.",
+   "subject": {
+    "target_source_root": "vendor/lib-b"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
       "verified": true,
       "anchor": "anchor-1",
       "coverage": [

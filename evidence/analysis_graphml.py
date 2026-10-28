@@ -12,14 +12,23 @@ elements. **List-valued properties are dropped by the exporter** (for example th
 The semantics used come from the code property graph schema (``ShiftLeftSecurity/codepropertygraph``,
 ``CallGraph.scala``): a ``CALL`` edge connects a call site (a ``CALL`` node) to the ``METHOD`` node it
 invokes; a ``CONTAINS`` edge relates a ``METHOD`` to the nodes in its body (the semanticcpg library
-traverses it from the method, ``_containsOut``, while the schema comment words it the other way
-round; this adapter therefore does not depend on the edge direction and identifies the container as
-the ``METHOD`` end). The method-level call edge is *container(call site) -> invoked METHOD*.
+reads it from the method, ``method._containsOut``, while the CPG schema comment words it the other
+way round; the adapter follows the library, which implements the graph, and reports a reversed edge
+as a diagnostic instead of using it. A call site whose container is unknown for that or any other
+reason stays a ``CALL`` edge with an unknown caller and is treated as potentially relevant). The method-level call edge is *container(call site) -> invoked METHOD*.
 
 Consumed: ``META_DATA`` (``LANGUAGE``, ``ROOT``, ``VERSION``, ``HASH``), ``METHOD`` (``FULL_NAME``,
 ``NAME``, ``FILENAME``, ``IS_EXTERNAL``), ``CALL`` nodes and ``CALL`` / ``CONTAINS`` edges.
 Everything else (AST, CFG, REACHING_DEF, ARGUMENT, ... and every other property) is ignored on
 purpose: a CFG, a PDG and a data-flow edge are not call-graph evidence.
+
+Which export is usable. ``joern-export --format graphml`` (JoernExport.scala) writes the whole graph as
+one file for ``--repr all``, but for ``--repr cpg`` it writes **one file per method**, each holding only
+that method's AST subtree and the edges between those nodes; a ``CALL`` edge to a callee defined in
+another method is therefore absent from a per-method file, and other representations are not
+implemented for GraphML. Only a whole-graph export can contain a call path across methods; whether a
+given file is one cannot be established from the file (a diagnostic says so), and a path is recorded
+only if its edges are present, so an incomplete file can hide a path but cannot invent one.
 
 The file does not record the tool or its version, nor a source revision: tool identity is therefore
 ``None`` (so the document is unattributed, P0) and the only source identity is the optional
@@ -48,6 +57,7 @@ from evidence.analysis_model import (
     RunFacts,
     SourceArtifactIdentity,
     ToolIdentity,
+    UncontainedCall,
 )
 from sbom_parser._common import document_id
 
@@ -181,20 +191,24 @@ def parse_joern_graphml(raw: bytes) -> NormalizedAnalysis:
                                   props.get("FILENAME") or None, flag))
 
     container: dict[str, str] = {}   # CALL node id -> containing METHOD node id
+    reversed_contains = 0
     for index, source, target, label, _ in edges:
         if label != "CONTAINS":
             continue
-        kinds = {source: nodes[source][0], target: nodes[target][0]}
-        method_ends = [n for n, k in kinds.items() if k == "METHOD"]
-        call_ends = [n for n, k in kinds.items() if k == "CALL"]
-        if len(method_ends) == 1 and len(call_ends) == 1:  # direction-agnostic (see the module docstring)
-            call, method = call_ends[0], method_ends[0]
-            if container.setdefault(call, method) != method:
-                raise AnalysisArtifactError(E.CONTRADICTORY, f"call site {call!r} is contained in two methods", _edge_locator(index))
+        kinds = (nodes[source][0], nodes[target][0])
+        if kinds == ("METHOD", "CALL"):  # method -> node in its body: semanticcpg reads it as `method._containsOut`
+            if container.setdefault(target, source) != source:
+                raise AnalysisArtifactError(E.CONTRADICTORY, f"call site {target!r} is contained in two methods", _edge_locator(index))
+        elif kinds == ("CALL", "METHOD"):
+            reversed_contains += 1   # the CPG schema comment words the edge this way round; the library does not (see the docstring)
+    if reversed_contains:
+        diagnostics.append(AnalysisDiagnostic(
+            "CONTAINS_EDGE_REVERSED", f"{reversed_contains} CONTAINS edge(s) run CALL -> METHOD, opposite to the direction the "
+            "semanticcpg library reads; they are not used, so their call sites count as having no containing method"))
 
     call_edges: list[CallEdge] = []
     call_edge_count = 0
-    uncontained = 0
+    uncontained: list[UncontainedCall] = []
     for index, source, target, label, _ in edges:
         if label != "CALL":
             continue
@@ -205,12 +219,14 @@ def parse_joern_graphml(raw: bytes) -> NormalizedAnalysis:
                                         _edge_locator(index))
         caller = container.get(source)
         if caller is None:
-            uncontained += 1
+            uncontained.append(UncontainedCall(source, target, _edge_locator(index)))
             continue
         call_edges.append(CallEdge(caller, target, source, _edge_locator(index)))
     if uncontained:
-        diagnostics.append(AnalysisDiagnostic("CALL_SITE_WITHOUT_CONTAINING_METHOD",
-                                              f"{uncontained} CALL edge(s) have a call site with no containing METHOD and cannot be used"))
+        diagnostics.append(AnalysisDiagnostic(
+            "CALL_SITE_WITHOUT_CONTAINING_METHOD",
+            f"{len(uncontained)} CALL edge(s) have a call site with no containing METHOD; they cannot be placed in the method-level "
+            "graph and are kept as potentially relevant (the unknown caller might be reachable from an entry point)"))
     if call_edge_count == 0:
         diagnostics.append(AnalysisDiagnostic("NO_CALL_EDGES", "the export contains no CALL edges: it is not a call-graph export"))
     diagnostics.append(AnalysisDiagnostic("LIST_PROPERTIES_NOT_EXPORTED",
@@ -220,6 +236,6 @@ def parse_joern_graphml(raw: bytes) -> NormalizedAnalysis:
     return NormalizedAnalysis(
         source=SourceArtifactIdentity(document_id("joern-graphml", raw), AnalysisFormat.JOERN_GRAPHML,
                                       f"cpg-spec:{spec_version}" if spec_version else None, len(raw)),
-        runs=(run,), candidates=(), call_graph=CallGraph(tuple(methods), tuple(call_edges), call_edge_count),
+        runs=(run,), candidates=(), call_graph=CallGraph(tuple(methods), tuple(call_edges), call_edge_count, tuple(uncontained)),
         diagnostics=tuple(diagnostics),
     )

@@ -45,7 +45,7 @@ ground truth, and every fixture is synthetic.
   input schema; an SBOM dependency graph (K4) is read but is never reachability (A5).
 * Real analyzer artifacts (SARIF 2.1.0, Joern GraphML) are ingested by `evidence/analysis_*` and evaluated through the same engine
   (`evidence.analysis_ingest.evaluate_with_analysis`; `docs/analysis_ingestion.md`). They can establish only positive path
-  observations. The corpus is `fixtures/analysis/`; `python -m tests.analysis_eval` reports controlled conformance (no accuracy claim).
+  observations; an unresolved record that might be a path next to a K1 absence is refused (`EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE`), never ignored (`docs/spec_addendum_v0.2.4.md`). The corpus is `fixtures/analysis/` (upstream, synthetic and authentic CodeQL output, reported separately); `python -m tests.analysis_eval` reports controlled conformance (no accuracy claim).
 * One documented entry point, `evidence.sufficiency.evaluate_finding(profile, findings, index,
   verification=None, reachability=None)`, routes by the finding's justification. A run evaluates one
   predicate; no combined-predicate verdict exists.

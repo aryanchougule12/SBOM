@@ -1852,7 +1852,7 @@
     "bind": "matched",
     "blockers": [],
     "codes": [
-     "NO_ANALYSIS",
+     "CLAIM_CONTRADICTED_BY_PATH",
      "ENTRYPOINTS_UNDECLARED",
      "HAZARD_BUILD_TIME_PRUNING",
      "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
@@ -1861,31 +1861,31 @@
      "HAZARD_INTER_PROCESS_CALLS",
      "HAZARD_NATIVE_FFI",
      "HAZARD_REFLECTION",
-     "HAZARD_SERIALIZATION_GADGETS"
+     "HAZARD_SERIALIZATION_GADGETS",
+     "CONFIG_ASSUMPTION_UNDECLARED",
+     "ANALYSIS_PROVENANCE_BELOW_P3"
     ],
-    "diagnostic_codes": [
-     "SINGLE_LOCATION_FLOW"
-    ],
-    "evidence_items": 2,
+    "diagnostic_codes": [],
+    "evidence_items": 3,
     "limitations": [
-     "CFG=not_compared",
-     "REACH=Unknown: only a K4 dependency graph exists",
+     "sarif:sha256:6b1366c78b2062fc44a36cfd838f90867a889cef729d2dfe02f443d722ffd2e2: P2_NOT_GRANTED:bind_basis_not_digest",
+     "sarif:sha256:6b1366c78b2062fc44a36cfd838f90867a889cef729d2dfe02f443d722ffd2e2: P3_NOT_AVAILABLE:not_supplied",
      "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
      "sarif:sha256:6b1366c78b2062fc44a36cfd838f90867a889cef729d2dfe02f443d722ffd2e2: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
      "sarif:sha256:6b1366c78b2062fc44a36cfd838f90867a889cef729d2dfe02f443d722ffd2e2: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
      "sarif:sha256:6b1366c78b2062fc44a36cfd838f90867a889cef729d2dfe02f443d722ffd2e2: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
     ],
-    "observations": 0,
+    "observations": 1,
     "outcome": "evaluated",
-    "prov_reach": null,
-    "reach": "Unknown",
-    "result_limitations": [
-     "CFG=not_compared"
-    ],
+    "prov_reach": "P1",
+    "reach": "Present",
+    "result_limitations": [],
     "rules": [
-     "R2",
+     "R1",
      "R5",
-     "R11"
+     "R11",
+     "R12",
+     "R13"
     ],
     "verdict": "Insufficient"
    },
@@ -1895,21 +1895,18 @@
    "expected": {
     "bind": "matched",
     "blockers": [],
-    "diagnostics_include": [
-     "SINGLE_LOCATION_FLOW"
-    ],
+    "diagnostics_include": [],
     "limitations_include": [],
-    "observations": 0,
+    "observations": 1,
     "outcome": "evaluated",
-    "prov_reach": null,
-    "reach": "Unknown",
-    "result_limitations": [
-     "CFG=not_compared"
-    ],
+    "prov_reach": "P1",
+    "reach": "Present",
     "rules": [
-     "R2",
+     "R1",
      "R5",
-     "R11"
+     "R11",
+     "R12",
+     "R13"
     ],
     "verdict": "Insufficient"
    },
@@ -1917,10 +1914,8 @@
    "fixture_problems": [],
    "format": "sarif",
    "id": "B18-sarif-single-location-flow",
-   "open_questions": [
-    "minimum length of a flow that counts as a path (not defined)"
-   ],
-   "why": "A flow of a single location records a point, not a path from one location to another; no positive observation is derived from it."
+   "open_questions": [],
+   "why": "A threadFlow is the sequence of locations the tool visited while producing the result (SARIF threadFlow description); one visited location in the locus file already asserts an execution of the locus, which §5.1 step 1 counts (\"observes or asserts a path or execution of the locus\"). Counting it can only lower the verdict."
   },
   {
    "actual": {
@@ -1939,7 +1934,7 @@
      "HAZARD_SERIALIZATION_GADGETS"
     ],
     "diagnostic_codes": [
-     "FLOWS_WITH_UNRESOLVED_LOCATIONS"
+     "UNDECIDABLE_FLOW"
     ],
     "evidence_items": 2,
     "limitations": [
@@ -1949,7 +1944,8 @@
      "sarif:sha256:321f9f7361e92cd4cfcfad8496330575b6a035c631c0af79bb3f7234f600ca7d: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
      "sarif:sha256:321f9f7361e92cd4cfcfad8496330575b6a035c631c0af79bb3f7234f600ca7d: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
      "sarif:sha256:321f9f7361e92cd4cfcfad8496330575b6a035c631c0af79bb3f7234f600ca7d: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage",
-     "sarif:sha256:321f9f7361e92cd4cfcfad8496330575b6a035c631c0af79bb3f7234f600ca7d: UNRESOLVED_LOCATIONS_NOT_MATCHED: locations that could not be resolved to the analysis root are never matched, so a path through them would not be seen"
+     "sarif:sha256:321f9f7361e92cd4cfcfad8496330575b6a035c631c0af79bb3f7234f600ca7d: UNDECIDABLE_EVIDENCE: 1 recorded flow(s)/call edge(s) may touch the locus but cannot be resolved. They are not counted as paths in the reported outcome; the outcome is reported only if counting them as paths would not change the verdict, otherwise the evaluation is refused (EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE)",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the 1 undecidable observation(s) as paths gives the same verdict (Insufficient)"
     ],
     "observations": 0,
     "outcome": "evaluated",
@@ -1972,10 +1968,11 @@
     "bind": "matched",
     "blockers": [],
     "diagnostics_include": [
-     "FLOWS_WITH_UNRESOLVED_LOCATIONS"
+     "UNDECIDABLE_FLOW"
     ],
     "limitations_include": [
-     "UNRESOLVED_LOCATIONS_NOT_MATCHED"
+     "UNDECIDABLE_EVIDENCE",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
     ],
     "observations": 0,
     "outcome": "evaluated",
@@ -1996,9 +1993,9 @@
    "format": "sarif",
    "id": "B19-sarif-absolute-uris",
    "open_questions": [
-    "handling of absolute artifact URIs (no approved root mapping)"
+    "no approved mapping from an absolute URI to the analysis root"
    ],
-   "why": "file:// URIs cannot be resolved against the analysis root without a declared mapping: never matched on the file name alone. The limitation states that a path through such locations would not be seen."
+   "why": "file:// URIs cannot be resolved against the analysis root without a declared mapping, but their paths end with <target root>/<locus file>, so they might be the locus: the flow is undecidable, kept with its locators, never matched on the file name alone. With no supplied absence, counting it as a path would not change the verdict (Insufficient), so the outcome is reported with that stated; see G01 for the case where it would."
   },
   {
    "actual": {
@@ -2017,7 +2014,7 @@
      "HAZARD_SERIALIZATION_GADGETS"
     ],
     "diagnostic_codes": [
-     "FLOWS_WITH_UNRESOLVED_LOCATIONS"
+     "UNDECIDABLE_FLOW"
     ],
     "evidence_items": 2,
     "limitations": [
@@ -2027,7 +2024,8 @@
      "sarif:sha256:a6906a109e6f998c6eba0fce08ec1fa3b750ec80a6822dacd145f924fe343945: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
      "sarif:sha256:a6906a109e6f998c6eba0fce08ec1fa3b750ec80a6822dacd145f924fe343945: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
      "sarif:sha256:a6906a109e6f998c6eba0fce08ec1fa3b750ec80a6822dacd145f924fe343945: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage",
-     "sarif:sha256:a6906a109e6f998c6eba0fce08ec1fa3b750ec80a6822dacd145f924fe343945: UNRESOLVED_LOCATIONS_NOT_MATCHED: locations that could not be resolved to the analysis root are never matched, so a path through them would not be seen"
+     "sarif:sha256:a6906a109e6f998c6eba0fce08ec1fa3b750ec80a6822dacd145f924fe343945: UNDECIDABLE_EVIDENCE: 1 recorded flow(s)/call edge(s) may touch the locus but cannot be resolved. They are not counted as paths in the reported outcome; the outcome is reported only if counting them as paths would not change the verdict, otherwise the evaluation is refused (EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE)",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the 1 undecidable observation(s) as paths gives the same verdict (Insufficient)"
     ],
     "observations": 0,
     "outcome": "evaluated",
@@ -2050,10 +2048,11 @@
     "bind": "matched",
     "blockers": [],
     "diagnostics_include": [
-     "FLOWS_WITH_UNRESOLVED_LOCATIONS"
+     "UNDECIDABLE_FLOW"
     ],
     "limitations_include": [
-     "UNRESOLVED_LOCATIONS_NOT_MATCHED"
+     "UNDECIDABLE_EVIDENCE",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
     ],
     "observations": 0,
     "outcome": "evaluated",
@@ -2074,7 +2073,7 @@
    "format": "sarif",
    "id": "B20-sarif-unknown-uri-base",
    "open_questions": [],
-   "why": "uriBaseId '%OTHER%' is not the analysis root; the location is unresolved."
+   "why": "uriBaseId '%OTHER%' is not the analysis root; the relative path ends with the locus path, so the location is undecidable (not discarded)."
   },
   {
    "actual": {
@@ -2093,7 +2092,7 @@
      "HAZARD_SERIALIZATION_GADGETS"
     ],
     "diagnostic_codes": [
-     "FLOWS_WITH_UNRESOLVED_LOCATIONS"
+     "UNDECIDABLE_FLOW"
     ],
     "evidence_items": 2,
     "limitations": [
@@ -2103,7 +2102,8 @@
      "sarif:sha256:cd23a1f5a94b785ea7593d70b50052bb0e52755154f707c9261fee392d970a50: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
      "sarif:sha256:cd23a1f5a94b785ea7593d70b50052bb0e52755154f707c9261fee392d970a50: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
      "sarif:sha256:cd23a1f5a94b785ea7593d70b50052bb0e52755154f707c9261fee392d970a50: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage",
-     "sarif:sha256:cd23a1f5a94b785ea7593d70b50052bb0e52755154f707c9261fee392d970a50: UNRESOLVED_LOCATIONS_NOT_MATCHED: locations that could not be resolved to the analysis root are never matched, so a path through them would not be seen"
+     "sarif:sha256:cd23a1f5a94b785ea7593d70b50052bb0e52755154f707c9261fee392d970a50: UNDECIDABLE_EVIDENCE: 1 recorded flow(s)/call edge(s) may touch the locus but cannot be resolved. They are not counted as paths in the reported outcome; the outcome is reported only if counting them as paths would not change the verdict, otherwise the evaluation is refused (EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE)",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the 1 undecidable observation(s) as paths gives the same verdict (Insufficient)"
     ],
     "observations": 0,
     "outcome": "evaluated",
@@ -2126,9 +2126,12 @@
     "bind": "matched",
     "blockers": [],
     "diagnostics_include": [
-     "FLOWS_WITH_UNRESOLVED_LOCATIONS"
+     "UNDECIDABLE_FLOW"
     ],
-    "limitations_include": [],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
     "observations": 0,
     "outcome": "evaluated",
     "prov_reach": null,
@@ -2148,7 +2151,7 @@
    "format": "sarif",
    "id": "B21-sarif-path-escapes-root",
    "open_questions": [],
-   "why": "A location with '..' escaping the root cannot be a file of the analysed tree."
+   "why": "'../node_modules/lib-b/src/parse.js' leaves the analysis root, so it is not a file of the analysed tree as written, but it spells the locus path and could be the locus file under another root: undecidable, not matched and not discarded."
   },
   {
    "actual": {
@@ -4378,6 +4381,1483 @@
   },
   {
    "actual": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "file": "sarif/synthetic_unresolvable_locations.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G01-unresolved-relevant-flow-beside-k1-absence",
+   "open_questions": [],
+   "why": "THE REPAIRED DEFECT. A verified K1 absence alone is Supported (D03). The artifact records a flow whose locations are absolute file:// URIs ending in node_modules/lib-b/src/parse.js: it might be the locus, so it is undecidable. Counting it as a path gives REACH Contradictory (§5.1 step 1, R3, Insufficient); not counting it gives Supported. The unresolved record could change the verdict, an absence assertion has no authority to override it (M-4), and no rule defines a verdict for it: no verdict is justified, so the evaluation is refused. (Before the repair this input yielded Supported.)"
+  },
+  {
+   "actual": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "file": "sarif/synthetic_unknown_uri_base.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G02-unknown-uri-base-beside-k1-absence",
+   "open_questions": [],
+   "why": "Same hazard through an unknown uriBaseId: undecidable, verdict-sensitive, refused."
+  },
+  {
+   "actual": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "file": "sarif/synthetic_path_traversal_location.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G03-path-escaping-root-beside-k1-absence",
+   "open_questions": [],
+   "why": "Same hazard through a '..' location that spells the locus path."
+  },
+  {
+   "actual": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "file": "sarif/synthetic_flow_without_locations.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G04-flow-without-physical-locations-beside-k1-absence",
+   "open_questions": [],
+   "why": "A flow made only of logical locations says nothing resolvable about files: its relevance cannot be excluded, so it is undecidable and the evaluation is refused next to a K1 absence."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "NO_ANALYSIS",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS"
+    ],
+    "diagnostic_codes": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "evidence_items": 2,
+    "limitations": [
+     "CFG=not_compared",
+     "REACH=Unknown: only a K4 dependency graph exists",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:309f3a1a8591208c224cd64e5b71f6c13100b219261e06d09c64249489ba216c: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:309f3a1a8591208c224cd64e5b71f6c13100b219261e06d09c64249489ba216c: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:309f3a1a8591208c224cd64e5b71f6c13100b219261e06d09c64249489ba216c: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage",
+     "sarif:sha256:309f3a1a8591208c224cd64e5b71f6c13100b219261e06d09c64249489ba216c: UNDECIDABLE_EVIDENCE: 1 recorded flow(s)/call edge(s) may touch the locus but cannot be resolved. They are not counted as paths in the reported outcome; the outcome is reported only if counting them as paths would not change the verdict, otherwise the evaluation is refused (EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE)",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the 1 undecidable observation(s) as paths gives the same verdict (Insufficient)"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "sarif/synthetic_flow_without_locations.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G05-flow-without-physical-locations-alone",
+   "open_questions": [],
+   "why": "Without a supplied absence the verdict is Insufficient whether or not the flow is a path, so there is nothing to refuse; the flow stays visible as a diagnostic."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [],
+    "diagnostic_codes": [
+     "UNRESOLVED_LOCATIONS_EXCLUDED"
+    ],
+    "evidence_items": 4,
+    "limitations": [
+     "k1-analysis: P3_FROM_DETACHED_VERIFICATION_RESULT: the document declares no embedded signature; any P3 grant or coverage cap rests on an externally supplied verification result (specification A5, register U-2), not on a signature the document carries",
+     "reflection-basis: P3_NOT_AVAILABLE:no_result_for_document",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:d2545b972b60464233000bedab593bee8ae89e4ee10f04c2d72ea31a694bfb88: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:d2545b972b60464233000bedab593bee8ae89e4ee10f04c2d72ea31a694bfb88: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:d2545b972b60464233000bedab593bee8ae89e4ee10f04c2d72ea31a694bfb88: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": "P3",
+    "reach": "Absent",
+    "result_limitations": [],
+    "rules": [],
+    "verdict": "Supported"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "UNRESOLVED_LOCATIONS_EXCLUDED"
+    ],
+    "limitations_include": [],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": "P3",
+    "reach": "Absent",
+    "rules": [],
+    "verdict": "Supported"
+   },
+   "file": "sarif/synthetic_unresolved_irrelevant.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G06-unresolved-irrelevant-flow-beside-k1-absence",
+   "open_questions": [],
+   "why": "Unresolved absolute URIs whose paths cannot end with node_modules/lib-b/src/parse.js cannot be the locus: demonstrably irrelevant, so no refusal and the supplied absence stands (Supported)."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "REACH_CONFLICT",
+     "CONFIG_ASSUMPTION_UNDECLARED",
+     "ANALYSIS_PROVENANCE_BELOW_P3"
+    ],
+    "diagnostic_codes": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "evidence_items": 5,
+    "limitations": [
+     "k1-analysis: P3_FROM_DETACHED_VERIFICATION_RESULT: the document declares no embedded signature; any P3 grant or coverage cap rests on an externally supplied verification result (specification A5, register U-2), not on a signature the document carries",
+     "reflection-basis: P3_NOT_AVAILABLE:no_result_for_document",
+     "sarif:sha256:9b5f6b19cc2a4310936308d7f413b7a90e2a95c0dff2b19360b5b1b1a80a9a91: P2_NOT_GRANTED:bind_basis_not_digest",
+     "sarif:sha256:9b5f6b19cc2a4310936308d7f413b7a90e2a95c0dff2b19360b5b1b1a80a9a91: P3_NOT_AVAILABLE:no_result_for_document",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:9b5f6b19cc2a4310936308d7f413b7a90e2a95c0dff2b19360b5b1b1a80a9a91: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:9b5f6b19cc2a4310936308d7f413b7a90e2a95c0dff2b19360b5b1b1a80a9a91: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:9b5f6b19cc2a4310936308d7f413b7a90e2a95c0dff2b19360b5b1b1a80a9a91: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage",
+     "sarif:sha256:9b5f6b19cc2a4310936308d7f413b7a90e2a95c0dff2b19360b5b1b1a80a9a91: UNDECIDABLE_EVIDENCE: 1 recorded flow(s)/call edge(s) may touch the locus but cannot be resolved. They are not counted as paths in the reported outcome; the outcome is reported only if counting them as paths would not change the verdict, otherwise the evaluation is refused (EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE)",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the 1 undecidable observation(s) as paths gives the same verdict (Insufficient)"
+    ],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P1",
+    "reach": "Contradictory",
+    "result_limitations": [],
+    "rules": [
+     "R3",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P1",
+    "reach": "Contradictory",
+    "rules": [
+     "R3",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "sarif/synthetic_mixed_threadflows_one_unresolved.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G07-mixed-threadflows-one-unresolved-beside-k1-absence",
+   "open_questions": [],
+   "why": "One thread flow establishes a path, the other is unresolved. The established path already makes REACH Contradictory next to the K1 absence (R3); counting the unresolved flow too cannot change that verdict, so no refusal is needed and the unresolved flow is reported."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "CLAIM_CONTRADICTED_BY_PATH",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS",
+     "CONFIG_ASSUMPTION_UNDECLARED",
+     "ANALYSIS_PROVENANCE_BELOW_P3"
+    ],
+    "diagnostic_codes": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "evidence_items": 3,
+    "limitations": [
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: P2_NOT_GRANTED:bind_basis_not_digest",
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: P3_NOT_AVAILABLE:not_supplied",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P1",
+    "reach": "Present",
+    "result_limitations": [],
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": [],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P1",
+    "reach": "Present",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "sarif/synthetic_two_source_roots_same_file.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G08-two-source-roots-default-root",
+   "open_questions": [],
+   "why": "The same relative file exists under vendor/lib-b and node_modules/lib-b. Only the declared target root (node_modules/lib-b) matches; the other root is another component's tree, not the first plausible candidate."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "CLAIM_CONTRADICTED_BY_PATH",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS",
+     "CONFIG_ASSUMPTION_UNDECLARED",
+     "ANALYSIS_PROVENANCE_BELOW_P3"
+    ],
+    "diagnostic_codes": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "evidence_items": 3,
+    "limitations": [
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: P2_NOT_GRANTED:bind_basis_not_digest",
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: P3_NOT_AVAILABLE:not_supplied",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:6fd6506e38d455d8e5c75e7ef0d86abc36afcd346104acc27aad51c9de096c9c: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P1",
+    "reach": "Present",
+    "result_limitations": [],
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": [],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P1",
+    "reach": "Present",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "sarif/synthetic_two_source_roots_same_file.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G09-two-source-roots-other-root",
+   "open_questions": [],
+   "why": "Declaring vendor/lib-b as the target root selects the other flow: the root is an explicit input, never inferred from the data."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "NO_ANALYSIS",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS"
+    ],
+    "diagnostic_codes": [
+     "LOCUS_STEP_MARKED_UNREACHABLE"
+    ],
+    "evidence_items": 2,
+    "limitations": [
+     "CFG=not_compared",
+     "REACH=Unknown: only a K4 dependency graph exists",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:e238bf3ce470889d05effd60918196a9bd0288175749492e07d60841d6cbc28c: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:e238bf3ce470889d05effd60918196a9bd0288175749492e07d60841d6cbc28c: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:e238bf3ce470889d05effd60918196a9bd0288175749492e07d60841d6cbc28c: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "LOCUS_STEP_MARKED_UNREACHABLE"
+    ],
+    "limitations_include": [],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "sarif/synthetic_locus_step_marked_unreachable.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G10-locus-step-marked-unreachable",
+   "open_questions": [],
+   "why": "SARIF defines a threadFlowLocation as a location *visited* by the tool; kind 'unreachable' says the location is not. It is not an observation of the locus, and it is not an absence either: Unknown."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "NO_ANALYSIS",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS"
+    ],
+    "diagnostic_codes": [
+     "RESULTS_WITHOUT_CODE_FLOW"
+    ],
+    "evidence_items": 2,
+    "limitations": [
+     "CFG=not_compared",
+     "REACH=Unknown: only a K4 dependency graph exists",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:120e02c6692e81bb17f13d51e83581966fac50f81d9b7a8739dbb06017d4435b: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:120e02c6692e81bb17f13d51e83581966fac50f81d9b7a8739dbb06017d4435b: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:120e02c6692e81bb17f13d51e83581966fac50f81d9b7a8739dbb06017d4435b: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "RESULTS_WITHOUT_CODE_FLOW"
+    ],
+    "limitations_include": [],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "sarif/synthetic_empty_codeflows_array.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G11-empty-codeflows-array",
+   "open_questions": [],
+   "why": "`codeFlows: []` records no flow; it is not evidence that no flow exists."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [],
+    "diagnostic_codes": [
+     "RESULTS_WITHOUT_CODE_FLOW"
+    ],
+    "evidence_items": 4,
+    "limitations": [
+     "k1-analysis: P3_FROM_DETACHED_VERIFICATION_RESULT: the document declares no embedded signature; any P3 grant or coverage cap rests on an externally supplied verification result (specification A5, register U-2), not on a signature the document carries",
+     "reflection-basis: P3_NOT_AVAILABLE:no_result_for_document",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:120e02c6692e81bb17f13d51e83581966fac50f81d9b7a8739dbb06017d4435b: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:120e02c6692e81bb17f13d51e83581966fac50f81d9b7a8739dbb06017d4435b: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:120e02c6692e81bb17f13d51e83581966fac50f81d9b7a8739dbb06017d4435b: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": "P3",
+    "reach": "Absent",
+    "result_limitations": [],
+    "rules": [],
+    "verdict": "Supported"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "RESULTS_WITHOUT_CODE_FLOW"
+    ],
+    "limitations_include": [],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": "P3",
+    "reach": "Absent",
+    "rules": [],
+    "verdict": "Supported"
+   },
+   "file": "sarif/synthetic_empty_codeflows_array.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G12-empty-codeflows-beside-k1-absence",
+   "open_questions": [],
+   "why": "An empty codeFlows array neither asserts a path nor hides one (there is no record to resolve): the supplied absence is untouched. It also adds no support for it."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "NO_ANALYSIS",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS"
+    ],
+    "diagnostic_codes": [
+     "RUN_WITHOUT_RESULTS_ARRAY"
+    ],
+    "evidence_items": 2,
+    "limitations": [
+     "CFG=not_compared",
+     "REACH=Unknown: only a K4 dependency graph exists",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:d7427c4327627bc43c6a40e9ed6ce12bedca26fd7730d281a52cdb9bbbd9087d: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:d7427c4327627bc43c6a40e9ed6ce12bedca26fd7730d281a52cdb9bbbd9087d: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:d7427c4327627bc43c6a40e9ed6ce12bedca26fd7730d281a52cdb9bbbd9087d: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "RUN_WITHOUT_RESULTS_ARRAY"
+    ],
+    "limitations_include": [],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "sarif/synthetic_run_without_results_array.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G13-run-without-results-array",
+   "open_questions": [],
+   "why": "SARIF allows a run without `results` only for rule-metadata exports; it is not a scan and records nothing."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "NO_ANALYSIS",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS"
+    ],
+    "diagnostic_codes": [],
+    "evidence_items": 2,
+    "limitations": [
+     "CFG=not_compared",
+     "REACH=Unknown: only a K4 dependency graph exists",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:bdeeeb82ee435b09f19d876b733c214853e533e168f888bb50279c8cc89807e3: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:bdeeeb82ee435b09f19d876b733c214853e533e168f888bb50279c8cc89807e3: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:bdeeeb82ee435b09f19d876b733c214853e533e168f888bb50279c8cc89807e3: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "RUN_STATUS_RECORDED_AS_CLAIMED"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "sarif/synthetic_property_bag_claims_complete_coverage.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G14-property-bag-claims-complete-coverage",
+   "open_questions": [],
+   "why": "Schema-valid, evidence-meaningless: run.properties is an open property bag with no defined semantics; a producer-specific 'complete coverage' string is not the declared full-coverage claim over LOCUS and ENTRY that §5.1 step 2 requires."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "CLAIM_CONTRADICTED_BY_PATH",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS",
+     "CONFIG_ASSUMPTION_UNDECLARED",
+     "ANALYSIS_PROVENANCE_BELOW_P3"
+    ],
+    "diagnostic_codes": [],
+    "evidence_items": 3,
+    "limitations": [
+     "sarif:sha256:8a4a91e45d83466d01ae5a0068d44c8860aa7856c930131467d8611627d879fb: P2_NOT_GRANTED:bind_basis_not_digest",
+     "sarif:sha256:8a4a91e45d83466d01ae5a0068d44c8860aa7856c930131467d8611627d879fb: P3_NOT_AVAILABLE:not_supplied",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:8a4a91e45d83466d01ae5a0068d44c8860aa7856c930131467d8611627d879fb: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:8a4a91e45d83466d01ae5a0068d44c8860aa7856c930131467d8611627d879fb: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:8a4a91e45d83466d01ae5a0068d44c8860aa7856c930131467d8611627d879fb: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P1",
+    "reach": "Present",
+    "result_limitations": [],
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P1",
+    "reach": "Present",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "sarif/synthetic_duplicate_locations.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G15-duplicate-locations",
+   "open_questions": [],
+   "why": "Repeated locations in one flow are one observation."
+  },
+  {
+   "actual": {
+    "cause": "ANALYSIS_STRUCTURE_INVALID",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "cause": "ANALYSIS_STRUCTURE_INVALID",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID"
+   },
+   "file": "sarif/synthetic_invalid_invocation_time.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G16-invalid-invocation-time",
+   "open_questions": [],
+   "why": "`startTimeUtc` is not a date-time: invalid invocation metadata is refused (the attribution would otherwise rest on garbage)."
+  },
+  {
+   "actual": {
+    "cause": "ANALYSIS_STRUCTURE_INVALID",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "cause": "ANALYSIS_STRUCTURE_INVALID",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID"
+   },
+   "file": "sarif/synthetic_invalid_notification_level.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "G17-invalid-notification-level",
+   "open_questions": [],
+   "why": "A notification `level` outside none/note/warning/error is not SARIF; the run's error count would be unreliable."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "NO_ANALYSIS",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS"
+    ],
+    "diagnostic_codes": [
+     "CALL_SITE_WITHOUT_CONTAINING_METHOD",
+     "LIST_PROPERTIES_NOT_EXPORTED",
+     "UNDECIDABLE_CALL_EDGE"
+    ],
+    "evidence_items": 2,
+    "limitations": [
+     "CFG=not_compared",
+     "REACH=Unknown: only a K4 dependency graph exists",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "joern-graphml:sha256:2cec5e9f5d0c2dbbac64e5e12dda971ca06202670db87bd259b1b1a2e46255e3: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "joern-graphml:sha256:2cec5e9f5d0c2dbbac64e5e12dda971ca06202670db87bd259b1b1a2e46255e3: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "joern-graphml:sha256:2cec5e9f5d0c2dbbac64e5e12dda971ca06202670db87bd259b1b1a2e46255e3: CONTENT_HASH_ALGORITHM_UNSPECIFIED: equality of the declared and recorded source hash; the CPG schema defines no algorithm",
+     "joern-graphml:sha256:2cec5e9f5d0c2dbbac64e5e12dda971ca06202670db87bd259b1b1a2e46255e3: CALL_GRAPH_COMPLETENESS_UNKNOWN: dynamic dispatch, reflection and unresolved calls leave no CALL edge, so the absence of a path says nothing",
+     "joern-graphml:sha256:2cec5e9f5d0c2dbbac64e5e12dda971ca06202670db87bd259b1b1a2e46255e3: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage",
+     "joern-graphml:sha256:2cec5e9f5d0c2dbbac64e5e12dda971ca06202670db87bd259b1b1a2e46255e3: UNDECIDABLE_EVIDENCE: 1 recorded flow(s)/call edge(s) may touch the locus but cannot be resolved. They are not counted as paths in the reported outcome; the outcome is reported only if counting them as paths would not change the verdict, otherwise the evaluation is refused (EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE)",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the 1 undecidable observation(s) as paths gives the same verdict (Insufficient)"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_CALL_EDGE",
+     "CALL_SITE_WITHOUT_CONTAINING_METHOD"
+    ],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "joern-graphml/synthetic_uncontained_call_into_locus.graphml",
+   "fixture_problems": [],
+   "format": "joern-graphml",
+   "id": "G18-graph-uncontained-call-into-locus",
+   "open_questions": [],
+   "why": "A CALL edge into parse has a call site with no containing METHOD, so its caller (which might be reachable from main) is unknown. The fixture removes the known main -> run -> parse call edge, so the unknown-caller edge is the only candidate: it is undecidable and kept, never dropped and never promoted to a path."
+  },
+  {
+   "actual": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "file": "joern-graphml/synthetic_uncontained_call_into_locus.graphml",
+   "fixture_problems": [],
+   "format": "joern-graphml",
+   "id": "G19-graph-uncontained-call-beside-k1-absence",
+   "open_questions": [],
+   "why": "The same unknown-caller edge next to a K1 absence could turn Supported into Contradictory: refused."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [],
+    "diagnostic_codes": [
+     "CALL_SITE_WITHOUT_CONTAINING_METHOD",
+     "LIST_PROPERTIES_NOT_EXPORTED"
+    ],
+    "evidence_items": 4,
+    "limitations": [
+     "k1-analysis: P3_FROM_DETACHED_VERIFICATION_RESULT: the document declares no embedded signature; any P3 grant or coverage cap rests on an externally supplied verification result (specification A5, register U-2), not on a signature the document carries",
+     "reflection-basis: P3_NOT_AVAILABLE:no_result_for_document",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "joern-graphml:sha256:3b0fae89779ed73740bfe00e2cc3592272b08e51e49909843e3dd69b8a44ab0f: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "joern-graphml:sha256:3b0fae89779ed73740bfe00e2cc3592272b08e51e49909843e3dd69b8a44ab0f: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "joern-graphml:sha256:3b0fae89779ed73740bfe00e2cc3592272b08e51e49909843e3dd69b8a44ab0f: CALL_GRAPH_COMPLETENESS_UNKNOWN: dynamic dispatch, reflection and unresolved calls leave no CALL edge, so the absence of a path says nothing",
+     "joern-graphml:sha256:3b0fae89779ed73740bfe00e2cc3592272b08e51e49909843e3dd69b8a44ab0f: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": "P3",
+    "reach": "Absent",
+    "result_limitations": [],
+    "rules": [],
+    "verdict": "Supported"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "CALL_SITE_WITHOUT_CONTAINING_METHOD"
+    ],
+    "limitations_include": [],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": "P3",
+    "reach": "Absent",
+    "rules": [],
+    "verdict": "Supported"
+   },
+   "file": "joern-graphml/synthetic_uncontained_call_irrelevant.graphml",
+   "fixture_problems": [],
+   "format": "joern-graphml",
+   "id": "G20-graph-uncontained-call-irrelevant-beside-k1-absence",
+   "open_questions": [],
+   "why": "The unknown-caller CALL edge targets a method that cannot reach the locus method over any known edge, so it cannot lie on a path to the locus: irrelevant, no refusal."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "NO_ANALYSIS",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS"
+    ],
+    "diagnostic_codes": [
+     "CALL_SITE_WITHOUT_CONTAINING_METHOD",
+     "CONTAINS_EDGE_REVERSED",
+     "LIST_PROPERTIES_NOT_EXPORTED",
+     "UNDECIDABLE_CALL_EDGE"
+    ],
+    "evidence_items": 2,
+    "limitations": [
+     "CFG=not_compared",
+     "REACH=Unknown: only a K4 dependency graph exists",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "joern-graphml:sha256:41491ff0564a9371765b416c0a427c6695676b222de72f647b167035dd2412e2: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "joern-graphml:sha256:41491ff0564a9371765b416c0a427c6695676b222de72f647b167035dd2412e2: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "joern-graphml:sha256:41491ff0564a9371765b416c0a427c6695676b222de72f647b167035dd2412e2: CONTENT_HASH_ALGORITHM_UNSPECIFIED: equality of the declared and recorded source hash; the CPG schema defines no algorithm",
+     "joern-graphml:sha256:41491ff0564a9371765b416c0a427c6695676b222de72f647b167035dd2412e2: CALL_GRAPH_COMPLETENESS_UNKNOWN: dynamic dispatch, reflection and unresolved calls leave no CALL edge, so the absence of a path says nothing",
+     "joern-graphml:sha256:41491ff0564a9371765b416c0a427c6695676b222de72f647b167035dd2412e2: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage",
+     "joern-graphml:sha256:41491ff0564a9371765b416c0a427c6695676b222de72f647b167035dd2412e2: UNDECIDABLE_EVIDENCE: 1 recorded flow(s)/call edge(s) may touch the locus but cannot be resolved. They are not counted as paths in the reported outcome; the outcome is reported only if counting them as paths would not change the verdict, otherwise the evaluation is refused (EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE)",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the 1 undecidable observation(s) as paths gives the same verdict (Insufficient)"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "CONTAINS_EDGE_REVERSED",
+     "UNDECIDABLE_CALL_EDGE"
+    ],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "joern-graphml/synthetic_contains_edges_reversed.graphml",
+   "fixture_problems": [],
+   "format": "joern-graphml",
+   "id": "G21-graph-contains-edges-reversed",
+   "open_questions": [],
+   "why": "CONTAINS edges in the direction opposite to the one the semanticcpg library reads are not used. Every call site then has an unknown container, the path main -> run -> parse is no longer visible, and the CALL edges into methods that reach parse are undecidable instead of being silently lost."
+  },
+  {
+   "actual": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "agree": true,
+   "category": "B",
+   "differences": [],
+   "expected": {
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE",
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE"
+   },
+   "file": "joern-graphml/synthetic_contains_edges_reversed.graphml",
+   "fixture_problems": [],
+   "format": "joern-graphml",
+   "id": "G22-graph-contains-edges-reversed-beside-k1-absence",
+   "open_questions": [],
+   "why": "As G21 next to a K1 absence: the lost path could change the verdict, so the evaluation is refused rather than reporting Supported."
+  },
+  {
+   "actual": {
+    "bind": "unknown",
+    "blockers": [
+     "RUN_REVISION_UNKNOWN:#/runs/0"
+    ],
+    "codes": [
+     "CLAIM_CONTRADICTED_BY_PATH",
+     "ENTRYPOINTS_UNDECLARED",
+     "SCOPE_UNBOUND",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS",
+     "CONFIG_ASSUMPTION_UNDECLARED",
+     "ANALYSIS_PROVENANCE_BELOW_P3"
+    ],
+    "diagnostic_codes": [],
+    "evidence_items": 3,
+    "limitations": [
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: P2_NOT_GRANTED:not_p1",
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: P3_NOT_AVAILABLE:not_supplied",
+     "BIND: sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: RUN_REVISION_UNKNOWN:#/runs/0",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P0",
+    "reach": "Present",
+    "result_limitations": [],
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "L",
+   "differences": [],
+   "expected": {
+    "bind": "unknown",
+    "blockers": [
+     "RUN_REVISION_UNKNOWN:#/runs/0"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED"
+    ],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P0",
+    "reach": "Present",
+    "result_limitations": [],
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "authentic/codeql/codeql-2.27.3__js-command-injection__flow-via-vendor-lib.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "L01-live-codeql-flow-through-vendored-lib",
+   "open_questions": [
+    "binding a real CodeQL log to a revision (the log carries none)"
+   ],
+   "why": "The live code flow visits vendor/lib-b/src/parse.js (the locus file under the declared target root): a recorded path touching the locus -> Present (R1). Real CodeQL SARIF has no versionControlProvenance, so the run cannot be bound to the declared revision (BIND Unknown, R6), and it has no invocation start time, so under strict P1 it is unattributed (P0, R13)."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "NO_ANALYSIS",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS"
+    ],
+    "diagnostic_codes": [],
+    "evidence_items": 2,
+    "limitations": [
+     "CFG=not_compared",
+     "REACH=Unknown: only a K4 dependency graph exists",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:4f95a3a8b5b15cb16920740139d14e124e6d39bfd7db21882c5687a692337888: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:4f95a3a8b5b15cb16920740139d14e124e6d39bfd7db21882c5687a692337888: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:4f95a3a8b5b15cb16920740139d14e124e6d39bfd7db21882c5687a692337888: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "L",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "NO_ABSENCE_EVIDENCE"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "authentic/codeql/codeql-2.27.3__js-tainted-path__no-results.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "L02-live-codeql-empty-results",
+   "open_questions": [],
+   "why": "A successful live run with an empty result list says the query found nothing; it is not a coverage claim over the locus and entry points (§5.1 step 2): Unknown, never Absent."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [
+     "NO_ANALYSIS",
+     "ENTRYPOINTS_UNDECLARED",
+     "HAZARD_BUILD_TIME_PRUNING",
+     "HAZARD_CONFIGURATION_DEPENDENT_PATHS",
+     "HAZARD_DYNAMIC_LOADING",
+     "HAZARD_GENERATED_CODE",
+     "HAZARD_INTER_PROCESS_CALLS",
+     "HAZARD_NATIVE_FFI",
+     "HAZARD_REFLECTION",
+     "HAZARD_SERIALIZATION_GADGETS"
+    ],
+    "diagnostic_codes": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "evidence_items": 2,
+    "limitations": [
+     "CFG=not_compared",
+     "REACH=Unknown: only a K4 dependency graph exists",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:99e022bfe540b6ec260358ff9c0357ac81b2fc9c14061ae6cc51f90e759a6996: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:99e022bfe540b6ec260358ff9c0357ac81b2fc9c14061ae6cc51f90e759a6996: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:99e022bfe540b6ec260358ff9c0357ac81b2fc9c14061ae6cc51f90e759a6996: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "L",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": [],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": null,
+    "reach": "Unknown",
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "authentic/codeql/codeql-2.27.3__js-command-injection__flow-app-only.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "L03-live-codeql-flow-not-touching-the-locus",
+   "open_questions": [],
+   "why": "A genuine flow for a different part of the program (the application, not the vendored library): every visited location is resolved and elsewhere, so it is not an observation of the locus and not an absence either."
+  },
+  {
+   "actual": {
+    "bind": "unknown",
+    "blockers": [
+     "RUN_REVISION_UNKNOWN:#/runs/0"
+    ],
+    "codes": [
+     "REACH_CONFLICT",
+     "SCOPE_UNBOUND",
+     "CONFIG_ASSUMPTION_UNDECLARED",
+     "ANALYSIS_PROVENANCE_BELOW_P3"
+    ],
+    "diagnostic_codes": [],
+    "evidence_items": 5,
+    "limitations": [
+     "k1-analysis: P3_FROM_DETACHED_VERIFICATION_RESULT: the document declares no embedded signature; any P3 grant or coverage cap rests on an externally supplied verification result (specification A5, register U-2), not on a signature the document carries",
+     "reflection-basis: P3_NOT_AVAILABLE:no_result_for_document",
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: P2_NOT_GRANTED:not_p1",
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: P3_NOT_AVAILABLE:no_result_for_document",
+     "BIND: sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: RUN_REVISION_UNKNOWN:#/runs/0",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:7e1ab2108295a98169c255225cf099e9a83e1d3b7279dab598b36d0f61e5eb7e: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P0",
+    "reach": "Contradictory",
+    "result_limitations": [],
+    "rules": [
+     "R3",
+     "R6",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "agree": true,
+   "category": "L",
+   "differences": [],
+   "expected": {
+    "bind": "unknown",
+    "blockers": [
+     "RUN_REVISION_UNKNOWN:#/runs/0"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "observations": 1,
+    "outcome": "evaluated",
+    "prov_reach": "P0",
+    "reach": "Contradictory",
+    "rules": [
+     "R3",
+     "R6",
+     "R12",
+     "R13"
+    ],
+    "verdict": "Insufficient"
+   },
+   "file": "authentic/codeql/codeql-2.27.3__js-command-injection__flow-via-vendor-lib.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "L04-live-codeql-flow-beside-k1-absence",
+   "open_questions": [],
+   "why": "A live CodeQL path through the locus next to a verified K1 absence (Supported on its own): positive + K1 Absent = Contradictory (R3). The path is unbound, so BIND is Unknown (R6)."
+  },
+  {
+   "actual": {
+    "bind": "matched",
+    "blockers": [],
+    "codes": [],
+    "diagnostic_codes": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "evidence_items": 4,
+    "limitations": [
+     "k1-analysis: P3_FROM_DETACHED_VERIFICATION_RESULT: the document declares no embedded signature; any P3 grant or coverage cap rests on an externally supplied verification result (specification A5, register U-2), not on a signature the document carries",
+     "reflection-basis: P3_NOT_AVAILABLE:no_result_for_document",
+     "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
+     "sarif:sha256:99e022bfe540b6ec260358ff9c0357ac81b2fc9c14061ae6cc51f90e759a6996: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
+     "sarif:sha256:99e022bfe540b6ec260358ff9c0357ac81b2fc9c14061ae6cc51f90e759a6996: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
+     "sarif:sha256:99e022bfe540b6ec260358ff9c0357ac81b2fc9c14061ae6cc51f90e759a6996: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+    ],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": "P3",
+    "reach": "Absent",
+    "result_limitations": [],
+    "rules": [],
+    "verdict": "Supported"
+   },
+   "agree": true,
+   "category": "L",
+   "differences": [],
+   "expected": {
+    "bind": "matched",
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": [],
+    "observations": 0,
+    "outcome": "evaluated",
+    "prov_reach": "P3",
+    "reach": "Absent",
+    "rules": [],
+    "verdict": "Supported"
+   },
+   "file": "authentic/codeql/codeql-2.27.3__js-command-injection__flow-app-only.sarif",
+   "fixture_problems": [],
+   "format": "sarif",
+   "id": "L05-live-codeql-app-only-flow-beside-k1-absence",
+   "open_questions": [],
+   "why": "The genuine flow that does not touch the locus changes nothing about the supplied absence."
+  },
+  {
+   "actual": {
     "bind": "matched",
     "blockers": [],
     "codes": [
@@ -4395,7 +5875,8 @@
      "CONFIG_ASSUMPTION_UNDECLARED"
     ],
     "diagnostic_codes": [
-     "NO_LOCUS_FILES"
+     "NO_LOCUS_FILES",
+     "UNDECIDABLE_FLOW"
     ],
     "evidence_items": 1,
     "limitations": [
@@ -4404,7 +5885,9 @@
      "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
      "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
      "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
-     "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+     "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage",
+     "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: UNDECIDABLE_EVIDENCE: 1 recorded flow(s)/call edge(s) may touch the locus but cannot be resolved. They are not counted as paths in the reported outcome; the outcome is reported only if counting them as paths would not change the verdict, otherwise the evaluation is refused (EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE)",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the 1 undecidable observation(s) as paths gives the same verdict (Insufficient)"
     ],
     "observations": 0,
     "outcome": "evaluated",
@@ -4616,7 +6099,8 @@
      "HAZARD_SERIALIZATION_GADGETS"
     ],
     "diagnostic_codes": [
-     "TARGET_SOURCE_ROOT_NOT_DECLARED"
+     "TARGET_SOURCE_ROOT_NOT_DECLARED",
+     "UNDECIDABLE_FLOW"
     ],
     "evidence_items": 2,
     "limitations": [
@@ -4625,7 +6109,9 @@
      "EVIDENCE_NOT_VERIFIED: analyser soundness claims are recorded as claimed (A6); a signature authenticates origin, not soundness (CE-R6)",
      "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: NO_ABSENCE_EVIDENCE: this artifact type states no coverage claim over LOCUS and ENTRY (§5.1 step 2), so no absence or incomplete-analysis fact is derived from it; REACH stays Unknown unless a path is recorded",
      "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED: that the assessed artifact was built from the analysed source is an unauthenticated evaluator statement, not something the artifact establishes",
-     "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage"
+     "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: RUN_STATUS_RECORDED_AS_CLAIMED: the tool's own success status, notifications and result counts are recorded, never read as proof of complete coverage",
+     "sarif:sha256:83cc28f027696bcd674bf415977421c126c826d4049ad4ae16fea2788649ab1f: UNDECIDABLE_EVIDENCE: 1 recorded flow(s)/call edge(s) may touch the locus but cannot be resolved. They are not counted as paths in the reported outcome; the outcome is reported only if counting them as paths would not change the verdict, otherwise the evaluation is refused (EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE)",
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT: counting the 1 undecidable observation(s) as paths gives the same verdict (Insufficient)"
     ],
     "observations": 0,
     "outcome": "evaluated",
@@ -4968,18 +6454,18 @@
    }
   },
   "B": {
-   "agree": 71,
+   "agree": 93,
    "bind_state_distribution": {
-    "matched": 41,
+    "matched": 55,
     "unknown": 13
    },
    "by_format": {
     "joern-graphml": {
-     "agree": 25,
-     "artifacts": 25,
-     "cases": 25,
-     "evaluated": 16,
-     "refused": 9
+     "agree": 30,
+     "artifacts": 30,
+     "cases": 30,
+     "evaluated": 19,
+     "refused": 11
     },
     "none": {
      "agree": 1,
@@ -4989,18 +6475,17 @@
      "refused": 0
     },
     "sarif": {
-     "agree": 45,
-     "artifacts": 45,
-     "cases": 45,
-     "evaluated": 37,
-     "refused": 8
+     "agree": 62,
+     "artifacts": 62,
+     "cases": 62,
+     "evaluated": 48,
+     "refused": 14
     }
    },
-   "cases": 71,
+   "cases": 93,
    "cases_open_semantics": [
     "B05-sarif-abbreviated-revision",
     "B15-sarif-suppressed-path",
-    "B18-sarif-single-location-flow",
     "B19-sarif-absolute-uris",
     "C08-graphml-locus-method-no-filename",
     "C09-graphml-duplicate-locus-name"
@@ -5036,6 +6521,7 @@
     "B13-sarif-no-invocation-record",
     "B14-sarif-unknown-tool-no-version",
     "B15-sarif-suppressed-path",
+    "B18-sarif-single-location-flow",
     "B22-sarif-percent-encoded",
     "B23-sarif-artifact-index",
     "B24-sarif-two-flows-one-result",
@@ -5057,14 +6543,18 @@
     "F02-target-component-differs-from-finding",
     "F03-subject-artifact-differs-from-scope",
     "F05-subject-declares-no-revision",
-    "F06-graph-subject-declares-no-hash"
+    "F06-graph-subject-declares-no-hash",
+    "G07-mixed-threadflows-one-unresolved-beside-k1-absence",
+    "G08-two-source-roots-default-root",
+    "G09-two-source-roots-other-root",
+    "G15-duplicate-locations"
    ],
    "label": "synthetic controlled fixtures",
    "reach_state_distribution": {
-    "Absent": 2,
-    "Contradictory": 1,
-    "Present": 32,
-    "Unknown": 19
+    "Absent": 5,
+    "Contradictory": 2,
+    "Present": 36,
+    "Unknown": 25
    },
    "refusals_by_cause": {
     "ANALYSIS_ARTIFACT_CONTRADICTORY": 3,
@@ -5072,29 +6562,84 @@
     "ANALYSIS_FORMAT_UNRECOGNIZED": 1,
     "ANALYSIS_FORMAT_VERSION_UNSUPPORTED": 2,
     "ANALYSIS_REFERENCE_UNRESOLVED": 2,
-    "ANALYSIS_STRUCTURE_INVALID": 5,
-    "ANALYSIS_UNSAFE_CONSTRUCT": 1
+    "ANALYSIS_STRUCTURE_INVALID": 7,
+    "ANALYSIS_UNSAFE_CONSTRUCT": 1,
+    "UNRESOLVED_RELEVANT_EVIDENCE": 6
    },
    "rules_observed": {
-    "R1": 32,
-    "R11": 51,
-    "R12": 35,
-    "R13": 33,
-    "R2": 19,
-    "R3": 1,
+    "R1": 36,
+    "R11": 61,
+    "R12": 40,
+    "R13": 38,
+    "R2": 25,
+    "R3": 2,
     "R4": 2,
-    "R5": 51,
+    "R5": 61,
     "R6": 13
    },
    "verdict_distribution": {
-    "Insufficient": 52,
-    "Supported": 2
+    "Insufficient": 63,
+    "Supported": 5
+   }
+  },
+  "L": {
+   "agree": 5,
+   "bind_state_distribution": {
+    "matched": 3,
+    "unknown": 2
+   },
+   "by_format": {
+    "sarif": {
+     "agree": 5,
+     "artifacts": 5,
+     "cases": 5,
+     "evaluated": 5,
+     "refused": 0
+    }
+   },
+   "cases": 5,
+   "cases_open_semantics": [
+    "L01-live-codeql-flow-through-vendored-lib"
+   ],
+   "cases_unbound": [
+    "L01-live-codeql-flow-through-vendored-lib",
+    "L04-live-codeql-flow-beside-k1-absence"
+   ],
+   "cases_with_incomplete_or_unverified_run_info": [],
+   "cases_with_positive_path": [
+    "L01-live-codeql-flow-through-vendored-lib",
+    "L04-live-codeql-flow-beside-k1-absence"
+   ],
+   "label": "authentic CodeQL output (live runs made for this repository)",
+   "reach_state_distribution": {
+    "Absent": 1,
+    "Contradictory": 1,
+    "Present": 1,
+    "Unknown": 2
+   },
+   "refusals_by_cause": {},
+   "rules_observed": {
+    "R1": 1,
+    "R11": 3,
+    "R12": 2,
+    "R13": 2,
+    "R2": 2,
+    "R3": 1,
+    "R5": 3,
+    "R6": 2
+   },
+   "verdict_distribution": {
+    "Insufficient": 4,
+    "Supported": 1
    }
   }
  },
- "disclaimer": "Controlled conformance against hand-reviewed expectations. Category B is synthetic; category A files are upstream format examples/test data, not live analyzer runs. No accuracy, precision, recall or false-positive rate is reported because no labelled ground truth exists.",
+ "disclaimer": "Controlled conformance against hand-reviewed expectations. Category B is synthetic; category A files are upstream format examples/test data, not live analyzer runs; category L files are live CodeQL runs made for this repository. No accuracy, precision, recall or false-positive rate is reported because no labelled ground truth exists.",
  "kind": "controlled-conformance-results",
  "manifest_schema": "analysis-corpus-1",
+ "not_obtained": {
+  "authentic_joern": "authentic Joern output: 0 artifacts. Not obtained: the Joern distribution is about 1.7 GB and was not installed for this task; every Joern GraphML here is category B (synthetic), checked against the exporter source and CPG schema only."
+ },
  "rule_coverage": {
   "never_triggered": [
    "R7",
@@ -5105,24 +6650,24 @@
   "note": "The artifact adapters can only produce positive path observations, so rules that need an absence, an incomplete or an ambiguous K1 fact (R7, R8) or a non-governed dimension are exercised by the strict-input conformance harness (python -m tests.conformance), not by this corpus.",
   "scope": "rules observed to trigger in at least one evaluated case of this corpus (a count of cases, not of artifacts)",
   "triggered": {
-   "R1": 34,
+   "R1": 39,
    "R10": 0,
-   "R11": 58,
-   "R12": 37,
-   "R13": 35,
-   "R2": 24,
-   "R3": 1,
+   "R11": 71,
+   "R12": 44,
+   "R13": 42,
+   "R2": 32,
+   "R3": 3,
    "R4": 2,
-   "R5": 58,
-   "R6": 15,
+   "R5": 71,
+   "R6": 17,
    "R7": 0,
    "R8": 0,
    "R9": 0
   }
  },
  "totals": {
-  "agree": 80,
-  "cases": 80,
+  "agree": 107,
+  "cases": 107,
   "disagree": 0,
   "fixture_problems": 0
  }

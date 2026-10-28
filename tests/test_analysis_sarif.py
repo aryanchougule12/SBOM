@@ -17,14 +17,15 @@ from tests.pipeline_support import FIXTURES
 
 SCHEMA = json.loads((FIXTURES.parent / "third_party" / "sarif-schema-2.1.0.json").read_text())
 VALIDATOR = jsonschema.Draft7Validator(SCHEMA)
-ALL_SARIF = sorted(SARIF_DIR.glob("*.sarif")) + sorted(UPSTREAM_DIR.glob("*.sarif"))
+ALL_SARIF = sorted(SARIF_DIR.glob("*.sarif")) + sorted(UPSTREAM_DIR.glob("*.sarif")) + sorted((FIXTURES / "authentic" / "codeql").glob("*.sarif"))
 # files that are intentionally NOT valid against the official schema (or whose version is not 2.1.0)
 SCHEMA_INVALID = {"synthetic_invalid_results_type.sarif", "synthetic_invalid_execution_flag.sarif", "synthetic_invalid_empty_threadflow.sarif",
                   "synthetic_invalid_version_2_0_0.sarif", "synthetic_invalid_truncated.sarif",
-                  "codeql-action__invalid-sarif.sarif", "codeql-action__tool-names.sarif"}
+                  "codeql-action__invalid-sarif.sarif", "codeql-action__tool-names.sarif",
+                  "synthetic_invalid_notification_level.sarif"}
 # schema-valid (or not even JSON for the schema) yet unusable for this adapter: duplicate keys, dangling or contradictory references
 PARSER_REFUSED = SCHEMA_INVALID | {"synthetic_invalid_duplicate_key.sarif", "synthetic_invalid_unresolved_index.sarif",
-                                   "synthetic_invalid_index_uri_conflict.sarif"}
+                                   "synthetic_invalid_index_uri_conflict.sarif", "synthetic_invalid_invocation_time.sarif"}
 
 
 def raw(path):

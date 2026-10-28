@@ -110,6 +110,7 @@ class RunFacts:
     content_hash: Optional[str] = None  # a claimed hash over the analysed sources (GraphML META_DATA HASH)
     language: Optional[str] = None
     result_count: int = 0
+    results_present: bool = True   # SARIF: the `results` array exists (it "must be present ... if a log file represents an actual scan")
 
 
 @dataclass(frozen=True)
@@ -121,6 +122,12 @@ class PathStep:
     path: Optional[str]
     unresolved: Optional[str] = None
     line: Optional[int] = None
+    # What the artifact says about an *unresolved* location, kept so that its relevance can be judged
+    # instead of the location being discarded: ``loose_path`` is the decoded URI path with any scheme
+    # and authority removed (not anchored to the analysis root); ``None`` when the location carries no
+    # usable URI at all (then its relevance cannot be excluded).
+    loose_path: Optional[str] = None
+    kinds: tuple[str, ...] = ()   # threadFlowLocation.kinds, verbatim ('unreachable' matters)
 
 
 @dataclass(frozen=True)
@@ -160,10 +167,22 @@ class CallEdge:
 
 
 @dataclass(frozen=True)
+class UncontainedCall:
+    """A CALL edge whose call site has no containing METHOD in the artifact: the callee is known, the
+    caller is not, so the edge cannot be placed in the method-level call graph. It is kept because
+    the unknown caller might be reachable from an entry point."""
+
+    call_node: str
+    callee: str
+    locator: str
+
+
+@dataclass(frozen=True)
 class CallGraph:
     methods: tuple[MethodNode, ...]
     edges: tuple[CallEdge, ...]
     call_edge_count: int         # CALL edges in the artifact (0 means this is not a call-graph export)
+    uncontained: tuple[UncontainedCall, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -207,6 +226,19 @@ class ObservationTrace:
 
 
 @dataclass(frozen=True)
+class UndecidableObservation:
+    """A recorded flow or call edge that might touch the locus but cannot be classified: some
+    location (or the caller of a call edge) cannot be resolved, and nothing excludes it from being the
+    locus. It is neither a path observation nor a demonstrated non-path. It is never dropped: the
+    evaluator decides whether it can change the verdict (``evidence.reach_evaluator``)."""
+
+    observation_id: str
+    locator: str
+    reason: str
+    step_locators: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class SourceRef:
     """Where a derived ``ReachDocument`` came from. Python-level only: the strict JSON input of
     ``evidence.reach_inputs`` can never carry it, so a caller cannot fabricate derivation metadata."""
@@ -219,3 +251,4 @@ class SourceRef:
     limitations: tuple[str, ...]
     diagnostics: tuple[AnalysisDiagnostic, ...]
     subject_label: str = ""
+    undecidable: tuple[UndecidableObservation, ...] = ()

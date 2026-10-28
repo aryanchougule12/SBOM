@@ -4,15 +4,19 @@ Inputs and reviewed expectations for the analyzer-artifact adapters (`evidence/a
 `manifest.json` lists every case; each case records its source, its expected outcome and **why** the
 expectation follows from the formal rules. Run the corpus with `python -m tests.analysis_eval`.
 
-**Nothing here is the output of a live analyzer run made by this project.** No CodeQL or Joern
-installation was available and none was installed. The corpus must not be described as an evaluation
-of CodeQL or Joern.
+Categories are kept strictly apart. **Category L** (`authentic/codeql/`) is unedited output of live
+CodeQL 2.27.3 runs made for this repository (provenance and exact commands in
+`authentic/codeql/REPRODUCE.md`). Category A is upstream example/test data; category B is synthetic.
+**No authentic Joern output was obtained** (the distribution is about 1.7 GB; not installed), so every
+Joern GraphML here is synthetic. The corpus must not be described as an evaluation of CodeQL or Joern: it
+checks the adapters against hand-reviewed expectations.
 
 ## Categories
 
 | Category | Directory | What it is |
 |---|---|---|
 | **A** | `upstream/` | Files copied **byte-for-byte** from public repositories (provenance below). They are format examples / upstream test data, not verified-unmodified outputs of a live run. |
+| **L** | `authentic/codeql/` | **Live CodeQL 2.27.3 output** (3 SARIF files from two tiny JavaScript projects written for this repository; the SARIF is tool output, the sources are MIT-licensed here; CodeQL bundle and queries are GitHub's, MIT). Not a labelled ground truth. |
 | **B** | `sarif/`, `joern-graphml/` | **Synthetic** controlled fixtures written for this repository to the documented formats, each testing one edge case. |
 
 ## Category A provenance

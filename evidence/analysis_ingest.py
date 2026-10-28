@@ -100,6 +100,7 @@ def ingest_artifacts(
     evidence = base if base is not None else EMPTY_EVIDENCE
     documents = list(evidence.documents)
     sources = list(evidence.analysis_sources)
+    worst = list(evidence.worst_case_documents)
     seen = {d.doc_id for d in documents} | {s.artifact.doc_id for s in sources}
     for position, item in enumerate(artifacts):
         entry = item if isinstance(item, AnalysisArtifactInput) else AnalysisArtifactInput(item)
@@ -115,7 +116,10 @@ def ingest_artifacts(
         sources.append(derived.source)
         if derived.document is not None:
             documents.append(derived.document)
-    return dataclasses.replace(evidence, documents=tuple(documents), analysis_sources=tuple(sources))
+        if derived.worst_document is not None:
+            worst.append(derived.worst_document)
+    return dataclasses.replace(evidence, documents=tuple(documents), analysis_sources=tuple(sources),
+                               worst_case_documents=tuple(worst))
 
 
 def evaluate_with_analysis(
