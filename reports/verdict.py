@@ -24,21 +24,27 @@ class Verdict(str, Enum):
 class RationaleClass(str, Enum):
     """Rationale class tokens of §3 (sub-reasons, not verdicts).
 
-    NOTE: the specification (docs/formal_specification_v0.2.md §3) defines a fourth class, NO_RULE_APPLIES, not yet reflected here — this must be added when rationale generation is implemented (Stage 3/4).
+    ``NO_RULE_APPLIES`` is the class of the Step 4 no-rule default. It has no rule code,
+    is emitted only when that default applies and never co-occurs with the codes of a
+    triggered rule.
     """
 
     CONTRADICTORY_EVIDENCE = "CONTRADICTORY_EVIDENCE"
     CANNOT_BE_ESTABLISHED = "CANNOT_BE_ESTABLISHED"
     BELOW_BAR = "BELOW_BAR"
+    NO_RULE_APPLIES = "NO_RULE_APPLIES"
 
 
 @dataclass
 class VerdictResult:
-    """The ``(verdict, rationale)`` output of §3. ``rationale`` follows the grammar
-    ``<CLASS>[CODE,...]: text``; producing it is a later stage."""
+    """The ``(verdict, codes, rationale)`` output of §3. ``codes`` are the triggered
+    rule codes in the §3 output order (empty for Supported and for the no-rule default).
+    ``rationale`` follows the grammar ``<CLASS>[CODE,...]: text``; an empty string means
+    that no class applies (Supported)."""
 
     verdict: Verdict
     rationale: str
+    codes: tuple[str, ...] = ()
 
 
 def render_verdict(result: VerdictResult) -> str:

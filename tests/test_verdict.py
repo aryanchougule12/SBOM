@@ -9,9 +9,10 @@ def test_verdict_categories_are_exactly_three():
     assert [v.value for v in verdict.Verdict] == ["Supported", "Weak", "Insufficient"]
 
 
-def test_rationale_classes_are_exactly_the_three_spec_tokens():
+def test_rationale_classes_are_exactly_the_four_spec_tokens():
+    # Spec section 3: the three rule classes plus NO_RULE_APPLIES (the Step 4 no-rule default).
     assert {c.value for c in verdict.RationaleClass} == {
-        "CONTRADICTORY_EVIDENCE", "CANNOT_BE_ESTABLISHED", "BELOW_BAR",
+        "CONTRADICTORY_EVIDENCE", "CANNOT_BE_ESTABLISHED", "BELOW_BAR", "NO_RULE_APPLIES",
     }
     # Rationale classes are sub-reasons, not verdicts.
     assert {c.value for c in verdict.RationaleClass}.isdisjoint({v.value for v in verdict.Verdict})

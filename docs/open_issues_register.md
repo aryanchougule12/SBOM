@@ -172,14 +172,14 @@ Each row: affected sections/tests, issue, proposed fix, whether it changes resea
 - **Issue:** the spec defines the no-rule default (Insufficient) and the class `NO_RULE_APPLIES`; `RationaleClass` has three members and its NOTE defers the fourth; there is no rationale generation.
 - **Proposed fix:** add the class together with rationale generation in Stage 3/4.
 - **Changes research semantics:** no. **Blocks:** Stage 3/4 only.
-- **Status:** **Deferred.** Nothing changed.
+- **Status:** **Addressed in Phase 1 for `Req(component_not_present)`.** `RationaleClass.NO_RULE_APPLIES` exists, and `evidence/cnp_rules.py` generates the rationale (grammar and code ordering) for that predicate. Rationale generation for the reachability predicate is not implemented.
 
 ### G10: `ArtifactKind.UNKNOWN` and N14/N15
 - **Affects:** spec §4.3 N14/N15 preconditions, NT9-NT17, CE-N7; `model.ArtifactKind`.
 - **Issue:** the spec lists four kinds; the model adds `UNKNOWN` and every OpenVEX finding has it. Whether `UNKNOWN` satisfies the `{binary, container}` precondition is undefined. The `model.py` docstring is a deferral note, not an approved decision.
 - **Proposed fix:** Stage 3 must decide explicitly (e.g. treat `UNKNOWN` as possibly binary/container, giving N15 Weak, or make it an input error). It must never be coerced to `SOURCE` or `OTHER`.
 - **Changes research semantics:** yes. **Blocks:** Stage 3 only.
-- **Status:** **Deferred (Stage 3 decision).** Extraction does not consult `artifact_kind`.
+- **Status:** **Deferred (Stage 3 decision); still unresolved.** Extraction does not consult `artifact_kind`. The Phase 1 rule engine (`evidence/cnp_rules.py`) refuses `ArtifactKind.UNKNOWN` with `UnresolvedArtifactKindError` and decides nothing: it is never read as `SOURCE`, `OTHER`, binary or container.
 
 ### G11: Inventory completeness and reference resolution
 - **Affects:** spec §4.1 INV, N2, N4, NT6, NT20, NT21.
@@ -223,6 +223,13 @@ Each row: affected sections/tests, issue, proposed fix, whether it changes resea
 - **Changes research semantics:** yes. **Blocks:** BIND.
 - **Status:** **Open.** BIND is not extracted (a `NOT_EVALUATED` diagnostic is reported).
 
+### G18: Step 4 versus the definition of Insufficient (found in Phase 1)
+- **Affects:** spec §3 (Verdict definitions, Step 4, no-rule default), §4.2 rule table.
+- **Issue:** the §3 definition of Insufficient includes "a required dimension is missing or `Unknown`", but §4.2 has no rule for MATCH `Unknown`, DECL `Absent`/`Ambiguous`/`Contradictory`, or INV `Absent`/`Incomplete`/`Ambiguous`. When no other rule triggers, the no-rule default gives Insufficient. When another rule triggers (for example N12, Weak), the literal Step 4 ("minimum ceiling over all triggered rules") gives Weak although such an uncovered state is present.
+- **Proposed fix:** a project decision whether an uncovered state caps the verdict at Insufficient. That would be a reading or amendment of the specification and has not been made.
+- **Changes research semantics:** yes. **Blocks:** nothing in Phase 1.
+- **Status:** **Open.** `evidence/cnp_rules.py` follows the literal Step 4 and reports such states in `CnpEvaluation.uncovered_states` without changing the verdict.
+
 ## Specification-determined results
 
 These are fixed by the committed specification's own procedure and confirmed on review. They are not implementation conventions and are not in the same class as the approved conventions G3b, G3c, G3d and G8 above.
@@ -248,6 +255,17 @@ These can only lower a result or add a diagnostic, and need explicit confirmatio
 These are API choices made while implementing the isolated DECL candidate enumerator (`evidence/decl_candidates.py`). They are not requirements of the formal specification and are not among the approved G6 decisions. They need explicit confirmation:
 
 1. `evidence.decl_candidates.worst_case_state` raises `ValueError` for an empty collection and for any state other than `Present`, `Incomplete` and `Unknown`, rather than choosing a result. (The ordering it applies, `Unknown` > `Incomplete` > `Present`, is the approved G6-D8 policy; the refusal behaviour is the unconfirmed convention.)
+
+## Implementation conventions made in Phase 1 (unconfirmed; not approved semantic decisions)
+
+These are choices made in the pure `Req(component_not_present)` engine (`evidence/cnp_rules.py`) where the specification is silent. They need explicit confirmation:
+
+1. `INV` accepts `None` for "missing" (N2 reads "Unknown or missing"). `INV = Absent` is not read as missing, so N2 does not fire for it.
+2. `BIND` has three input states (`matched`, `mismatched`, `unknown`). N3 treats the last two identically; the factual state is preserved in the evaluation and named in the rationale text.
+3. Several rationale classes in one result are rendered as one `<CLASS>[CODE,...]: text` segment per class, in class-rank order, joined by ` | `. A Supported result has an empty rationale.
+4. `ArtifactKind.UNKNOWN` raises `UnresolvedArtifactKindError` (see G10).
+5. A separate corroborating document is a content-based basis only if the caller states that it meets the non-provenance criteria and its EP is at least P1; it is "relied upon" (N16) only for binary/container artifacts whose primary SBOM is not itself content-based.
+6. `prov_decl` is a required input when `decl` is Present and is ignored otherwise.
 
 ## Cross-reference: resolved prerequisite changes
 
