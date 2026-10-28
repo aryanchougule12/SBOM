@@ -11,16 +11,24 @@ Implemented here, and nothing else:
   ``derived_from`` reference yields P0 plus a diagnostic. It is never ignored and never
   strengthens the result.
 
-NOT implemented (deliberately; see ``docs/open_issues_register.md``): document-level EP
-(step 2) including the P0/P1 attribution classifier and P2 digest binding; the
-signed-coverage cap (step 3); the "inside the signed analysis" exception to step 4; any
-P2/P3 grant from subject hashes, signature presence, or parser metadata; trust anchors.
+* **Step 2, P0/P1 only** -- ``document_level_ep``: the approved strict attribution boundary
+  (register G3b, decision 1). A document is P1 only if it states a tool or process
+  identity (``tool_name``), a ``tool_version`` and a ``created`` timestamp; otherwise it
+  is P0. Nothing here grants P2 or P3.
 
-Because step 2 is not implemented, the level of each source document is an **input**
-(``document_levels``): the caller asserts it, and this module does not derive or check
-it. A ``source_doc`` that is absent from ``document_levels`` cannot be given a level, so
-the item is P0 with a ``SOURCE_DOC_LEVEL_UNAVAILABLE`` diagnostic (an implementation
-convention that can only lower a result; flagged in the register).
+NOT implemented (deliberately; see ``docs/open_issues_register.md``): P2 (digest binding)
+and P3 (verified signature) for a document; the signed-coverage cap (step 3), which can
+never lower a P0/P1 result because the cap is ``min(level, P1)``; the "inside the signed
+analysis" exception to step 4; any P2/P3 grant from subject hashes, signature presence, or
+parser metadata; trust anchors and signature verification (a declared signature and a
+declared signed coverage are claims, not verification).
+
+``effective_provenance_all`` still takes the level of each source document as an **input**
+(``document_levels``): the caller asserts it, and that function does not derive or check it.
+``document_levels`` (below) builds such a mapping from P0/P1 classifications. A
+``source_doc`` that is absent from ``document_levels`` cannot be given a level, so the item
+is P0 with a ``SOURCE_DOC_LEVEL_UNAVAILABLE`` diagnostic (an implementation convention that
+can only lower a result; flagged in the register).
 
 ``locator_within`` is an isolated helper for the later step 3. Its existence does not
 mean step 3 is implemented.
@@ -32,7 +40,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Iterable, Mapping, Optional, Sequence
 
-from model import EvidenceItem, ProvenanceLevel
+from model import EvidenceItem, ProvenanceLevel, SourceDocument
 
 
 class DiagnosticCode(str, Enum):
@@ -183,6 +191,127 @@ def effective_provenance(
         if candidate is item:
             return effective_provenance_all(items, document_levels)[index]
     raise ValueError("item is not a member of the supplied items")
+
+
+# ---- document-level EP, step 2, P0/P1 only ------------------------------------------------
+
+class AttributionGap(str, Enum):
+    """A condition of P1 (specification section 1.2: "tool or process, version, and
+    timestamp known"; strict reading, register G3b) that the document does not state."""
+
+    TOOL_NAME_MISSING = "TOOL_NAME_MISSING"
+    TOOL_VERSION_MISSING = "TOOL_VERSION_MISSING"
+    CREATED_MISSING = "CREATED_MISSING"
+
+
+class EpLimitation(str, Enum):
+    """Why a document-level result is a lower bound and not a full step 2 result."""
+
+    P2_P3_NOT_EVALUATED = "P2_P3_NOT_EVALUATED"
+    SIGNATURE_DECLARED_NOT_VERIFIED = "SIGNATURE_DECLARED_NOT_VERIFIED"
+    TOOL_FIELDS_FROM_PARSER_HEURISTIC = "TOOL_FIELDS_FROM_PARSER_HEURISTIC"
+
+
+@dataclass(frozen=True)
+class DeclaredIntegrity:
+    """Integrity information as the document or a verification step recorded it, copied
+    without interpretation. Declared claims and verified results are kept apart:
+    ``signature_declared`` and ``signed_coverage_declared`` are claims read from the input;
+    ``signature_verified`` and ``verified_coverage_established`` come from a verification
+    step, which no parser performs, so for parsed documents they are ``None`` and
+    ``False``. Nothing here changes the level."""
+
+    signature_declared: bool
+    signed_coverage_declared: tuple[str, ...]
+    signature_verified: Optional[bool]
+    verified_coverage_established: bool
+    artifact_digest_binding: Optional[str]
+
+
+@dataclass(frozen=True)
+class DocumentEP:
+    """The P0/P1 classification of one source document.
+
+    ``level`` is P1 exactly when ``attribution_gaps`` is empty, otherwise P0. It is a lower
+    bound: P2 and P3 are not evaluated (``limitations`` always says so), so a P1 result
+    never means the document is not P2 or P3, only that this function grants neither.
+    ``producer_declared`` records whether any producer was stated; under the strict reading
+    a producer without tool identity, version and timestamp is still P0.
+    """
+
+    doc_id: str
+    level: ProvenanceLevel
+    attribution_gaps: tuple[AttributionGap, ...]
+    producer_declared: bool
+    integrity: DeclaredIntegrity
+    limitations: tuple[EpLimitation, ...]
+
+    def __post_init__(self) -> None:
+        if self.level not in (ProvenanceLevel.P0, ProvenanceLevel.P1):
+            raise ValueError("a document-level result here is P0 or P1 only")
+        if (self.level is ProvenanceLevel.P1) != (not self.attribution_gaps):
+            raise ValueError("P1 requires, and only requires, that no attribution gap exists")
+        if EpLimitation.P2_P3_NOT_EVALUATED not in self.limitations:
+            raise ValueError("the P2/P3 limitation must always be stated")
+
+
+def _stated(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def document_level_ep(document: SourceDocument) -> DocumentEP:
+    """Classify ``document`` as P0 or P1 under the approved strict attribution boundary.
+
+    P1 needs all of ``tool_name``, ``tool_version`` (non-blank) and ``created``. The
+    evaluator-supplied process attestation that decision 1 allows has no representation yet,
+    so it cannot raise a level. Pure: reads the document, mutates nothing, and never sets
+    ``signature_verified``, ``trust_anchor_id``, ``established_coverage`` or
+    ``artifact_digest_binding``.
+    """
+    gaps: list[AttributionGap] = []
+    if not _stated(document.tool_name):
+        gaps.append(AttributionGap.TOOL_NAME_MISSING)
+    if not _stated(document.tool_version):
+        gaps.append(AttributionGap.TOOL_VERSION_MISSING)
+    if document.created is None:
+        gaps.append(AttributionGap.CREATED_MISSING)
+    level = ProvenanceLevel.P0 if gaps else ProvenanceLevel.P1
+
+    integrity = document.integrity
+    declared = DeclaredIntegrity(
+        signature_declared=integrity.signature is not None,
+        signed_coverage_declared=tuple(sorted(integrity.signed_coverage)),
+        signature_verified=integrity.signature_verified,
+        verified_coverage_established=integrity.established_coverage is not None,
+        artifact_digest_binding=integrity.artifact_digest_binding,
+    )
+    limitations = [EpLimitation.P2_P3_NOT_EVALUATED]
+    if declared.signature_declared and declared.signature_verified is not True:
+        limitations.append(EpLimitation.SIGNATURE_DECLARED_NOT_VERIFIED)
+    if level is ProvenanceLevel.P1 and document.declared_metadata.get("format") == "SPDX":
+        limitations.append(EpLimitation.TOOL_FIELDS_FROM_PARSER_HEURISTIC)  # the Tool: creator split
+    return DocumentEP(
+        doc_id=document.doc_id,
+        level=level,
+        attribution_gaps=tuple(gaps),
+        producer_declared=_stated(document.producer),
+        integrity=declared,
+        limitations=tuple(limitations),
+    )
+
+
+def document_levels(documents: Iterable[SourceDocument]) -> dict[str, ProvenanceLevel]:
+    """``doc_id -> level`` for ``effective_provenance_all``, from ``document_level_ep``.
+
+    Repeating a document with the same classification is harmless; two documents that share
+    a ``doc_id`` but classify differently raise ``ValueError`` rather than choosing one.
+    """
+    levels: dict[str, ProvenanceLevel] = {}
+    for document in documents:
+        level = document_level_ep(document).level
+        if levels.setdefault(document.doc_id, level) is not level:
+            raise ValueError(f"conflicting classifications for document {document.doc_id!r}")
+    return levels
 
 
 # ---- locator containment (isolated helper for the later step 3) -----------------------
