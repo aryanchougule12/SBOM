@@ -138,3 +138,39 @@ def test_the_parsers_still_extract_no_reachability_facts():
     for name in ("cyclonedx", "spdx", "openvex"):
         names = {n.id for n in ast.walk(_tree(f"sbom_parser/{name}.py")) if isinstance(n, ast.Name)}
         assert not any(word in n.lower() for n in names for word in ("callgraph", "hazard", "entry_point"))
+
+
+# ---- analyzer-artifact adapter layering ----------------------------------------------------------------------------------------
+
+ANALYSIS_MODULES = ["analysis_model", "analysis_sarif", "analysis_graphml", "analysis_binding", "analysis_ingest"]
+
+
+@pytest.mark.parametrize("module", ANALYSIS_MODULES)
+def test_the_analysis_modules_import_no_cryptography_network_or_process_library(module):
+    assert not (_imports(_tree(f"evidence/{module}.py")) & FORBIDDEN_IMPORTS)
+
+
+def test_the_raw_format_parsers_depend_only_on_the_neutral_model():
+    """Layering: parsing and structural validation know nothing of subjects, reachability rules or the evaluator."""
+    assert _evidence_imports("analysis_model") == set()
+    assert _evidence_imports("analysis_sarif") == {"analysis_model"}
+    assert _evidence_imports("analysis_graphml") == {"analysis_model"}
+
+
+def test_binding_depends_on_the_model_the_parsers_helper_and_the_strict_input_only():
+    assert _evidence_imports("analysis_binding") == {"analysis_model", "analysis_sarif", "reach_inputs"}
+
+
+def test_the_reachability_rule_engine_and_the_cnp_modules_do_not_import_the_adapters():
+    for module in PIPELINE + ["cnp_rules", "bind", "aggregation", "reach_rules", "reach_derivation", "reach_items", "rule_core"]:
+        assert not {m for m in _evidence_imports(module) if m.startswith("analysis")} - {"analysis_model"}, module
+
+
+def test_only_the_neutral_model_is_imported_by_the_evaluation_path():
+    assert {m for m in _evidence_imports("reach_evaluator") if m.startswith("analysis")} == {"analysis_model"}
+    assert {m for m in _evidence_imports("reach_inputs") if m.startswith("analysis")} == {"analysis_model"}
+
+
+def test_the_hash_function_is_used_only_for_content_addressed_ids_through_the_existing_parser_helper():
+    for module in ANALYSIS_MODULES:
+        assert "hashlib" not in _imports(_tree(f"evidence/{module}.py")), module

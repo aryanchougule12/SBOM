@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="labelV" for="node" attr.name="labelV" attr.type="string"></key>
+  <key id="labelE" for="edge" attr.name="labelE" attr.type="string"></key>
+  <key id="node__CALL__METHOD_FULL_NAME" for="node" attr.name="METHOD_FULL_NAME" attr.type="string"></key>
+  <key id="node__CALL__NAME" for="node" attr.name="NAME" attr.type="string"></key>
+  <key id="node__META_DATA__HASH" for="node" attr.name="HASH" attr.type="string"></key>
+  <key id="node__META_DATA__LANGUAGE" for="node" attr.name="LANGUAGE" attr.type="string"></key>
+  <key id="node__META_DATA__ROOT" for="node" attr.name="ROOT" attr.type="string"></key>
+  <key id="node__META_DATA__VERSION" for="node" attr.name="VERSION" attr.type="string"></key>
+  <key id="node__METHOD__FILENAME" for="node" attr.name="FILENAME" attr.type="string"></key>
+  <key id="node__METHOD__FULL_NAME" for="node" attr.name="FULL_NAME" attr.type="string"></key>
+  <key id="node__METHOD__IS_EXTERNAL" for="node" attr.name="IS_EXTERNAL" attr.type="string"></key>
+  <key id="node__METHOD__NAME" for="node" attr.name="NAME" attr.type="string"></key>
+
+  <graph id="G" edgedefault="directed">
+    <node id="1">
+      <data key="labelV">META_DATA</data>
+      <data key="node__META_DATA__LANGUAGE">JAVASRC</data>

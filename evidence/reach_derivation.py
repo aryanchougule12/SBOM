@@ -124,16 +124,26 @@ class DocumentAssessment:
     provenance: DocumentProvenance
 
     @property
+    def source_blockers(self) -> tuple[str, ...]:
+        """Binding failures recorded when the document was derived from an analyzer artifact
+        (``evidence.analysis_binding``); empty for a directly supplied document."""
+        return self.document.source.bind_blockers if self.document.source is not None else ()
+
+    @property
     def bind_state(self) -> BindState:
         if self.artifact_bind.state is BindState.MISMATCHED:
             return BindState.MISMATCHED
+        if self.source_blockers:
+            return BindState.UNKNOWN
         if self.artifact_bind.state is BindState.MATCHED and self.component_bind.state is BindState.MATCHED:
             return BindState.MATCHED
         return BindState.UNKNOWN
 
     @property
     def bind_reasons(self) -> tuple[str, ...]:
-        reasons = [] if self.artifact_bind.state is BindState.MATCHED else [self.artifact_bind.reason.value]
+        reasons = list(self.source_blockers)
+        if self.artifact_bind.state is not BindState.MATCHED and not self.source_blockers:
+            reasons.append(self.artifact_bind.reason.value)
         if self.component_bind.state is not BindState.MATCHED:
             reasons.append(self.component_bind.reason)
         return tuple(reasons)
@@ -172,6 +182,10 @@ def assess_document(
         tool_name=document.tool_name, tool_version=document.tool_version, created=document.created,
         declared_metadata={"format": "reachability-evidence", "kind": document.kind.value},
     )
+    if document.source is not None:  # a derived document: keep what the raw artifact is
+        source.declared_metadata.update({"format": document.source.artifact.format.value,
+                                         "format_version": document.source.artifact.format_version or "unknown",
+                                         "derived_by": "evidence.analysis_binding"})
     if document.artifact is None:
         artifact_bind = BindEvaluation(state=BindState.UNKNOWN, basis=None, reason=BindCode.NO_SUBJECT,
                                        document_id=document.doc_id)

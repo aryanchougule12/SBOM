@@ -32,6 +32,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Mapping, Optional
 
+from evidence.analysis_model import ObservationTrace
 from evidence.items import ItemIntegrityError, ItemPayload, item_id
 from evidence.reach_derivation import (
     DIM_ENTRY,
@@ -62,6 +63,7 @@ class ReachPayload(ItemPayload):
     full_coverage_claim: bool = False
     basis: Optional[ReachBasis] = None
     graph: Optional[DependencyGraphFacts] = None
+    trace: Optional[ObservationTrace] = None   # set for an observation derived from an analyzer artifact
 
 
 @dataclass(frozen=True)
@@ -109,6 +111,18 @@ def build_reach_items(
         if document.kind is ReachKind.HAZARD_BASIS:
             continue
         assessment = assessments[document.doc_id]
+        if document.source is not None:  # one item per recorded path, at its raw-artifact locator
+            for trace in document.source.traces:
+                ep = assessment.level_at(trace.locator)
+                state, basis, reason = observation_state(document, ep)
+                items.append(EvidenceItem(
+                    dimension=DIM_REACH, state=state,
+                    value_or_ref=ReachPayload(DIM_REACH, reason, document.source.limitations, document.kind.value,
+                                              document.finding.value if document.finding else None, ep, False, basis, None, trace),
+                    source_doc=document.doc_id, locator=trace.locator,
+                    item_id=item_id(DIM_REACH, document.doc_id, trace.locator, f"@{trace.observation_id}"),
+                ))
+            continue
         ep = assessment.level_at(REPORT_FINDING_LOCATOR)
         state, basis, reason = observation_state(document, ep)
         items.append(EvidenceItem(
@@ -146,7 +160,8 @@ def build_reach_items(
     return tuple(items)
 
 
-def validate_reach_items(finding: Finding, sbom_doc_id: str, items: Iterable[EvidenceItem]) -> None:
+def validate_reach_items(finding: Finding, sbom_doc_id: str, items: Iterable[EvidenceItem],
+                         observation_locators: Optional[Mapping[str, frozenset]] = None) -> None:
     """Raise ``ItemIntegrityError`` unless every item is traceable (see the module docstring)."""
     collected = list(items)
     seen: set[str] = set()
@@ -169,11 +184,11 @@ def validate_reach_items(finding: Finding, sbom_doc_id: str, items: Iterable[Evi
         if not isinstance(payload, _PAYLOAD_TYPES[item.dimension]) or payload.dimension != item.dimension:
             raise ItemIntegrityError("ITEM_PAYLOAD_INVALID", item.item_id,
                                      f"{item.dimension} items carry a {_PAYLOAD_TYPES[item.dimension].__name__}")
-        _validate_source(item, finding, sbom_doc_id)
+        _validate_source(item, finding, sbom_doc_id, observation_locators or {})
         _validate_claim(item, finding)
 
 
-def _validate_source(item: EvidenceItem, finding: Finding, sbom_doc_id: str) -> None:
+def _validate_source(item: EvidenceItem, finding: Finding, sbom_doc_id: str, observation_locators: Mapping[str, frozenset]) -> None:
     payload = item.value_or_ref
     evaluator_entered = item.dimension == DIM_LOCUS or (item.dimension == DIM_ENTRY and payload.origin == "evaluator")
     if item.source_doc is None:
@@ -193,6 +208,14 @@ def _validate_source(item: EvidenceItem, finding: Finding, sbom_doc_id: str) -> 
         return
     if role is not DocumentRole.REACHABILITY_REPORT:
         raise ItemIntegrityError("ITEM_ROLE_MISSING", item.item_id, f"document {item.source_doc!r} has no reachability_report role for this finding")
+    if item.dimension == DIM_REACH and item.source_doc in observation_locators:
+        trace = payload.trace
+        if trace is None or item.locator != trace.locator or item.locator not in observation_locators[item.source_doc]:
+            raise ItemIntegrityError("ITEM_LOCATOR_NOT_IN_DOCUMENT", item.item_id,
+                                     "an item derived from an analyzer artifact sits at a recorded observation locator of that artifact")
+        return
+    if item.dimension == DIM_REACH and payload.trace is not None:
+        raise ItemIntegrityError("ITEM_CLAIM_UNSUPPORTED", item.item_id, "only a derived document can carry an observation trace")
     expected = REPORT_FINDING_LOCATOR if item.dimension == DIM_REACH else REPORT_ENTRY_LOCATOR
     if item.locator != expected:
         raise ItemIntegrityError("ITEM_LOCATOR_NOT_IN_DOCUMENT", item.item_id, f"a {item.dimension} item of a report is at {expected!r}")

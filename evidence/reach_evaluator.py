@@ -44,6 +44,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping, Optional, Sequence, Union
 
 from evidence.aggregation import AggregationResult, aggregate
+from evidence.analysis_model import SourceRef
 from evidence.bind import BindEvaluation, evaluate_bind_for_profile
 from evidence.cnp_rules import BindState
 from evidence.document_provenance import record_consumed_integrity
@@ -102,6 +103,7 @@ class ReachOutcome:
     evaluation: ReachEvaluation
     diagnostics: tuple[str, ...]
     limitations: tuple[str, ...]
+    analysis: tuple[SourceRef, ...] = ()   # every ingested analyzer artifact and what was derived from it
 
     @property
     def result(self) -> VerdictResult:
@@ -180,7 +182,7 @@ def evaluate_reachability(
                        "REACH_CONFIGURATION_CONFLICT")
 
     diagnostics: list[str] = [f"{d.code.value}: {d.detail}" for d in assembly.diagnostics]
-    known_ids = {doc_id} | {d.doc_id for d in evidence.documents}
+    known_ids = {doc_id} | {d.doc_id for d in evidence.documents} | {a.artifact.doc_id for a in evidence.analysis_sources}
     if verification is not None:
         unreferenced = sorted({r.doc_id for r in verification.results} - known_ids)
         if unreferenced:
@@ -210,7 +212,8 @@ def evaluate_reachability(
 
     items = build_reach_items(evidence, assessments, doc_id, graph)
     try:
-        validate_reach_items(finding, doc_id, items)
+        validate_reach_items(finding, doc_id, items, {d.doc_id: frozenset(d.source.observation_locators)
+                                                      for d in evidence.documents if d.source is not None})
     except ItemIntegrityError as error:
         return _refuse(RefusalCode.ITEM_INTEGRITY_FAILED, str(error), error.code)
 
@@ -224,7 +227,9 @@ def evaluate_reachability(
 
     inputs = ReachInputs(
         reach=reach.state, locus=locus.state, entry=entry.state, bind=bind.state, cfg=cfg.state,
-        prov_reach=level, reach_basis=reach.basis, only_k4_evidence=reach.only_k4,
+        prov_reach=level, reach_basis=reach.basis,
+        # an ingested analyzer artifact is reachability-related evidence even when nothing could be derived from it (R2 text)
+        only_k4_evidence=reach.only_k4 and not evidence.analysis_sources,
         hazards={h.hazard_class: h.to_input() for h in hazards},
     )
     evaluation = evaluate_reach(inputs)
@@ -248,6 +253,11 @@ def evaluate_reachability(
         if effective.note:
             diagnostics.append(f"HAZARD_STEP1: {effective.hazard_class.value}: {effective.note}")
 
+    for source in evidence.analysis_sources:
+        limitations.extend(f"{source.artifact.doc_id}: {lim}" for lim in source.limitations)
+        diagnostics.extend(f"ANALYSIS_DIAGNOSTIC {source.artifact.doc_id}: {d.code}: {d.detail}"
+                           + (f" [{d.locator}]" if d.locator else "") for d in source.diagnostics)
+
     return ReachOutcome(
         profile_id=profile.profile_id,
         doc_id=doc_id,
@@ -267,4 +277,5 @@ def evaluate_reachability(
         evaluation=evaluation,
         diagnostics=tuple(diagnostics),
         limitations=tuple(dict.fromkeys(limitations)),
+        analysis=evidence.analysis_sources,
     )

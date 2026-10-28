@@ -88,6 +88,9 @@ class RefusalCode(str, Enum):
     # used by the evidence.reach_evaluator path and by evidence.sufficiency routing (additive)
     REACH_INPUT_INVALID = "EVAL_REACH_INPUT_INVALID"
     REACH_INPUT_NOT_APPLICABLE = "EVAL_REACH_INPUT_NOT_APPLICABLE"
+    # used by evidence.analysis_ingest (analyzer artifacts)
+    ANALYSIS_ARTIFACT_INVALID = "EVAL_ANALYSIS_ARTIFACT_INVALID"
+    ANALYSIS_SUBJECT_INVALID = "EVAL_ANALYSIS_SUBJECT_INVALID"
 
 
 @dataclass(frozen=True)

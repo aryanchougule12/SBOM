@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "organization": "GitHub",
+          "semanticVersion": "2.15.5",
+          "rules": [
+            {
+              "id": "js/example-path-problem"
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "js/example-path-problem",
+          "ruleIndex": 0,
+          "message": {
+            "text": "Synthetic path-problem result."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "node_modules/lib-b/src/parse.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 42
+                }
+              }
+            }
+          ],
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "src/app.js",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 3
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "node_modules/lib-b/src/parse.js",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 10
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "node_modules/lib-b/src/parse.js",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 42
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "columnKind": "utf16CodeUnits",
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "startTimeUtc": "2026-01-16T09:00:00Z",
+          "endTimeUtc": "2026-01-16T09:05:00Z"
+        }
+      ],
+      "versionControlProvenance": [
+        {
+          "repositoryUri": "https://example.org/git/app.git",
+          "revisionId": "0123456789abcdef0123456789abcdef01234567",
+          "branch": "main"
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "organization": "GitHub",
+          "semanticVersion": "2.15.5",
+          "rules": [
+            {
+              "id": "js/example-path-problem"
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "js/example-path-problem",
+          "ruleIndex": 0,
+          "message": {
+            "text": "Synthetic path-problem result."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "node_modules/lib-b/src/parse.js",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 42
+                }
+              }
+            }
+          ],
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "src/app.js",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 3
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "node_modules/lib-b/src/parse.js",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 10
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "node_modules/lib-b/src/parse.js",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 42
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "columnKind": "utf16CodeUnits",
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "startTimeUtc": "2026-01-16T09:00:00Z",
+          "endTimeUtc": "2026-01-16T09:05:00Z"
+        }
+      ],
+      "versionControlProvenance": [
+        {
+          "repositoryUri": "https://example.org/git/app.git",
+          "revisionId": "fedcba9876543210fedcba9876543210fedcba98",
+          "branch": "main"
+        }
+      ]
+    }
+  ]
+}

@@ -44,6 +44,7 @@ from evidence.reach_rules import (
 )
 from model import ArtifactKind, EvidenceState as S, ProvenanceLevel as P
 from reports.verdict import Verdict
+from tests import analysis_eval
 from tests.reach_support import RT_PIPELINE_CASES, all_hazards, baseline_hazards, excluded, inputs as reach_inputs, run
 
 NT_IDS = tuple(f"NT{n}" for n in range(1, 26))
@@ -236,8 +237,12 @@ def build_report() -> dict:
             "missing_tests": [t for t in spec["tests"] if not test_status[t]["covered"]],
             "results": results,
         }
+    corpus = analysis_eval.build_report()  # the analyzer-artifact corpus is evaluated by the same public entry points
+    report["analysis_corpus"] = {"cases": corpus["totals"]["cases"], "agree": corpus["totals"]["agree"],
+                                 "disagree": corpus["totals"]["disagree"], "fixture_problems": corpus["totals"]["fixture_problems"],
+                                 "note": "controlled conformance against reviewed expectations; see python -m tests.analysis_eval"}
     report["ok"] = all(not p["failed_cases"] and not p["missing_rules"] and not p["missing_tests"]
-                       for p in report["predicates"].values())
+                       for p in report["predicates"].values()) and not corpus["totals"]["disagree"] and not corpus["totals"]["fixture_problems"]
     return report
 
 
@@ -254,6 +259,9 @@ def render(report: dict) -> str:
                      + (f"; missing: {', '.join(p['missing_tests'])}" if p["missing_tests"] else ""))
         for failed in p["failed_cases"]:
             lines.append(f"  FAILED: {failed}")
+    corpus = report["analysis_corpus"]
+    lines.append(f"\nanalyzer-artifact corpus: {corpus['agree']}/{corpus['cases']} cases agree with the reviewed expectations "
+                 f"({corpus['fixture_problems']} fixture-attribution problems)")
     lines.append("\nresult: " + ("OK" if report["ok"] else "GAPS OR FAILURES"))
     return "\n".join(lines)
 

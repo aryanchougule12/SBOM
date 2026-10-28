@@ -47,6 +47,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Mapping, Optional
 
+from evidence.analysis_model import SourceRef
 from evidence.reach_rules import HazardClass, HazardDisposition
 from model import Component, Hash
 from sbom_parser._common import InputSource, load_json_object, parse_timestamp, read_source
@@ -134,6 +135,9 @@ class ReachDocument:
     entry_points_complete: Optional[bool] = None  # None: the document declares no entry-point set
     analyzed_configurations: tuple[str, ...] = ()
     modeled_hazards: tuple[HazardClass, ...] = ()
+    # Derivation metadata of a document produced from a real analyzer artifact (evidence.analysis_binding).
+    # Python-level only: the JSON loader never sets it, so input text cannot fabricate it.
+    source: Optional[SourceRef] = None
 
 
 @dataclass(frozen=True)
@@ -170,6 +174,9 @@ class ReachabilityEvidence:
     entry_points: Optional[EntryInput] = None
     hazards: tuple[HazardClaim, ...] = ()
     deployment_config_id: Optional[str] = None
+    # Every analyzer artifact that was ingested for this evaluation, including those that produced no
+    # document (their diagnostics and limitations are part of the explanation). Python-level only.
+    analysis_sources: tuple[SourceRef, ...] = ()
 
     def document(self, doc_id: str) -> Optional[ReachDocument]:
         return next((d for d in self.documents if d.doc_id == doc_id), None)

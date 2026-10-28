@@ -43,6 +43,9 @@ ground truth, and every fixture is synthetic.
   rule-to-implementation matrix, limitations). Reachability follows the specification: it rests on
   call-graph or equivalent analysis evidence (K1-K3) supplied through the project's own reachability
   input schema; an SBOM dependency graph (K4) is read but is never reachability (A5).
+* Real analyzer artifacts (SARIF 2.1.0, Joern GraphML) are ingested by `evidence/analysis_*` and evaluated through the same engine
+  (`evidence.analysis_ingest.evaluate_with_analysis`; `docs/analysis_ingestion.md`). They can establish only positive path
+  observations. The corpus is `fixtures/analysis/`; `python -m tests.analysis_eval` reports controlled conformance (no accuracy claim).
 * One documented entry point, `evidence.sufficiency.evaluate_finding(profile, findings, index,
   verification=None, reachability=None)`, routes by the finding's justification. A run evaluates one
   predicate; no combined-predicate verdict exists.
@@ -71,6 +74,7 @@ From the repository root:
 ```
 python -m pytest -v -rs
 python -m tests.conformance
+python -m tests.analysis_eval --check
 ```
 
 `python -m` is used so the repository root is on the import path. Install the dependencies first

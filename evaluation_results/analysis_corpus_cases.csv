@@ -1,0 +1,81 @@
+id,category,format,file,expected_outcome,actual_outcome,expected_verdict,actual_verdict,expected_reach,actual_reach,bind,observations,prov_reach,rules,agree
+A01-codeql-results-no-codeflow,A,sarif,upstream/codeql-action__fingerprinting.input.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+A02-lgtm-empty-results,A,sarif,upstream/codeql-action__empty-sarif.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+A03-codeql-two-runs-no-codeflow,A,sarif,upstream/codeql-action__valid-sarif.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+A04-documented-codeflow-unbound,A,sarif,upstream/sarif-tutorials__bad-eval-with-code-flow.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P0,R1 R5 R6 R11 R12 R13,yes
+A05-documented-two-codeflows,A,sarif,upstream/sarif-tutorials__CodeFlows.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,2,P0,R1 R5 R6 R11 R12 R13,yes
+A06-lgtm-results-wrong-type,A,sarif,upstream/codeql-action__invalid-sarif.sarif,refused,refused,,,,,,,,,yes
+A07-tool-names-null-name,A,sarif,upstream/codeql-action__tool-names.sarif,refused,refused,,,,,,,,,yes
+A08-invalid-uri-no-codeflow,A,sarif,upstream/codeql-action__with-invalid-uri.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+A09-documented-finding-no-codeflow,A,sarif,upstream/sarif-tutorials__bad-eval.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B01-sarif-path-bound,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P1,R1 R5 R11 R12 R13,yes
+B02-sarif-path-other-revision,B,sarif,sarif/synthetic_path_other_revision.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P1,R1 R5 R6 R11 R12 R13,yes
+B03-sarif-path-other-repository,B,sarif,sarif/synthetic_path_other_repository.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P1,R1 R5 R6 R11 R12 R13,yes
+B04-sarif-path-no-vcs-provenance,B,sarif,sarif/synthetic_path_no_vcs.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P1,R1 R5 R6 R11 R12 R13,yes
+B05-sarif-abbreviated-revision,B,sarif,sarif/synthetic_path_abbreviated_revision.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P1,R1 R5 R6 R11 R12 R13,yes
+B06-sarif-conflicting-revisions,B,sarif,sarif/synthetic_conflicting_revisions_in_run.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P1,R1 R5 R6 R11 R12 R13,yes
+B07-sarif-other-component-same-filename,B,sarif,sarif/synthetic_path_other_component.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B08-sarif-two-components-one-matches,B,sarif,sarif/synthetic_two_components_same_filename.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P1,R1 R5 R11 R12 R13,yes
+B09-sarif-no-results,B,sarif,sarif/synthetic_no_results.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B10-sarif-alert-without-codeflow,B,sarif,sarif/synthetic_alert_without_codeflow.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B11-sarif-incomplete-no-path,B,sarif,sarif/synthetic_incomplete_no_path.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B12-sarif-incomplete-with-path,B,sarif,sarif/synthetic_incomplete_with_path.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P1,R1 R5 R11 R12 R13,yes
+B13-sarif-no-invocation-record,B,sarif,sarif/synthetic_no_invocation_record.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P0,R1 R5 R11 R12 R13,yes
+B14-sarif-unknown-tool-no-version,B,sarif,sarif/synthetic_unknown_tool_no_version.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P0,R1 R5 R11 R12 R13,yes
+B15-sarif-suppressed-path,B,sarif,sarif/synthetic_suppressed_path.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P1,R1 R5 R11 R12 R13,yes
+B16-sarif-result-kind-pass,B,sarif,sarif/synthetic_result_kind_pass.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B17-sarif-baseline-absent,B,sarif,sarif/synthetic_baseline_absent.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B18-sarif-single-location-flow,B,sarif,sarif/synthetic_single_location_flow.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B19-sarif-absolute-uris,B,sarif,sarif/synthetic_unresolvable_locations.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B20-sarif-unknown-uri-base,B,sarif,sarif/synthetic_unknown_uri_base.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B21-sarif-path-escapes-root,B,sarif,sarif/synthetic_path_traversal_location.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+B22-sarif-percent-encoded,B,sarif,sarif/synthetic_percent_encoded_path.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P1,R1 R5 R11 R12 R13,yes
+B23-sarif-artifact-index,B,sarif,sarif/synthetic_artifact_index_references.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P1,R1 R5 R11 R12 R13,yes
+B24-sarif-two-flows-one-result,B,sarif,sarif/synthetic_two_flows_same_result.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,2,P1,R1 R5 R11 R12 R13,yes
+B25-sarif-two-runs-second-other-revision,B,sarif,sarif/synthetic_two_runs_second_other_revision.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,2,P1,R1 R5 R6 R11 R12 R13,yes
+B26-sarif-two-runs-different-tools,B,sarif,sarif/synthetic_two_runs_different_tools.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,2,P0,R1 R5 R11 R12 R13,yes
+B-refuse-sarif-truncated,B,sarif,sarif/synthetic_invalid_truncated.sarif,refused,refused,,,,,,,,,yes
+B-refuse-sarif-duplicate-key,B,sarif,sarif/synthetic_invalid_duplicate_key.sarif,refused,refused,,,,,,,,,yes
+B-refuse-sarif-version-2-0-0,B,sarif,sarif/synthetic_invalid_version_2_0_0.sarif,refused,refused,,,,,,,,,yes
+B-refuse-sarif-results-type,B,sarif,sarif/synthetic_invalid_results_type.sarif,refused,refused,,,,,,,,,yes
+B-refuse-sarif-execution-flag,B,sarif,sarif/synthetic_invalid_execution_flag.sarif,refused,refused,,,,,,,,,yes
+B-refuse-sarif-empty-threadflow,B,sarif,sarif/synthetic_invalid_empty_threadflow.sarif,refused,refused,,,,,,,,,yes
+B-refuse-sarif-unresolved-index,B,sarif,sarif/synthetic_invalid_unresolved_index.sarif,refused,refused,,,,,,,,,yes
+B-refuse-sarif-index-uri-conflict,B,sarif,sarif/synthetic_invalid_index_uri_conflict.sarif,refused,refused,,,,,,,,,yes
+C01-graphml-path-bound,B,joern-graphml,joern-graphml/synthetic_path_bound.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P0,R1 R5 R11 R12 R13,yes
+C02-graphml-hash-mismatch,B,joern-graphml,joern-graphml/synthetic_path_hash_mismatch.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P0,R1 R5 R6 R11 R12 R13,yes
+C03-graphml-no-hash,B,joern-graphml,joern-graphml/synthetic_path_no_hash.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P0,R1 R5 R6 R11 R12 R13,yes
+C04-graphml-no-meta-data,B,joern-graphml,joern-graphml/synthetic_no_meta_data.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P0,R1 R5 R6 R11 R12 R13,yes
+C05-graphml-no-path,B,joern-graphml,joern-graphml/synthetic_no_path_to_locus.graphml,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+C06-graphml-cfg-edges-only,B,joern-graphml,joern-graphml/synthetic_no_call_edges_cfg_only.graphml,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+C07-graphml-locus-method-other-component,B,joern-graphml,joern-graphml/synthetic_locus_method_other_component.graphml,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+C08-graphml-locus-method-no-filename,B,joern-graphml,joern-graphml/synthetic_locus_method_no_filename.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P0,R1 R5 R11 R12 R13,yes
+C09-graphml-duplicate-locus-name,B,joern-graphml,joern-graphml/synthetic_duplicate_locus_full_name.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P0,R1 R5 R11 R12 R13,yes
+C10-graphml-entry-is-locus,B,joern-graphml,joern-graphml/synthetic_entry_is_locus.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P0,R1 R5 R11 R12 R13,yes
+C11-graphml-cycle,B,joern-graphml,joern-graphml/synthetic_cycle_with_path.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P0,R1 R5 R11 R12 R13,yes
+C12-graphml-entry-missing,B,joern-graphml,joern-graphml/synthetic_path_bound.graphml,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+C13-graphml-no-entry-methods,B,joern-graphml,joern-graphml/synthetic_path_bound.graphml,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+C-refuse-graphml-unresolved-endpoint,B,joern-graphml,joern-graphml/synthetic_invalid_unresolved_endpoint.graphml,refused,refused,,,,,,,,,yes
+C-refuse-graphml-duplicate-node-id,B,joern-graphml,joern-graphml/synthetic_invalid_duplicate_node_id.graphml,refused,refused,,,,,,,,,yes
+C-refuse-graphml-call-site-in-two-methods,B,joern-graphml,joern-graphml/synthetic_invalid_call_site_in_two_methods.graphml,refused,refused,,,,,,,,,yes
+C-refuse-graphml-call-edge-wrong-kinds,B,joern-graphml,joern-graphml/synthetic_invalid_call_edge_wrong_kinds.graphml,refused,refused,,,,,,,,,yes
+C-refuse-graphml-cpg-spec-version,B,joern-graphml,joern-graphml/synthetic_invalid_cpg_spec_version.graphml,refused,refused,,,,,,,,,yes
+C-refuse-graphml-doctype,B,joern-graphml,joern-graphml/synthetic_invalid_doctype.graphml,refused,refused,,,,,,,,,yes
+C-refuse-graphml-undirected,B,joern-graphml,joern-graphml/synthetic_invalid_undirected.graphml,refused,refused,,,,,,,,,yes
+C-refuse-graphml-truncated,B,joern-graphml,joern-graphml/synthetic_invalid_truncated.graphml,refused,refused,,,,,,,,,yes
+C-refuse-graphml-not-flatgraph,B,joern-graphml,joern-graphml/synthetic_invalid_not_flatgraph.graphml,refused,refused,,,,,,,,,yes
+D01-sbom-dependency-edges-only,B,none,,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+D02-path-contradicts-supplied-k1-absence,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Contradictory,Contradictory,matched,1,P1,R3 R12 R13,yes
+D03-no-path-leaves-supported-k1-unchanged,B,sarif,sarif/synthetic_no_results.sarif,evaluated,evaluated,Supported,Supported,Absent,Absent,matched,0,P3,,yes
+D04-failed-run-leaves-supported-k1-unchanged,B,sarif,sarif/synthetic_incomplete_no_path.sarif,evaluated,evaluated,Supported,Supported,Absent,Absent,matched,0,P3,,yes
+E01-verified-covering-cannot-reach-p3,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P1,R1 R5 R11 R12 R13,yes
+E02-verification-excluding-the-path,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P1,R1 R5 R11 R12 R13,yes
+E03-verification-untrusted-anchor,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P1,R1 R5 R11 R12 R13,yes
+E04-verification-for-graph-without-attribution,B,joern-graphml,joern-graphml/synthetic_path_bound.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,matched,1,P0,R1 R5 R11 R12 R13,yes
+F01-no-locus-supplied,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R4 R5 R11 R12,yes
+F02-target-component-differs-from-finding,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P1,R1 R5 R6 R11 R12 R13,yes
+F03-subject-artifact-differs-from-scope,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P1,R1 R5 R6 R11 R12 R13,yes
+F04-no-target-source-root,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R5 R11,yes
+F05-subject-declares-no-revision,B,sarif,sarif/synthetic_path_bound.sarif,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P1,R1 R5 R6 R11 R12 R13,yes
+F06-graph-subject-declares-no-hash,B,joern-graphml,joern-graphml/synthetic_path_bound.graphml,evaluated,evaluated,Insufficient,Insufficient,Present,Present,unknown,1,P0,R1 R5 R6 R11 R12 R13,yes
+F07-graph-no-locus-symbols,B,joern-graphml,joern-graphml/synthetic_path_bound.graphml,evaluated,evaluated,Insufficient,Insufficient,Unknown,Unknown,matched,0,,R2 R4 R5 R11 R12,yes

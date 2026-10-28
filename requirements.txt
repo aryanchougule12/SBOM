@@ -1,3 +1,4 @@
 cyclonedx-python-lib
 spdx-tools
 pytest
+jsonschema
