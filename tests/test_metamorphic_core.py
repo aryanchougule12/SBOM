@@ -5,7 +5,7 @@ import pytest
 from tests.metamorphic import core
 from tests.metamorphic.campaign import run_campaign
 from tests.metamorphic.operators import NEUTRAL, OPERATORS
-from tests.metamorphic.scenarios import all_scenarios, cnp_scenarios
+from tests.metamorphic.scenarios import all_scenarios
 
 SCENARIOS = {s.scenario_id: s for s in all_scenarios()}
 
@@ -18,10 +18,10 @@ def test_the_base_scenarios_evaluate_and_start_from_different_verdicts():
 
 
 def test_mutation_never_changes_the_scenario_it_was_applied_to():
-    for scenario in cnp_scenarios():
+    for scenario in all_scenarios():
         before = (repr(scenario.sbom), repr(scenario.vex), repr(scenario.profile))
         for operator in OPERATORS:
-            if operator.applies(scenario):
+            if scenario.predicate in operator.predicates and scenario.sbom_format in operator.formats and operator.applies(scenario):
                 operator.apply(scenario)
         assert (repr(scenario.sbom), repr(scenario.vex), repr(scenario.profile)) == before
 

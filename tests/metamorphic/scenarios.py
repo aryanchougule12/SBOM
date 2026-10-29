@@ -29,5 +29,20 @@ def cnp_scenarios() -> list[Scenario]:
     ]
 
 
+def reach_scenarios() -> list[Scenario]:
+    """``vulnerable_code_not_in_execute_path`` baselines: the synthetic K1 negative report with a declared full-coverage claim, complete entry
+    points, modeled and excluded hazards, a declared configuration, bound to the SBOM's artifact by digest; verified, unverified, and over SPDX."""
+    cdx, spdx, vex = _load("equivalent/app.cdx.json"), _load("equivalent/app.spdx.json"), _load("openvex/reachability_equivalent.json")
+    profile = profile_data(PLACEHOLDER)
+    reach = _load("reachability/synthetic_baseline.json")
+    verified = (("k1-analysis", ("#",)),)
+    return [
+        Scenario("reach-cdx-verified", "reach", "cdx", cdx, vex, profile, None, reach, verified,
+                 note="K1 absence with a declared full-coverage claim, verified (P3), every other dimension satisfied: Supported"),
+        Scenario("reach-cdx-unverified", "reach", "cdx", cdx, vex, profile, None, reach, (), note="the same evidence without verification: R13, Weak"),
+        Scenario("reach-spdx-verified", "reach", "spdx", spdx, vex, profile, None, reach, verified, note="the same evidence over an SPDX SBOM"),
+    ]
+
+
 def all_scenarios() -> list[Scenario]:
-    return cnp_scenarios()
+    return cnp_scenarios() + reach_scenarios()

@@ -51,5 +51,6 @@ NEUTRAL = (
 )
 
 from tests.metamorphic.operators_cnp import CNP_OPERATORS
+from tests.metamorphic.operators_reach import REACH_OPERATORS
 
-OPERATORS = NEUTRAL + CNP_OPERATORS
+OPERATORS = NEUTRAL + CNP_OPERATORS + REACH_OPERATORS

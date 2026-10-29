@@ -32,6 +32,8 @@ class Scenario:
     profile: Mapping[str, Any]
     verified_coverage: Optional[tuple[str, ...]] = None
     reachability: Optional[Mapping[str, Any]] = None
+    # trusted detached verification results for *reachability documents*: ((doc_id, coverage), ...)
+    verified_docs: tuple[tuple[str, tuple[str, ...]], ...] = ()
     note: str = ""
 
     def mutate(self, **changes) -> "Scenario":
@@ -72,9 +74,12 @@ def observe(scenario: Scenario) -> Observation:
         findings = list(load_openvex(json.dumps(scenario.vex).encode("utf-8")).findings)
         profile = parse_profile(json.loads(json.dumps(scenario.profile).replace(PLACEHOLDER, record.doc_id)))
         verification = None
+        results = []
         if scenario.verified_coverage is not None:
-            verification = VerificationConfig(frozenset({"anchor-1"}), (VerificationResult(
-                record.doc_id, True, "anchor-1", "external-verifier", "1.0", tuple(scenario.verified_coverage)),))
+            results.append(VerificationResult(record.doc_id, True, "anchor-1", "external-verifier", "1.0", tuple(scenario.verified_coverage)))
+        results += [VerificationResult(doc, True, "anchor-1", "external-verifier", "1.0", tuple(cov)) for doc, cov in scenario.verified_docs]
+        if results:
+            verification = VerificationConfig(frozenset({"anchor-1"}), tuple(results))
         reachability = parse_reachability(copy.deepcopy(dict(scenario.reachability))) if scenario.reachability is not None else None
         outcome = evaluate_finding(profile, findings, Stage1Index([record]), verification, reachability)
     except (ParserError, ValueError, KeyError, TypeError) as error:       # includes ProfileError / ReachInputError (ValueErrors)
