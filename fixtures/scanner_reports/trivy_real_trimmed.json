@@ -1,0 +1,307 @@
+{
+ "SchemaVersion": 2,
+ "Trivy": {
+  "Version": "0.76.1"
+ },
+ "ReportID": "01a18792-6382-7af7-8832-e12eeadff8c6",
+ "CreatedAt": "2026-10-29T12:11:20.322729447Z",
+ "ArtifactName": "sbom_clean/legacy-mixed.json",
+ "ArtifactType": "cyclonedx",
+ "Results": [
+  {
+   "Target": "Java",
+   "Class": "lang-pkgs",
+   "Type": "jar",
+   "Packages": [
+    {
+     "ID": "commons-fileupload:commons-fileupload:1.3.2",
+     "Name": "commons-fileupload:commons-fileupload",
+     "Identifier": {
+      "PURL": "pkg:maven/commons-fileupload/commons-fileupload@1.3.2",
+      "UID": "e8665bf84f15aaa4",
+      "BOMRef": "pkg:maven/commons-fileupload/commons-fileupload@1.3.2?package-id=5b20a0ff1c5be444"
+     },
+     "Version": "1.3.2"
+    },
+    {
+     "ID": "org.apache.struts:struts2-core:2.5.16",
+     "Name": "org.apache.struts:struts2-core",
+     "Identifier": {
+      "PURL": "pkg:maven/org.apache.struts/struts2-core@2.5.16",
+      "UID": "72c658e02e464f43",
+      "BOMRef": "pkg:maven/org.apache.struts/struts2-core@2.5.16?package-id=dfae8ddef9aa0adb"
+     },
+     "Version": "2.5.16"
+    },
+    {
+     "ID": "org.yaml:snakeyaml:1.26",
+     "Name": "org.yaml:snakeyaml",
+     "Identifier": {
+      "PURL": "pkg:maven/org.yaml/snakeyaml@1.26",
+      "UID": "5cbde2642652e352",
+      "BOMRef": "pkg:maven/org.yaml/snakeyaml@1.26?package-id=3728e33d7e08147f"
+     },
+     "Version": "1.26"
+    }
+   ],
+   "Vulnerabilities": [
+    {
+     "VulnerabilityID": "CVE-2016-1000031",
+     "VendorIDs": [
+      "GHSA-7x9j-7223-rg5m"
+     ],
+     "PkgID": "commons-fileupload:commons-fileupload:1.3.2",
+     "PkgName": "commons-fileupload:commons-fileupload",
+     "PkgIdentifier": {
+      "PURL": "pkg:maven/commons-fileupload/commons-fileupload@1.3.2",
+      "UID": "e8665bf84f15aaa4",
+      "BOMRef": "pkg:maven/commons-fileupload/commons-fileupload@1.3.2?package-id=5b20a0ff1c5be444"
+     },
+     "InstalledVersion": "1.3.2",
+     "FixedVersion": "1.3.3",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2016-1000031",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory Maven",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+     },
+     "Fingerprint": "sha256:1849ced10d1ef0f1948797c162340e745a437ecdd044ab7ca18390a569e6dc03",
+     "Title": "FileUpload: DiskFileItem file manipulation",
+     "Severity": "CRITICAL",
+     "PublishedDate": "2016-10-25T14:29:00.18Z",
+     "LastModifiedDate": "2026-10-07T19:17:10.767Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2023-24998",
+     "VendorIDs": [
+      "GHSA-hfrx-6qgj-fp6c"
+     ],
+     "PkgID": "commons-fileupload:commons-fileupload:1.3.2",
+     "PkgName": "commons-fileupload:commons-fileupload",
+     "PkgIdentifier": {
+      "PURL": "pkg:maven/commons-fileupload/commons-fileupload@1.3.2",
+      "UID": "e8665bf84f15aaa4",
+      "BOMRef": "pkg:maven/commons-fileupload/commons-fileupload@1.3.2?package-id=5b20a0ff1c5be444"
+     },
+     "InstalledVersion": "1.3.2",
+     "FixedVersion": "1.5",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-24998",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory Maven",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Amaven"
+     },
+     "Fingerprint": "sha256:103324354b1280f3b440ee2a2b1267586e43fe374a0ebeea4517b00698a6d4cd",
+     "Title": "FileUpload: FileUpload DoS with excessive parts",
+     "Severity": "HIGH",
+     "PublishedDate": "2023-02-20T16:15:10.423Z",
+     "LastModifiedDate": "2026-10-07T17:16:43.86Z"
+    }
+   ]
+  },
+  {
+   "Target": "Node.js",
+   "Class": "lang-pkgs",
+   "Type": "node-pkg",
+   "Packages": [
+    {
+     "ID": "lodash@4.17.15",
+     "Name": "lodash",
+     "Identifier": {
+      "PURL": "pkg:npm/lodash@4.17.15",
+      "UID": "59a2614a4fa230b5",
+      "BOMRef": "pkg:npm/lodash@4.17.15?package-id=fdfa1dde54d5d6aa"
+     },
+     "Version": "4.17.15"
+    },
+    {
+     "ID": "moment@2.19.1",
+     "Name": "moment",
+     "Identifier": {
+      "PURL": "pkg:npm/moment@2.19.1",
+      "UID": "9e422dc1c81be496",
+      "BOMRef": "pkg:npm/moment@2.19.1?package-id=db44412af2e08711"
+     },
+     "Version": "2.19.1"
+    },
+    {
+     "ID": "request@2.88.0",
+     "Name": "request",
+     "Identifier": {
+      "PURL": "pkg:npm/request@2.88.0",
+      "UID": "b21e28776ce09b6c",
+      "BOMRef": "pkg:npm/request@2.88.0?package-id=d51d4a4941428e24"
+     },
+     "Version": "2.88.0"
+    },
+    {
+     "ID": "tar@4.4.1",
+     "Name": "tar",
+     "Identifier": {
+      "PURL": "pkg:npm/tar@4.4.1",
+      "UID": "911f1956a421c751",
+      "BOMRef": "pkg:npm/tar@4.4.1?package-id=2ae4b2963d6d466f"
+     },
+     "Version": "4.4.1"
+    }
+   ],
+   "Vulnerabilities": [
+    {
+     "VulnerabilityID": "CVE-2020-8203",
+     "VendorIDs": [
+      "GHSA-p6mc-m468-83gw"
+     ],
+     "PkgID": "lodash@4.17.15",
+     "PkgName": "lodash",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/lodash@4.17.15",
+      "UID": "59a2614a4fa230b5",
+      "BOMRef": "pkg:npm/lodash@4.17.15?package-id=fdfa1dde54d5d6aa"
+     },
+     "InstalledVersion": "4.17.15",
+     "FixedVersion": "4.17.19",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2020-8203",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory npm",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+     },
+     "Fingerprint": "sha256:654eb32df008bc6b5d55792382b93f26893aad5b532b36905136a36f621721c7",
+     "Title": "nodejs-lodash: prototype pollution in zipObjectDeep function",
+     "Severity": "HIGH",
+     "PublishedDate": "2020-07-15T17:15:11.797Z",
+     "LastModifiedDate": "2026-06-17T03:26:02.917Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2021-23337",
+     "VendorIDs": [
+      "GHSA-35jh-r3h4-6jhm"
+     ],
+     "PkgID": "lodash@4.17.15",
+     "PkgName": "lodash",
+     "PkgIdentifier": {
+      "PURL": "pkg:npm/lodash@4.17.15",
+      "UID": "59a2614a4fa230b5",
+      "BOMRef": "pkg:npm/lodash@4.17.15?package-id=fdfa1dde54d5d6aa"
+     },
+     "InstalledVersion": "4.17.15",
+     "FixedVersion": "4.17.21",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2021-23337",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory npm",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+     },
+     "Fingerprint": "sha256:e6fbdfd5861000dbe9ba4ea2e8f3d6751ac0cbbcbae49c811ff1d07b3833394d",
+     "Title": "nodejs-lodash: command injection via template",
+     "Severity": "HIGH",
+     "PublishedDate": "2021-02-15T13:15:12.56Z",
+     "LastModifiedDate": "2026-10-08T22:17:07.363Z"
+    }
+   ]
+  },
+  {
+   "Target": "Python",
+   "Class": "lang-pkgs",
+   "Type": "python-pkg",
+   "Packages": [
+    {
+     "ID": "paramiko@2.4.0",
+     "Name": "paramiko",
+     "Identifier": {
+      "PURL": "pkg:pypi/paramiko@2.4.0",
+      "UID": "5d6ae45e52f01783",
+      "BOMRef": "pkg:pypi/paramiko@2.4.0?package-id=8048d79981ea65ae"
+     },
+     "Version": "2.4.0"
+    },
+    {
+     "ID": "pyjwt@1.5.0",
+     "Name": "pyjwt",
+     "Identifier": {
+      "PURL": "pkg:pypi/pyjwt@1.5.0",
+      "UID": "4bbfa4bf1f2ad024",
+      "BOMRef": "pkg:pypi/pyjwt@1.5.0?package-id=444476bfa9b759b1"
+     },
+     "Version": "1.5.0"
+    },
+    {
+     "ID": "requests@2.19.0",
+     "Name": "requests",
+     "Identifier": {
+      "PURL": "pkg:pypi/requests@2.19.0",
+      "UID": "2b56c960ca9fc858",
+      "BOMRef": "pkg:pypi/requests@2.19.0?package-id=93a0daacc39c1a57"
+     },
+     "Version": "2.19.0"
+    }
+   ],
+   "Vulnerabilities": [
+    {
+     "VulnerabilityID": "CVE-2018-7750",
+     "VendorIDs": [
+      "GHSA-232r-66cg-79px"
+     ],
+     "PkgID": "paramiko@2.4.0",
+     "PkgName": "paramiko",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/paramiko@2.4.0",
+      "UID": "5d6ae45e52f01783",
+      "BOMRef": "pkg:pypi/paramiko@2.4.0?package-id=8048d79981ea65ae"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.0.8, 2.1.5, 2.2.3, 2.3.2, 2.4.1, 1.18.5, 1.17.6",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2018-7750",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:5e718e2168d8fe75034697fdbadcc4c4c0d0d7056613fc5c35c292d21cc46709",
+     "Title": "python-paramiko: Authentication bypass in transport.py",
+     "Severity": "CRITICAL",
+     "PublishedDate": "2018-03-13T18:29:00.303Z",
+     "LastModifiedDate": "2026-06-17T02:03:38.71Z"
+    },
+    {
+     "VulnerabilityID": "CVE-2018-1000805",
+     "VendorIDs": [
+      "GHSA-f2j6-wrhh-v25m"
+     ],
+     "PkgID": "paramiko@2.4.0",
+     "PkgName": "paramiko",
+     "PkgIdentifier": {
+      "PURL": "pkg:pypi/paramiko@2.4.0",
+      "UID": "5d6ae45e52f01783",
+      "BOMRef": "pkg:pypi/paramiko@2.4.0?package-id=8048d79981ea65ae"
+     },
+     "InstalledVersion": "2.4.0",
+     "FixedVersion": "2.4.2, 2.3.3, 2.2.4, 2.1.6, 2.0.9",
+     "Status": "fixed",
+     "SeveritySource": "ghsa",
+     "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2018-1000805",
+     "DataSource": {
+      "ID": "ghsa",
+      "Name": "GitHub Security Advisory pip",
+      "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+     },
+     "Fingerprint": "sha256:f35d58dc03983330aa9bced8feaa22287c8480839fed24490478fbff2c66897a",
+     "Title": "python-paramiko: Authentication bypass in auth_handler.py",
+     "Severity": "HIGH",
+     "PublishedDate": "2018-10-08T15:29:00.713Z",
+     "LastModifiedDate": "2026-06-17T01:33:05.013Z"
+    }
+   ]
+  }
+ ]
+}

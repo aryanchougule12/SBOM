@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Callable, Optional, Sequence
 
 ROOT = Path(__file__).resolve().parent.parent
-PACKAGES = ("evidence", "tests", "analysis_runner", "reports", "sbom_parser")
+PACKAGES = ("evidence", "tests", "analysis_runner", "reports", "sbom_parser", "scanner_reports", "batch_runner")
 
 
 def stages(python: str = sys.executable) -> list[tuple[str, list[str]]]:

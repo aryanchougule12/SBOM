@@ -1,0 +1,90 @@
+{
+ "results": [
+  {
+   "source": {
+    "path": "legacy-mixed.cdx.json",
+    "type": "sbom"
+   },
+   "packages": [
+    {
+     "package": {
+      "name": "commons-fileupload:commons-fileupload",
+      "version": "1.3.2",
+      "ecosystem": "Maven",
+      "purl": "pkg:maven/commons-fileupload/commons-fileupload@1.3.2"
+     },
+     "vulnerabilities": [
+      {
+       "aliases": [
+        "CVE-2016-1000031"
+       ],
+       "id": "GHSA-7x9j-7223-rg5m",
+       "summary": "Improper Access Control in commons-fileupload"
+      },
+      {
+       "aliases": [
+        "CVE-2023-24998"
+       ],
+       "id": "GHSA-hfrx-6qgj-fp6c",
+       "summary": "Apache Commons FileUpload denial of service vulnerability"
+      }
+     ]
+    },
+    {
+     "package": {
+      "name": "lodash",
+      "version": "4.17.15",
+      "ecosystem": "npm",
+      "purl": "pkg:npm/lodash@4.17.15"
+     },
+     "vulnerabilities": [
+      {
+       "aliases": [
+        "CVE-2020-28500"
+       ],
+       "id": "GHSA-29mw-wpgm-hmr9",
+       "summary": "Regular Expression Denial of Service (ReDoS) in lodash"
+      },
+      {
+       "aliases": [
+        "CVE-2021-23337"
+       ],
+       "id": "GHSA-35jh-r3h4-6jhm",
+       "summary": "Command Injection in lodash"
+      }
+     ]
+    },
+    {
+     "package": {
+      "name": "moment",
+      "version": "2.19.1",
+      "ecosystem": "npm",
+      "purl": "pkg:npm/moment@2.19.1"
+     },
+     "vulnerabilities": [
+      {
+       "aliases": [
+        "CVE-2017-18214"
+       ],
+       "id": "GHSA-446m-mv8f-q348",
+       "summary": "Regular Expression Denial of Service in moment"
+      },
+      {
+       "aliases": [
+        "CVE-2022-24785"
+       ],
+       "id": "GHSA-8hfj-j24r-96c4",
+       "summary": "Path Traversal: 'dir/../../filename' in moment.locale"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "experimental_config": {
+  "licenses": {
+   "summary": false,
+   "allowlist": null
+  }
+ }
+}
