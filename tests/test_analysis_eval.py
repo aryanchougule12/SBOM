@@ -201,16 +201,16 @@ def test_every_case_states_why_its_expectation_follows_from_the_rules(manifest):
 
 def test_every_corpus_file_is_listed_in_the_manifest_and_vice_versa(manifest):
     listed = {c["file"] for c in manifest["cases"] if c.get("file")}
-    on_disk = {str(p.relative_to(ANALYSIS_DIR)) for sub in ("upstream", "sarif", "joern-graphml") for p in (ANALYSIS_DIR / sub).iterdir() if p.is_file()}
-    on_disk |= {str(p.relative_to(ANALYSIS_DIR)) for p in (ANALYSIS_DIR / "authentic" / "codeql").glob("*.sarif")}
-    on_disk |= {str(p.relative_to(ANALYSIS_DIR)) for p in (ANALYSIS_DIR / "authentic" / "codeql" / "recorded").glob("*.sarif")}
+    on_disk = {p.relative_to(ANALYSIS_DIR).as_posix() for sub in ("upstream", "sarif", "joern-graphml") for p in (ANALYSIS_DIR / sub).iterdir() if p.is_file()}
+    on_disk |= {p.relative_to(ANALYSIS_DIR).as_posix() for p in (ANALYSIS_DIR / "authentic" / "codeql").glob("*.sarif")}
+    on_disk |= {p.relative_to(ANALYSIS_DIR).as_posix() for p in (ANALYSIS_DIR / "authentic" / "codeql" / "recorded").glob("*.sarif")}
     assert listed == on_disk
 
 
 def test_every_run_record_file_is_used_by_a_case_and_vice_versa(manifest):
     used = {c["run"] for c in manifest["cases"] if c.get("run")}
-    on_disk = {str(p.relative_to(ANALYSIS_DIR)) for p in (ANALYSIS_DIR / "runs").glob("*.json")}
-    on_disk |= {str(p.relative_to(ANALYSIS_DIR)) for p in (ANALYSIS_DIR / "authentic" / "codeql" / "recorded").glob("*.run.json")}
+    on_disk = {p.relative_to(ANALYSIS_DIR).as_posix() for p in (ANALYSIS_DIR / "runs").glob("*.json")}
+    on_disk |= {p.relative_to(ANALYSIS_DIR).as_posix() for p in (ANALYSIS_DIR / "authentic" / "codeql" / "recorded").glob("*.run.json")}
     assert used == on_disk
 
 

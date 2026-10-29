@@ -3,6 +3,7 @@
 Uses only committed fixtures/examples and a throw-away git repository with a fake analyzer; no CodeQL/Joern is needed."""
 
 import json
+import shutil
 import subprocess
 import sys
 import textwrap
@@ -20,7 +21,7 @@ GOOD = ["evaluate", "--sbom", SBOM, "--vex", VEX, "--profile", "examples/quickst
 
 
 def cli(*args, module="evidence"):
-    done = subprocess.run([sys.executable, "-m", module, *args], cwd=ROOT, capture_output=True, text=True, timeout=300)
+    done = subprocess.run([sys.executable, "-m", module, *args], cwd=ROOT, capture_output=True, encoding="utf-8", timeout=300)
     return done
 
 
@@ -92,7 +93,8 @@ def _repo(tmp_path):
     repo = tmp_path / "repo"
     (repo / "src").mkdir(parents=True)
     (repo / "src" / "a.js").write_text("1\n")
-    env = {"PATH": "/usr/bin:/bin:/usr/local/bin", "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@e.org", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@e.org", "HOME": str(tmp_path)}
+    from tests.test_analysis_runner import git_env
+    env = git_env(tmp_path)
     for command in (["init", "-q"], ["add", "-A"], ["commit", "-q", "-m", "i"]):
         subprocess.run(["git", "-C", str(repo), *command], check=True, capture_output=True, env=env)
     (tmp_path / "tool.py").write_text(FAKE)
@@ -109,6 +111,7 @@ def _plan(tmp_path, repo, mode, artifact):
     return out
 
 
+@pytest.mark.skipif(shutil.which("git") is None, reason="git is not on the PATH (the recorder reads git state)")
 def test_recorder_then_evaluator_end_to_end_and_a_failed_stage_is_never_a_successful_analysis(tmp_path):
     repo = _repo(tmp_path)
     # a successful recorded run of a no-path artifact

@@ -143,5 +143,6 @@ def main(argv: Optional[list[str]] = None) -> int:
         args.out.write_text(text, encoding="utf-8")
         print(f"wrote {args.out} ({summary['outcome']}{', verdict ' + summary['verdict'] if not status else ''})")
     else:
-        sys.stdout.write(text)
+        sys.stdout.buffer.write(text.encode("utf-8"))     # bytes, not the console's code page: the output is identical on every platform
+        sys.stdout.buffer.flush()
     return status

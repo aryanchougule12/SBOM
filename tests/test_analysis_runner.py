@@ -4,12 +4,15 @@ The fake tool is a few lines of Python written by the test; nothing here runs Co
 the authentic CodeQL record)."""
 
 import json
+import shutil
 import subprocess
 import sys
 import textwrap
 from datetime import datetime, timedelta, timezone
 
 import pytest
+
+pytestmark = pytest.mark.skipif(shutil.which("git") is None, reason="git is not on the PATH (the recorder reads git state)")
 
 from analysis_runner import PlanError, load_plan, redact_argv, run_plan, verify_record
 from analysis_runner.cli import main
@@ -33,10 +36,16 @@ FAKE = textwrap.dedent('''
 ''')
 
 
+def git_env(home):
+    """A minimal environment for git (the inherited PATH, so it also works where git is not under /usr/bin), with a fixed identity."""
+    import os
+    keep = {k: v for k, v in os.environ.items() if k in ("PATH", "SYSTEMROOT", "PATHEXT", "COMSPEC")}
+    return {**keep, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.org", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.org",
+            "HOME": str(home), "USERPROFILE": str(home)}
+
+
 def git(repo, *args):
-    subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True,
-                   env={"PATH": "/usr/bin:/bin:/usr/local/bin", "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.org",
-                        "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.org", "HOME": str(repo)})
+    subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, env=git_env(repo))
 
 
 @pytest.fixture()
