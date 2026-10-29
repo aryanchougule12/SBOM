@@ -1,0 +1,458 @@
+{
+ "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+ "bomFormat": "CycloneDX",
+ "components": [
+  {
+   "bom-ref": "pkg:npm/axios@1.7.9?package-id=a0067b198e95a2f1",
+   "cpe": "cpe:2.3:a:axios:axios:1.7.9:*:*:*:*:node.js:*:*",
+   "name": "axios",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/axios@1.7.9",
+   "type": "library",
+   "version": "1.7.9"
+  },
+  {
+   "bom-ref": "pkg:pypi/cryptography@43.0.3?package-id=1112534f93dc2238",
+   "cpe": "cpe:2.3:a:cryptography.io:cryptography:43.0.3:*:*:*:*:python:*:*",
+   "name": "cryptography",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "python-package-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "python-pip-requirements-entry"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:cryptography.io:cryptography:43.0.3:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/requirements.txt"
+    }
+   ],
+   "purl": "pkg:pypi/cryptography@43.0.3",
+   "type": "library",
+   "version": "43.0.3"
+  },
+  {
+   "bom-ref": "pkg:pypi/django@5.1.4?package-id=029d9a2be44ff441",
+   "cpe": "cpe:2.3:a:python-django:python-django:5.1.4:*:*:*:*:*:*:*",
+   "name": "django",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "python-package-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "python-pip-requirements-entry"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python-django:python_django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python_django:python-django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python_django:python_django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:django:python-django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:django:python_django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python-django:django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python:python-django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python:python_django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python_django:django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:django:django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python:django:5.1.4:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/requirements.txt"
+    }
+   ],
+   "purl": "pkg:pypi/django@5.1.4",
+   "type": "library",
+   "version": "5.1.4"
+  },
+  {
+   "bom-ref": "pkg:npm/ejs@3.1.10?package-id=b3aad6f5536dbe63",
+   "cpe": "cpe:2.3:a:ejs:ejs:3.1.10:*:*:*:*:node.js:*:*",
+   "name": "ejs",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/ejs@3.1.10",
+   "type": "library",
+   "version": "3.1.10"
+  },
+  {
+   "bom-ref": "pkg:npm/express@4.21.2?package-id=47743e34387101df",
+   "cpe": "cpe:2.3:a:openjsf:express:4.21.2:*:*:*:*:node.js:*:*",
+   "name": "express",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/express@4.21.2",
+   "type": "library",
+   "version": "4.21.2"
+  },
+  {
+   "bom-ref": "pkg:pypi/jinja2@3.1.5?package-id=c18500845bd3bacd",
+   "cpe": "cpe:2.3:a:python-jinja2:python-jinja2:3.1.5:*:*:*:*:*:*:*",
+   "name": "jinja2",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "python-package-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "python-pip-requirements-entry"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python-jinja2:python_jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python_jinja2:python-jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python_jinja2:python_jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:jinja2:python-jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:jinja2:python_jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python-jinja2:jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python:python-jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python:python_jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python_jinja2:jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:jinja2:jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:python:jinja2:3.1.5:*:*:*:*:*:*:*"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/requirements.txt"
+    }
+   ],
+   "purl": "pkg:pypi/jinja2@3.1.5",
+   "type": "library",
+   "version": "3.1.5"
+  },
+  {
+   "bom-ref": "pkg:npm/lodash@4.17.21?package-id=48df5e3161468460",
+   "cpe": "cpe:2.3:a:lodash:lodash:4.17.21:*:*:*:*:node.js:*:*",
+   "name": "lodash",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/lodash@4.17.21",
+   "type": "library",
+   "version": "4.17.21"
+  },
+  {
+   "bom-ref": "pkg:npm/qs@6.13.0?package-id=df05440a7c0f40b7",
+   "cpe": "cpe:2.3:a:qs_project:qs:6.13.0:*:*:*:*:node.js:*:*",
+   "name": "qs",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/qs@6.13.0",
+   "type": "library",
+   "version": "6.13.0"
+  },
+  {
+   "bom-ref": "pkg:pypi/requests@2.32.3?package-id=7ae587b350fcb071",
+   "cpe": "cpe:2.3:a:python:requests:2.32.3:*:*:*:*:*:*:*",
+   "name": "requests",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "python-package-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "python-pip-requirements-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/requirements.txt"
+    }
+   ],
+   "purl": "pkg:pypi/requests@2.32.3",
+   "type": "library",
+   "version": "2.32.3"
+  },
+  {
+   "bom-ref": "pkg:pypi/urllib3@2.2.3?package-id=e27c555ad86ed517",
+   "cpe": "cpe:2.3:a:python:urllib3:2.2.3:*:*:*:*:*:*:*",
+   "name": "urllib3",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "python-package-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "python"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "python-pip-requirements-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/requirements.txt"
+    }
+   ],
+   "purl": "pkg:pypi/urllib3@2.2.3",
+   "type": "library",
+   "version": "2.2.3"
+  }
+ ],
+ "dependencies": [
+  {
+   "ref": "pkg:npm/axios@1.7.9?package-id=a0067b198e95a2f1"
+  },
+  {
+   "ref": "pkg:pypi/cryptography@43.0.3?package-id=1112534f93dc2238"
+  },
+  {
+   "ref": "pkg:pypi/django@5.1.4?package-id=029d9a2be44ff441"
+  },
+  {
+   "ref": "pkg:npm/ejs@3.1.10?package-id=b3aad6f5536dbe63"
+  },
+  {
+   "ref": "pkg:npm/express@4.21.2?package-id=47743e34387101df"
+  },
+  {
+   "ref": "pkg:pypi/jinja2@3.1.5?package-id=c18500845bd3bacd"
+  },
+  {
+   "ref": "pkg:npm/lodash@4.17.21?package-id=48df5e3161468460"
+  },
+  {
+   "ref": "pkg:npm/qs@6.13.0?package-id=df05440a7c0f40b7"
+  },
+  {
+   "ref": "pkg:pypi/requests@2.32.3?package-id=7ae587b350fcb071"
+  },
+  {
+   "ref": "pkg:pypi/urllib3@2.2.3?package-id=e27c555ad86ed517"
+  }
+ ],
+ "metadata": {
+  "component": {
+   "bom-ref": "product:hardened-service",
+   "hashes": [
+    {
+     "alg": "SHA-256",
+     "content": "e3de3e7a7879ba550a5c70fc15bff33171b7b8b9d771c439555968db7328d9bf"
+    }
+   ],
+   "name": "hardened-service",
+   "type": "application",
+   "version": "1.0.0"
+  },
+  "timestamp": "2026-10-29T12:10:50Z",
+  "tools": {
+   "components": [
+    {
+     "author": "anchore",
+     "name": "syft",
+     "type": "application",
+     "version": "1.55.0"
+    }
+   ]
+  }
+ },
+ "serialNumber": "urn:uuid:220b97d3-0caf-40f4-bc9e-a008c4f47c2e",
+ "specVersion": "1.6",
+ "version": 1
+}

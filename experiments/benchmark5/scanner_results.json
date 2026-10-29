@@ -1,0 +1,680 @@
+{
+ "missed": [
+  {
+   "advisory": [
+    "PYSEC-2023-175"
+   ],
+   "component": "pypi:Pillow@8.1.0",
+   "project": "data-service",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2023-46136",
+    "GHSA-hrfv-mqp8-q5rw",
+    "PYSEC-2023-221"
+   ],
+   "component": "pypi:Werkzeug@0.16.0",
+   "project": "data-service",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2022-29361",
+    "PYSEC-2022-203"
+   ],
+   "component": "pypi:Werkzeug@0.16.0",
+   "project": "data-service",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2026-69249",
+    "GHSA-jwv3-5hgf-82ww",
+    "PYSEC-2026-3553"
+   ],
+   "component": "pypi:cryptography@3.3.1",
+   "project": "data-service",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2026-69248",
+    "GHSA-m2h6-j472-rp4c",
+    "PYSEC-2026-3554"
+   ],
+   "component": "pypi:cryptography@3.3.1",
+   "project": "data-service",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2026-69248",
+    "GHSA-m2h6-j472-rp4c",
+    "PYSEC-2026-3554"
+   ],
+   "component": "pypi:cryptography@43.0.3",
+   "project": "hardened-service",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2026-48522",
+    "GHSA-993g-76c3-p5m4",
+    "PYSEC-2026-175"
+   ],
+   "component": "pypi:PyJWT@1.5.0",
+   "project": "legacy-mixed",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2026-48524",
+    "GHSA-fhv5-28vv-h8m8",
+    "PYSEC-2026-177"
+   ],
+   "component": "pypi:PyJWT@1.5.0",
+   "project": "legacy-mixed",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2025-45768",
+    "PYSEC-2025-183"
+   ],
+   "component": "pypi:PyJWT@1.5.0",
+   "project": "legacy-mixed",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2022-24302",
+    "GHSA-f8q4-jwww-x3wv",
+    "PYSEC-2022-166"
+   ],
+   "component": "pypi:paramiko@2.4.0",
+   "project": "legacy-mixed",
+   "tool": "Trivy"
+  },
+  {
+   "advisory": [
+    "CVE-2026-112902",
+    "GHSA-xvh5-g6gv-559v"
+   ],
+   "component": "pypi:Pillow@8.1.0",
+   "project": "data-service",
+   "tool": "pip-audit"
+  }
+ ],
+ "rows": [
+  {
+   "metrics": {
+    "accuracy": 0.9908088235294118,
+    "accuracy_ci": [
+     0.9831638504158466,
+     0.9950000151119003
+    ],
+    "f1": 0.9888888888888888,
+    "n": 1088,
+    "precision": 1.0,
+    "precision_ci": [
+     0.9914410785453043,
+     1.0
+    ],
+    "recall": 0.978021978021978,
+    "recall_ci": [
+     0.960020439688719,
+     0.9880191452137831
+    ]
+   },
+   "per_project": {
+    "billing-backend": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 48,
+     "TP": 84,
+     "disputed": 0,
+     "unmapped": 0
+    },
+    "data-service": {
+     "FN": 5,
+     "FP": 0,
+     "TN": 215,
+     "TP": 151,
+     "disputed": 1,
+     "unmapped": 0
+    },
+    "hardened-service": {
+     "FN": 1,
+     "FP": 0,
+     "TN": 234,
+     "TP": 77,
+     "disputed": 0,
+     "unmapped": 0
+    },
+    "legacy-mixed": {
+     "FN": 4,
+     "FP": 0,
+     "TN": 77,
+     "TP": 71,
+     "disputed": 0,
+     "unmapped": 0
+    },
+    "shop-frontend-api": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 59,
+     "TP": 62,
+     "disputed": 0,
+     "unmapped": 0
+    }
+   },
+   "per_project_metrics": {
+    "billing-backend": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.9717200032979587,
+      1.0
+     ],
+     "f1": 1.0,
+     "n": 132,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9562667346678565,
+      0.9999999999999999
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9562667346678565,
+      0.9999999999999999
+     ]
+    },
+    "data-service": {
+     "accuracy": 0.9865229110512129,
+     "accuracy_ci": [
+      0.9688433613594887,
+      0.9942301075404414
+     ],
+     "f1": 0.9837133550488599,
+     "n": 371,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9751901297842439,
+      0.9999999999999999
+     ],
+     "recall": 0.967948717948718,
+     "recall_ci": [
+      0.9271706270177924,
+      0.9862336432097327
+     ]
+    },
+    "hardened-service": {
+     "accuracy": 0.9967948717948718,
+     "accuracy_ci": [
+      0.9820706464658654,
+      0.9994340064994186
+     ],
+     "f1": 0.9935483870967742,
+     "n": 312,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9524799113327793,
+      1.0000000000000002
+     ],
+     "recall": 0.9871794871794872,
+     "recall_ci": [
+      0.9308897697115066,
+      0.9977333266111463
+     ]
+    },
+    "legacy-mixed": {
+     "accuracy": 0.9736842105263158,
+     "accuracy_ci": [
+      0.9342952234099888,
+      0.9897199304385342
+     ],
+     "f1": 0.9726027397260273,
+     "n": 152,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9486702582520953,
+      1.0000000000000002
+     ],
+     "recall": 0.9466666666666667,
+     "recall_ci": [
+      0.8707382679518444,
+      0.9790669110399569
+     ]
+    },
+    "shop-frontend-api": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.969228205982621,
+      0.9999999999999999
+     ],
+     "f1": 1.0,
+     "n": 121,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9416539087749995,
+      1.0000000000000002
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9416539087749995,
+      1.0000000000000002
+     ]
+    }
+   },
+   "tool": "Trivy",
+   "total": {
+    "FN": 10,
+    "FP": 0,
+    "TN": 633,
+    "TP": 445,
+    "disputed": 1,
+    "unmapped": 0
+   }
+  },
+  {
+   "metrics": {
+    "accuracy": 1.0,
+    "accuracy_ci": [
+     0.9964815409121616,
+     0.9999999999999999
+    ],
+    "f1": 1.0,
+    "n": 1088,
+    "precision": 1.0,
+    "precision_ci": [
+     0.9916276117945713,
+     1.0
+    ],
+    "recall": 1.0,
+    "recall_ci": [
+     0.9916276117945713,
+     1.0
+    ]
+   },
+   "per_project": {
+    "billing-backend": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 48,
+     "TP": 84,
+     "disputed": 0,
+     "unmapped": 0
+    },
+    "data-service": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 215,
+     "TP": 156,
+     "disputed": 1,
+     "unmapped": 0
+    },
+    "hardened-service": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 234,
+     "TP": 78,
+     "disputed": 0,
+     "unmapped": 0
+    },
+    "legacy-mixed": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 77,
+     "TP": 75,
+     "disputed": 0,
+     "unmapped": 0
+    },
+    "shop-frontend-api": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 59,
+     "TP": 62,
+     "disputed": 0,
+     "unmapped": 0
+    }
+   },
+   "per_project_metrics": {
+    "billing-backend": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.9717200032979587,
+      1.0
+     ],
+     "f1": 1.0,
+     "n": 132,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9562667346678565,
+      0.9999999999999999
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9562667346678565,
+      0.9999999999999999
+     ]
+    },
+    "data-service": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.989751404326521,
+      1.0000000000000002
+     ],
+     "f1": 1.0,
+     "n": 371,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9759662065444789,
+      0.9999999999999999
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9759662065444789,
+      0.9999999999999999
+     ]
+    },
+    "hardened-service": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.9878369410489309,
+      1.0
+     ],
+     "f1": 1.0,
+     "n": 312,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9530605462258804,
+      1.0000000000000002
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9530605462258804,
+      1.0000000000000002
+     ]
+    },
+    "legacy-mixed": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.9753493290623299,
+      1.0
+     ],
+     "f1": 1.0,
+     "n": 152,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9512744540953,
+      1.0
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9512744540953,
+      1.0
+     ]
+    },
+    "shop-frontend-api": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.969228205982621,
+      0.9999999999999999
+     ],
+     "f1": 1.0,
+     "n": 121,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9416539087749995,
+      1.0000000000000002
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9416539087749995,
+      1.0000000000000002
+     ]
+    }
+   },
+   "tool": "OSV-Scanner",
+   "total": {
+    "FN": 0,
+    "FP": 0,
+    "TN": 633,
+    "TP": 455,
+    "disputed": 1,
+    "unmapped": 0
+   }
+  },
+  {
+   "metrics": {
+    "accuracy": 0.9984276729559748,
+    "accuracy_ci": [
+     0.991147841515271,
+     0.9997223988692243
+    ],
+    "f1": 0.9976689976689977,
+    "n": 636,
+    "precision": 1.0,
+    "precision_ci": [
+     0.9823651680854346,
+     1.0
+    ],
+    "recall": 0.9953488372093023,
+    "recall_ci": [
+     0.9741282161586808,
+     0.9991785043185957
+    ]
+   },
+   "per_project": {
+    "data-service": {
+     "FN": 1,
+     "FP": 0,
+     "TN": 215,
+     "TP": 155,
+     "disputed": 1,
+     "unmapped": 0
+    },
+    "hardened-service": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 189,
+     "TP": 37,
+     "disputed": 0,
+     "unmapped": 0
+    },
+    "legacy-mixed": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 17,
+     "TP": 22,
+     "disputed": 0,
+     "unmapped": 0
+    }
+   },
+   "per_project_metrics": {
+    "data-service": {
+     "accuracy": 0.9973045822102425,
+     "accuracy_ci": [
+      0.9848917709858507,
+      0.9995240462553521
+     ],
+     "f1": 0.9967845659163987,
+     "n": 371,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9758148998750957,
+      1.0
+     ],
+     "recall": 0.9935897435897436,
+     "recall_ci": [
+      0.9645862554536858,
+      0.9988675638274022
+     ]
+    },
+    "hardened-service": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.9832858803628236,
+      0.9999999999999999
+     ],
+     "f1": 1.0,
+     "n": 226,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9059390425448564,
+      1.0000000000000002
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9059390425448564,
+      1.0000000000000002
+     ]
+    },
+    "legacy-mixed": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.9103301463997611,
+      1.0
+     ],
+     "f1": 1.0,
+     "n": 39,
+     "precision": 1.0,
+     "precision_ci": [
+      0.8513404742740388,
+      1.0
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.8513404742740388,
+      1.0
+     ]
+    }
+   },
+   "tool": "pip-audit",
+   "total": {
+    "FN": 1,
+    "FP": 0,
+    "TN": 421,
+    "TP": 214,
+    "disputed": 1,
+    "unmapped": 0
+   }
+  },
+  {
+   "metrics": {
+    "accuracy": 1.0,
+    "accuracy_ci": [
+     0.9845620667926908,
+     1.0000000000000002
+    ],
+    "f1": 1.0,
+    "n": 245,
+    "precision": 1.0,
+    "precision_ci": [
+     0.9717200032979587,
+     1.0
+    ],
+    "recall": 1.0,
+    "recall_ci": [
+     0.9717200032979587,
+     1.0
+    ]
+   },
+   "per_project": {
+    "hardened-service": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 45,
+     "TP": 41,
+     "disputed": 0,
+     "unmapped": 0
+    },
+    "legacy-mixed": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 9,
+     "TP": 29,
+     "disputed": 0,
+     "unmapped": 0
+    },
+    "shop-frontend-api": {
+     "FN": 0,
+     "FP": 0,
+     "TN": 59,
+     "TP": 62,
+     "disputed": 0,
+     "unmapped": 0
+    }
+   },
+   "per_project_metrics": {
+    "hardened-service": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.9572402984808819,
+      1.0
+     ],
+     "f1": 1.0,
+     "n": 86,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9143295511310926,
+      1.0
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9143295511310926,
+      1.0
+     ]
+    },
+    "legacy-mixed": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.90818706741616,
+      0.9999999999999999
+     ],
+     "f1": 1.0,
+     "n": 38,
+     "precision": 1.0,
+     "precision_ci": [
+      0.8830264055344442,
+      1.0
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.8830264055344442,
+      1.0
+     ]
+    },
+    "shop-frontend-api": {
+     "accuracy": 1.0,
+     "accuracy_ci": [
+      0.969228205982621,
+      0.9999999999999999
+     ],
+     "f1": 1.0,
+     "n": 121,
+     "precision": 1.0,
+     "precision_ci": [
+      0.9416539087749995,
+      1.0000000000000002
+     ],
+     "recall": 1.0,
+     "recall_ci": [
+      0.9416539087749995,
+      1.0000000000000002
+     ]
+    }
+   },
+   "tool": "npm audit",
+   "total": {
+    "FN": 0,
+    "FP": 0,
+    "TN": 113,
+    "TP": 132,
+    "disputed": 0,
+    "unmapped": 0
+   }
+  }
+ ],
+ "unmapped": []
+}

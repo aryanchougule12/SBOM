@@ -1,0 +1,370 @@
+{
+ "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+ "bomFormat": "CycloneDX",
+ "components": [
+  {
+   "bom-ref": "pkg:npm/axios@0.21.0?package-id=fc82ea750c642b07",
+   "cpe": "cpe:2.3:a:axios:axios:0.21.0:*:*:*:*:node.js:*:*",
+   "name": "axios",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/axios@0.21.0",
+   "type": "library",
+   "version": "0.21.0"
+  },
+  {
+   "bom-ref": "pkg:npm/body-parser@1.19.0?package-id=14d38e0b23c2c172",
+   "cpe": "cpe:2.3:a:openjsf:body-parser:1.19.0:*:*:*:*:node.js:*:*",
+   "name": "body-parser",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/body-parser@1.19.0",
+   "type": "library",
+   "version": "1.19.0"
+  },
+  {
+   "bom-ref": "pkg:npm/ejs@3.1.5?package-id=47a7837ddc563dd6",
+   "cpe": "cpe:2.3:a:ejs:ejs:3.1.5:*:*:*:*:node.js:*:*",
+   "name": "ejs",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/ejs@3.1.5",
+   "type": "library",
+   "version": "3.1.5"
+  },
+  {
+   "bom-ref": "pkg:npm/express@4.17.1?package-id=3f405f51c752777f",
+   "cpe": "cpe:2.3:a:openjsf:express:4.17.1:*:*:*:*:node.js:*:*",
+   "name": "express",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/express@4.17.1",
+   "type": "library",
+   "version": "4.17.1"
+  },
+  {
+   "bom-ref": "pkg:npm/handlebars@4.7.6?package-id=dd0f86f58a4e2e2f",
+   "cpe": "cpe:2.3:a:handlebars.js_project:handlebars.js:4.7.6:*:*:*:*:node.js:*:*",
+   "name": "handlebars",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:cpe23",
+     "value": "cpe:2.3:a:handlebarsjs:handlebars:4.7.6:*:*:*:*:node.js:*:*"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/handlebars@4.7.6",
+   "type": "library",
+   "version": "4.7.6"
+  },
+  {
+   "bom-ref": "pkg:npm/jsonwebtoken@8.5.1?package-id=fdf9f5b154b84a1f",
+   "cpe": "cpe:2.3:a:auth0:jsonwebtoken:8.5.1:*:*:*:*:node.js:*:*",
+   "name": "jsonwebtoken",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/jsonwebtoken@8.5.1",
+   "type": "library",
+   "version": "8.5.1"
+  },
+  {
+   "bom-ref": "pkg:npm/lodash@4.17.15?package-id=fdfa1dde54d5d6aa",
+   "cpe": "cpe:2.3:a:lodash:lodash:4.17.15:*:*:*:*:node.js:*:*",
+   "name": "lodash",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/lodash@4.17.15",
+   "type": "library",
+   "version": "4.17.15"
+  },
+  {
+   "bom-ref": "pkg:npm/minimist@1.2.5?package-id=3f185903cada08d2",
+   "cpe": "cpe:2.3:a:minimist:minimist:1.2.5:*:*:*:*:*:*:*",
+   "name": "minimist",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/minimist@1.2.5",
+   "type": "library",
+   "version": "1.2.5"
+  },
+  {
+   "bom-ref": "pkg:npm/node-fetch@2.6.0?package-id=cd7bbdc404acec14",
+   "cpe": "cpe:2.3:a:node-fetch_project:node-fetch:2.6.0:*:*:*:*:node.js:*:*",
+   "name": "node-fetch",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/node-fetch@2.6.0",
+   "type": "library",
+   "version": "2.6.0"
+  },
+  {
+   "bom-ref": "pkg:npm/qs@6.7.0?package-id=366cc14275fbc9d8",
+   "cpe": "cpe:2.3:a:qs_project:qs:6.7.0:*:*:*:*:node.js:*:*",
+   "name": "qs",
+   "properties": [
+    {
+     "name": "syft:package:foundBy",
+     "value": "javascript-lock-cataloger"
+    },
+    {
+     "name": "syft:package:language",
+     "value": "javascript"
+    },
+    {
+     "name": "syft:package:type",
+     "value": "npm"
+    },
+    {
+     "name": "syft:package:metadataType",
+     "value": "javascript-npm-package-lock-entry"
+    },
+    {
+     "name": "syft:location:0:path",
+     "value": "/package-lock.json"
+    }
+   ],
+   "purl": "pkg:npm/qs@6.7.0",
+   "type": "library",
+   "version": "6.7.0"
+  }
+ ],
+ "dependencies": [
+  {
+   "ref": "pkg:npm/axios@0.21.0?package-id=fc82ea750c642b07"
+  },
+  {
+   "ref": "pkg:npm/body-parser@1.19.0?package-id=14d38e0b23c2c172"
+  },
+  {
+   "ref": "pkg:npm/ejs@3.1.5?package-id=47a7837ddc563dd6"
+  },
+  {
+   "ref": "pkg:npm/express@4.17.1?package-id=3f405f51c752777f"
+  },
+  {
+   "ref": "pkg:npm/handlebars@4.7.6?package-id=dd0f86f58a4e2e2f"
+  },
+  {
+   "ref": "pkg:npm/jsonwebtoken@8.5.1?package-id=fdf9f5b154b84a1f"
+  },
+  {
+   "ref": "pkg:npm/lodash@4.17.15?package-id=fdfa1dde54d5d6aa"
+  },
+  {
+   "ref": "pkg:npm/minimist@1.2.5?package-id=3f185903cada08d2"
+  },
+  {
+   "ref": "pkg:npm/node-fetch@2.6.0?package-id=cd7bbdc404acec14"
+  },
+  {
+   "ref": "pkg:npm/qs@6.7.0?package-id=366cc14275fbc9d8"
+  }
+ ],
+ "metadata": {
+  "component": {
+   "bom-ref": "product:shop-frontend-api",
+   "hashes": [
+    {
+     "alg": "SHA-256",
+     "content": "355c849df9b6015e5610ba04b9e62caa8e7cdc6fb5df05555286caaaadfff7df"
+    }
+   ],
+   "name": "shop-frontend-api",
+   "type": "application",
+   "version": "1.0.0"
+  },
+  "timestamp": "2026-10-29T12:10:54Z",
+  "tools": {
+   "components": [
+    {
+     "author": "anchore",
+     "name": "syft",
+     "type": "application",
+     "version": "1.55.0"
+    }
+   ]
+  }
+ },
+ "serialNumber": "urn:uuid:0636b732-df69-41b1-ab36-4f0d2551560c",
+ "specVersion": "1.6",
+ "version": 1
+}
