@@ -9,8 +9,8 @@ from tests import validate_all
 def test_the_mandatory_stages_are_exactly_the_documented_ones():
     commands = [" ".join(c[1:]) for _, c in validate_all.stages()]
     assert commands[0] == "-m pytest -q -rs"
-    assert commands[1:4] == ["-m tests.conformance", "-m tests.analysis_eval --check", "-m tests.research_report --check"]
-    assert commands[4].startswith("-m compileall -q evidence tests analysis_runner") and commands[5].startswith("-m pyflakes ")
+    assert commands[1:5] == ["-m tests.conformance", "-m tests.analysis_eval --check", "-m tests.research_report --check", "-m tests.metamorphic --check"]
+    assert commands[5].startswith("-m compileall -q evidence tests analysis_runner") and commands[6].startswith("-m pyflakes ")
     assert all(c[0] == sys.executable for _, c in validate_all.stages())      # the current interpreter
 
 

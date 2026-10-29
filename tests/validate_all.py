@@ -9,8 +9,9 @@ Stages (each is an ordinary command whose own output is shown and whose own exit
 2. ``tests.conformance``                    rule conformance of both predicates and the corpus agreement
 3. ``tests.analysis_eval --check``          the analyzer corpus report is current and every case agrees
 4. ``tests.research_report --check``        the research report is current, deterministic, and the weakening invariant holds
-5. ``compileall``                           every module compiles
-6. ``pyflakes``                             static check (declared in requirements.txt)
+5. ``tests.metamorphic --check``            the metamorphic campaign report is current and no relation is violated
+6. ``compileall``                           every module compiles
+7. ``pyflakes``                             static check (declared in requirements.txt)
 
 All stages run even if an earlier one fails, so one invocation shows every problem; the exit status is 1 if any failed. The test suite never
 calls this module's ``main`` (it would recurse); ``tests/test_validate_all.py`` checks it with stand-in commands only.
@@ -34,6 +35,7 @@ def stages(python: str = sys.executable) -> list[tuple[str, list[str]]]:
         ("rule conformance", [python, "-m", "tests.conformance"]),
         ("analyzer corpus report is current", [python, "-m", "tests.analysis_eval", "--check"]),
         ("research report is current", [python, "-m", "tests.research_report", "--check"]),
+        ("metamorphic report is current", [python, "-m", "tests.metamorphic", "--check"]),
         ("compile", [python, "-m", "compileall", "-q", *PACKAGES]),
         ("static check (pyflakes)", [python, "-m", "pyflakes", *PACKAGES, "model.py"]),
     ]

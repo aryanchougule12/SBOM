@@ -1,0 +1,659 @@
+{
+ "disclaimer": "Controlled synthetic mutations through the public evaluation entry point; relations are the specification's invariants M-1..M-6. The report shows the engine obeys them on these mutations; it is not an accuracy measurement and says nothing about real SBOMs.",
+ "kind": "metamorphic-campaign-report",
+ "operator_table": {
+  "D-ASSERTION": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the evaluator's inventory assertion",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 1,
+    "Weak -> Insufficient": 2
+   },
+   "violations": 0
+  },
+  "D-COMPONENT": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove one component from the inventory",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 1,
+    "Weak -> Insufficient": 2
+   },
+   "violations": 0
+  },
+  "D-DECLARATION": {
+   "changed_verdict_or_codes": 2,
+   "description": "remove the completeness declaration",
+   "kind": "delete",
+   "pairs": 2,
+   "transitions": {
+    "Supported -> Weak": 1,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "D-DEP-ALL": {
+   "changed_verdict_or_codes": 0,
+   "description": "remove every dependency edge",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Supported": 1,
+    "Weak -> Weak": 2
+   },
+   "violations": 0
+  },
+  "D-DEP-EDGE": {
+   "changed_verdict_or_codes": 0,
+   "description": "remove one dependency edge",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Supported": 1,
+    "Weak -> Weak": 2
+   },
+   "violations": 0
+  },
+  "D-IDENTIFIER": {
+   "changed_verdict_or_codes": 0,
+   "description": "remove the strong identifier (purl) of every component",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Supported": 1,
+    "Weak -> Weak": 2
+   },
+   "violations": 0
+  },
+  "D-SUBJECT-DIGEST": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the subject's digest",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 1,
+    "Weak -> Insufficient": 2
+   },
+   "violations": 0
+  },
+  "D-TIMESTAMP": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the document timestamp",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 1,
+    "Weak -> Weak": 1,
+    "Weak -> input_error": 1
+   },
+   "violations": 0
+  },
+  "D-TOOL": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the generating tool identity",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 1,
+    "Weak -> Insufficient": 1,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "D-VERIFICATION": {
+   "changed_verdict_or_codes": 2,
+   "description": "remove the detached verification result",
+   "kind": "delete",
+   "pairs": 2,
+   "transitions": {
+    "Supported -> Weak": 1,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "D-VERSION": {
+   "changed_verdict_or_codes": 0,
+   "description": "remove component version information",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Supported": 1,
+    "Weak -> Weak": 2
+   },
+   "violations": 0
+  },
+  "D-VEX-JUSTIFICATION": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the VEX justification",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> refused": 1,
+    "Weak -> refused": 2
+   },
+   "violations": 0
+  },
+  "DR-ARTIFACT-HASH": {
+   "changed_verdict_or_codes": 2,
+   "description": "remove the digest the K1 report declares for the analysed artifact",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "DR-CFG": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the deployment configuration",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "DR-CONFIGS": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the K1 report's analysed configurations",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "DR-CREATED": {
+   "changed_verdict_or_codes": 2,
+   "description": "remove the K1 report's timestamp (attribution)",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "DR-ENTRY": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the K1 report's entry-point completeness",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "DR-HAZ-BASIS": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the hazard-exclusion basis document",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "DR-HAZ-CLAIMS": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the evaluator's hazard dispositions",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "DR-K1": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the K1 analysis report",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "DR-LOCUS": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the vulnerable-code locus",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "DR-MODELED": {
+   "changed_verdict_or_codes": 3,
+   "description": "remove the hazards the K1 report declares modeled",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "DR-TOOL-VERSION": {
+   "changed_verdict_or_codes": 2,
+   "description": "remove the K1 report's tool version (attribution)",
+   "kind": "delete",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "DR-VERIFICATION": {
+   "changed_verdict_or_codes": 2,
+   "description": "remove the detached verification result",
+   "kind": "delete",
+   "pairs": 2,
+   "transitions": {
+    "Supported -> Weak": 2
+   },
+   "violations": 0
+  },
+  "G-DANGLING-EDGE": {
+   "changed_verdict_or_codes": 3,
+   "description": "add a dependency edge to a component that is not defined",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 1,
+    "Weak -> Insufficient": 2
+   },
+   "violations": 0
+  },
+  "G-DECL-INCOMPLETE": {
+   "changed_verdict_or_codes": 2,
+   "description": "declare the composition incomplete",
+   "kind": "degrade",
+   "pairs": 2,
+   "transitions": {
+    "Supported -> Weak": 1,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "G-DECL-UNKNOWN": {
+   "changed_verdict_or_codes": 2,
+   "description": "declare the composition unknown",
+   "kind": "degrade",
+   "pairs": 2,
+   "transitions": {
+    "Supported -> Weak": 1,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "G-ORPHAN": {
+   "changed_verdict_or_codes": 0,
+   "description": "add an unrelated orphan component",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Supported": 1,
+    "Weak -> Weak": 2
+   },
+   "violations": 0
+  },
+  "G-SUBJECT-DIGEST": {
+   "changed_verdict_or_codes": 3,
+   "description": "alter the subject's digest",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 1,
+    "Weak -> Insufficient": 2
+   },
+   "violations": 0
+  },
+  "G-VERIFICATION": {
+   "changed_verdict_or_codes": 2,
+   "description": "narrow the verified coverage",
+   "kind": "degrade",
+   "pairs": 2,
+   "transitions": {
+    "Supported -> Weak": 1,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "G-VERSION": {
+   "changed_verdict_or_codes": 0,
+   "description": "replace component versions with a wrong value",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Supported": 1,
+    "Weak -> Weak": 2
+   },
+   "violations": 0
+  },
+  "GR-ARTIFACT-HASH": {
+   "changed_verdict_or_codes": 3,
+   "description": "the K1 report's declared artifact digest is not the assessed artifact's",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "GR-CONFIGS": {
+   "changed_verdict_or_codes": 3,
+   "description": "the K1 report was analysed under another configuration",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "GR-COVERAGE": {
+   "changed_verdict_or_codes": 3,
+   "description": "withdraw the K1 report's full-coverage claim",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "GR-ENTRY-INCOMPLETE": {
+   "changed_verdict_or_codes": 3,
+   "description": "the K1 report declares its entry-point set incomplete",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "GR-K1-AMBIGUOUS": {
+   "changed_verdict_or_codes": 3,
+   "description": "the K1 report says unresolved may-reach edges remain",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "GR-K1-INCOMPLETE": {
+   "changed_verdict_or_codes": 3,
+   "description": "the K1 report says the analysis is incomplete",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "GR-K1-UNKNOWN": {
+   "changed_verdict_or_codes": 3,
+   "description": "the K1 report reports nothing usable",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "GR-LOCUS": {
+   "changed_verdict_or_codes": 3,
+   "description": "the locus may be an under-approximation",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Weak": 2,
+    "Weak -> Weak": 1
+   },
+   "violations": 0
+  },
+  "GR-TARGET": {
+   "changed_verdict_or_codes": 3,
+   "description": "the K1 report concerns another component",
+   "kind": "degrade",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "GR-VERIFICATION": {
+   "changed_verdict_or_codes": 2,
+   "description": "narrow the verified coverage so it excludes the report",
+   "kind": "degrade",
+   "pairs": 2,
+   "transitions": {
+    "Supported -> Weak": 2
+   },
+   "violations": 0
+  },
+  "I-NESTED-TWIN": {
+   "changed_verdict_or_codes": 2,
+   "description": "add the target component nested under another component",
+   "kind": "inject_positive",
+   "pairs": 2,
+   "transitions": {
+    "Supported -> Insufficient": 1,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "I-ORPHAN-TWIN": {
+   "changed_verdict_or_codes": 3,
+   "description": "add the target component as an orphan (no edge)",
+   "kind": "inject_positive",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 1,
+    "Weak -> Insufficient": 2
+   },
+   "violations": 0
+  },
+  "I-TWIN": {
+   "changed_verdict_or_codes": 3,
+   "description": "add the target component with a dependency edge",
+   "kind": "inject_positive",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 1,
+    "Weak -> Insufficient": 2
+   },
+   "violations": 0
+  },
+  "IR-K1-POSITIVE": {
+   "changed_verdict_or_codes": 3,
+   "description": "add a second K1 report that observes a path to the locus",
+   "kind": "inject_positive",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "IR-K2-POSITIVE": {
+   "changed_verdict_or_codes": 3,
+   "description": "add a K2 assertion that the code is reachable",
+   "kind": "inject_positive",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "IR-K3-POSITIVE": {
+   "changed_verdict_or_codes": 3,
+   "description": "add runtime coverage data that executes the locus",
+   "kind": "inject_positive",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "IR-UNATTRIBUTED-POSITIVE": {
+   "changed_verdict_or_codes": 3,
+   "description": "add an unattributed (P0) assertion that the code is reachable",
+   "kind": "inject_positive",
+   "pairs": 3,
+   "transitions": {
+    "Supported -> Insufficient": 2,
+    "Weak -> Insufficient": 1
+   },
+   "violations": 0
+  },
+  "N-LABEL": {
+   "changed_verdict_or_codes": 0,
+   "description": "change the evaluator's entered_by labels (never used in a decision)",
+   "kind": "neutral",
+   "pairs": 6,
+   "transitions": {
+    "Supported -> Supported": 3,
+    "Weak -> Weak": 3
+   },
+   "violations": 0
+  },
+  "N-SBOM-TEXT": {
+   "changed_verdict_or_codes": 0,
+   "description": "rewrite description/comment free text of every SBOM component or package",
+   "kind": "neutral",
+   "pairs": 6,
+   "transitions": {
+    "Supported -> Supported": 3,
+    "Weak -> Weak": 3
+   },
+   "violations": 0
+  },
+  "N-VEX-TEXT": {
+   "changed_verdict_or_codes": 0,
+   "description": "rewrite impact_statement and status_notes of every VEX statement",
+   "kind": "neutral",
+   "pairs": 6,
+   "transitions": {
+    "Supported -> Supported": 3,
+    "Weak -> Weak": 3
+   },
+   "violations": 0
+  }
+ },
+ "operators": {
+  "by_kind": {
+   "degrade": 17,
+   "delete": 24,
+   "inject_positive": 7,
+   "neutral": 3
+  },
+  "count": 51
+ },
+ "operators_that_never_changed_a_verdict_or_codes": [
+  "D-DEP-ALL",
+  "D-DEP-EDGE",
+  "D-IDENTIFIER",
+  "D-VERSION",
+  "G-ORPHAN",
+  "G-VERSION",
+  "N-LABEL",
+  "N-SBOM-TEXT",
+  "N-VEX-TEXT"
+ ],
+ "pairs": {
+  "by_kind": {
+   "degrade": 47,
+   "delete": 69,
+   "inject_positive": 20,
+   "neutral": 18
+  },
+  "count": 154,
+  "mutant_without_verdict": {
+   "input_error": 1,
+   "refused": 3
+  },
+  "verdict_changed_or_codes_changed": 115
+ },
+ "relations": {
+  "M-1": {
+   "checked": 116,
+   "exercised": 95,
+   "held": 116,
+   "violated": 0
+  },
+  "M-2": {
+   "checked": 69,
+   "exercised": 54,
+   "held": 69,
+   "violated": 0
+  },
+  "M-3": {
+   "checked": 160,
+   "exercised": 115,
+   "held": 160,
+   "violated": 0
+  },
+  "M-4": {
+   "checked": 20,
+   "exercised": 20,
+   "held": 20,
+   "violated": 0
+  },
+  "M-5": {
+   "checked": 160,
+   "exercised": 115,
+   "held": 160,
+   "violated": 0
+  },
+  "M-6": {
+   "checked": 18,
+   "exercised": 0,
+   "held": 18,
+   "violated": 0
+  }
+ },
+ "scenarios": {
+  "base_verdicts": {
+   "cnp-cdx-unverified": "Weak",
+   "cnp-cdx-verified": "Supported",
+   "cnp-spdx": "Weak",
+   "reach-cdx-unverified": "Weak",
+   "reach-cdx-verified": "Supported",
+   "reach-spdx-verified": "Supported"
+  },
+  "by_format": {
+   "cdx": 4,
+   "spdx": 2
+  },
+  "by_predicate": {
+   "cnp": 3,
+   "reach": 3
+  },
+  "count": 6
+ },
+ "violations": []
+}

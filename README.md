@@ -92,7 +92,7 @@ record says `failed`/partial, the assessment reports the execution state, and no
 **3. Validate everything** (the one command CI runs, `.github/workflows/validate.yml`):
 
 ```
-python -m tests.validate_all        # pytest -q -rs, conformance, analysis_eval --check, research_report --check, compileall, pyflakes; exit 0 only if all pass
+python -m tests.validate_all        # pytest -q -rs, conformance, analysis_eval/research_report/metamorphic --check, compileall, pyflakes; exit 0 only if all pass
 ```
 
 ## Module structure
@@ -118,6 +118,7 @@ python -m pytest -q -rs
 python -m tests.conformance
 python -m tests.analysis_eval --check
 python -m tests.research_report --check
+python -m tests.metamorphic --check      # mutation operators x metamorphic relations M-1..M-6 (docs/metamorphic_checkpoints.md)
 ```
 
 (or all mandatory checks at once: `python -m tests.validate_all`). Regenerate the committed reports with `python -m tests.analysis_eval` and
