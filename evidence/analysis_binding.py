@@ -590,6 +590,7 @@ def derive_document(analysis: NormalizedAnalysis, subject: AnalysisSubject, locu
             diagnostics.append(AnalysisDiagnostic("COVERAGE_CLAIM_NOT_CONSUMED",
                                                   "the record declares a coverage claim, but these conditions are not established: " + ", ".join(coverage.preventing)))
     if negative:
+        limitations = [x for x in limitations if x != NO_NEGATIVE_LIMITATION]   # that text says no absence was derived; one was
         limitations.append(ABSENCE_LIMITATION)
         blockers = []
     limitation_tuple = tuple(dict.fromkeys(limitations))

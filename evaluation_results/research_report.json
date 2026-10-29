@@ -1,0 +1,489 @@
+{
+ "authentic_joern": "0 artifacts: no authentic Joern output was obtained; every GraphML case is synthetic (category B).",
+ "categories": {
+  "A": {
+   "analysis_run_records": {
+    "binding": {},
+    "coverage_facts_per_fact": {},
+    "denominator_for_facts": 0,
+    "evaluated_cases_with_a_record": 0,
+    "negative_k1_derived": {
+     "case_ids": [],
+     "count": 0,
+     "denominator": 0,
+     "resulting_verdicts": {}
+    }
+   },
+   "by_format": {
+    "sarif": 9
+   },
+   "cases": 9,
+   "cases_with_an_artifact": 9,
+   "evaluated": 7,
+   "evidence_states_of_evaluated_cases": {
+    "BIND": {
+     "matched": 5,
+     "unknown": 2
+    },
+    "REACH": {
+     "Present": 2,
+     "Unknown": 5
+    },
+    "denominator": 7
+   },
+   "expected_vs_actual": {
+    "agree": 9,
+    "cases": 9,
+    "disagree": 0
+   },
+   "inconclusive": {
+    "count": 9,
+    "definition": "refused, or evaluated with verdict Insufficient",
+    "denominator": 9,
+    "one_primary_reason_per_case": {
+     "a path to the locus is recorded (contradicts the claim)": 2,
+     "no analysis-run record: an artifact alone states no coverage": 5,
+     "refused: ANALYSIS_STRUCTURE_INVALID": 2
+    }
+   },
+   "label": "upstream format examples / test data (byte-for-byte)",
+   "refusals_by_cause": {
+    "ANALYSIS_STRUCTURE_INVALID": 2
+   },
+   "refused": 2,
+   "supported_verdicts": {
+    "count": 0,
+    "note": "no Supported verdict rests on an artifact or an analysis-run record",
+    "resting_on_a_caller_supplied_verified_k1_report": 0
+   },
+   "verdicts_of_evaluated_cases": {
+    "Insufficient": 7,
+    "denominator": 7
+   }
+  },
+  "B": {
+   "analysis_run_records": {
+    "binding": {
+     "ambiguous": 2,
+     "contradicted": 11,
+     "established": 58,
+     "impossible": 2,
+     "missing": 2
+    },
+    "coverage_facts_per_fact": {
+     "binding_established": {
+      "established": 58,
+      "not_established": 17
+     },
+     "claim_semantics": {
+      "established": 72,
+      "not_established": 2,
+      "not_recorded": 1
+     },
+     "coverage_claim_declared": {
+      "contradicted": 3,
+      "established": 69,
+      "not_recorded": 3
+     },
+     "entry_points_enumerated": {
+      "contradicted": 1,
+      "established": 71,
+      "not_established": 2,
+      "not_recorded": 1
+     },
+     "exclusions_accounted": {
+      "established": 73,
+      "not_established": 1,
+      "not_recorded": 1
+     },
+     "extraction_completed": {
+      "established": 74,
+      "not_established": 1
+     },
+     "language_scope": {
+      "established": 74,
+      "not_recorded": 1
+     },
+     "locus_included": {
+      "established": 72,
+      "not_established": 2,
+      "not_recorded": 1
+     },
+     "no_partial_indicators": {
+      "established": 69,
+      "not_established": 6
+     },
+     "no_undecidable_evidence": {
+      "established": 61,
+      "not_established": 14
+     },
+     "process_completed": {
+      "contradicted": 1,
+      "established": 70,
+      "not_established": 4
+     },
+     "query_suite_completed": {
+      "contradicted": 4,
+      "established": 67,
+      "not_established": 3,
+      "not_recorded": 1
+     },
+     "suppressions_accounted": {
+      "established": 74,
+      "not_established": 1
+     },
+     "tool_declared": {
+      "established": 74,
+      "not_recorded": 1
+     }
+    },
+    "denominator_for_facts": 75,
+    "evaluated_cases_with_a_record": 75,
+    "negative_k1_derived": {
+     "case_ids": [
+      "N45-complete-run-declared-coverage-gives-a-weak-absence",
+      "N45b-file-scope-only-from-the-record-is-an-assertion",
+      "N46-a-verified-detached-result-cannot-lift-a-record-derived-absence-to-p3",
+      "Q02-graph-complete-record-declared-coverage-weak-absence",
+      "U09-vendored-root-file-that-cannot-be-the-locus",
+      "U12b-record-with-a-claim-adds-a-lower-provenance-k1-report"
+     ],
+     "count": 6,
+     "denominator": 75,
+     "resulting_verdicts": {
+      "Weak": 6
+     }
+    }
+   },
+   "by_format": {
+    "joern-graphml": 38,
+    "sarif": 148
+   },
+   "cases": 187,
+   "cases_with_an_artifact": 186,
+   "evaluated": 143,
+   "evidence_states_of_evaluated_cases": {
+    "BIND": {
+     "matched": 117,
+     "unknown": 26
+    },
+    "REACH": {
+     "Absent": 12,
+     "Contradictory": 4,
+     "Present": 55,
+     "Unknown": 72
+    },
+    "denominator": 143
+   },
+   "expected_vs_actual": {
+    "agree": 187,
+    "cases": 187,
+    "disagree": 0
+   },
+   "inconclusive": {
+    "count": 175,
+    "definition": "refused, or evaluated with verdict Insufficient",
+    "denominator": 187,
+    "one_primary_reason_per_case": {
+     "a path to the locus is recorded (contradicts the claim)": 55,
+     "a recorded path conflicts with a supplied K1 absence": 4,
+     "coverage not established: claim_semantics": 3,
+     "coverage not established: coverage_claim_declared": 4,
+     "coverage not established: entry_points_enumerated": 4,
+     "coverage not established: exclusions_accounted": 1,
+     "coverage not established: extraction_completed": 1,
+     "coverage not established: language_scope": 1,
+     "coverage not established: locus_included": 3,
+     "coverage not established: no_partial_indicators": 2,
+     "coverage not established: process_completed": 4,
+     "coverage not established: query_suite_completed": 5,
+     "coverage not established: suppressions_accounted": 1,
+     "coverage not established: tool_declared": 1,
+     "no analysis-run record: an artifact alone states no coverage": 17,
+     "refused: ANALYSIS_ARTIFACT_CONTRADICTORY": 3,
+     "refused: ANALYSIS_ARTIFACT_MALFORMED": 3,
+     "refused: ANALYSIS_FORMAT_UNRECOGNIZED": 1,
+     "refused: ANALYSIS_FORMAT_VERSION_UNSUPPORTED": 2,
+     "refused: ANALYSIS_REFERENCE_UNRESOLVED": 2,
+     "refused: ANALYSIS_RUN_RECORD_INVALID": 11,
+     "refused: ANALYSIS_STRUCTURE_INVALID": 7,
+     "refused: ANALYSIS_UNSAFE_CONSTRUCT": 1,
+     "refused: UNRESOLVED_RELEVANT_EVIDENCE": 14,
+     "run binding contradicted": 3,
+     "unresolved potentially relevant evidence": 22
+    }
+   },
+   "label": "synthetic controlled fixtures",
+   "refusals_by_cause": {
+    "ANALYSIS_ARTIFACT_CONTRADICTORY": 3,
+    "ANALYSIS_ARTIFACT_MALFORMED": 3,
+    "ANALYSIS_FORMAT_UNRECOGNIZED": 1,
+    "ANALYSIS_FORMAT_VERSION_UNSUPPORTED": 2,
+    "ANALYSIS_REFERENCE_UNRESOLVED": 2,
+    "ANALYSIS_RUN_RECORD_INVALID": 11,
+    "ANALYSIS_STRUCTURE_INVALID": 7,
+    "ANALYSIS_UNSAFE_CONSTRUCT": 1,
+    "UNRESOLVED_RELEVANT_EVIDENCE": 14
+   },
+   "refused": 44,
+   "supported_verdicts": {
+    "count": 6,
+    "note": "no Supported verdict rests on an artifact or an analysis-run record",
+    "resting_on_a_caller_supplied_verified_k1_report": 6
+   },
+   "verdicts_of_evaluated_cases": {
+    "Insufficient": 131,
+    "Supported": 6,
+    "Weak": 6,
+    "denominator": 143
+   }
+  },
+  "L": {
+   "analysis_run_records": {
+    "binding": {
+     "contradicted": 2,
+     "established": 5
+    },
+    "coverage_facts_per_fact": {
+     "binding_established": {
+      "established": 5,
+      "not_established": 2
+     },
+     "claim_semantics": {
+      "not_established": 7
+     },
+     "coverage_claim_declared": {
+      "not_recorded": 7
+     },
+     "entry_points_enumerated": {
+      "not_recorded": 7
+     },
+     "exclusions_accounted": {
+      "not_recorded": 7
+     },
+     "extraction_completed": {
+      "established": 7
+     },
+     "language_scope": {
+      "established": 7
+     },
+     "locus_included": {
+      "established": 7
+     },
+     "no_partial_indicators": {
+      "established": 7
+     },
+     "no_undecidable_evidence": {
+      "established": 7
+     },
+     "process_completed": {
+      "established": 7
+     },
+     "query_suite_completed": {
+      "contradicted": 1,
+      "established": 6
+     },
+     "suppressions_accounted": {
+      "established": 7
+     },
+     "tool_declared": {
+      "established": 7
+     }
+    },
+    "denominator_for_facts": 7,
+    "evaluated_cases_with_a_record": 7,
+    "negative_k1_derived": {
+     "case_ids": [],
+     "count": 0,
+     "denominator": 7,
+     "resulting_verdicts": {}
+    }
+   },
+   "by_format": {
+    "sarif": 12
+   },
+   "cases": 12,
+   "cases_with_an_artifact": 12,
+   "evaluated": 12,
+   "evidence_states_of_evaluated_cases": {
+    "BIND": {
+     "matched": 9,
+     "unknown": 3
+    },
+    "REACH": {
+     "Absent": 2,
+     "Contradictory": 2,
+     "Present": 3,
+     "Unknown": 5
+    },
+    "denominator": 12
+   },
+   "expected_vs_actual": {
+    "agree": 12,
+    "cases": 12,
+    "disagree": 0
+   },
+   "inconclusive": {
+    "count": 10,
+    "definition": "refused, or evaluated with verdict Insufficient",
+    "denominator": 12,
+    "one_primary_reason_per_case": {
+     "a path to the locus is recorded (contradicts the claim)": 3,
+     "a recorded path conflicts with a supplied K1 absence": 2,
+     "coverage not established: claim_semantics": 2,
+     "no analysis-run record: an artifact alone states no coverage": 2,
+     "run binding contradicted": 1
+    }
+   },
+   "label": "authentic CodeQL output (live runs made for this repository)",
+   "refusals_by_cause": {},
+   "refused": 0,
+   "supported_verdicts": {
+    "count": 2,
+    "note": "no Supported verdict rests on an artifact or an analysis-run record",
+    "resting_on_a_caller_supplied_verified_k1_report": 2
+   },
+   "verdicts_of_evaluated_cases": {
+    "Insufficient": 10,
+    "Supported": 2,
+    "denominator": 12
+   }
+  }
+ },
+ "conformance": {
+  "analysis_corpus": {
+   "agree": 208,
+   "cases": 208,
+   "disagree": 0,
+   "fixture_problems": 0,
+   "note": "controlled conformance against reviewed expectations; see python -m tests.analysis_eval"
+  },
+  "ok": true,
+  "predicates": {
+   "cnp": {
+    "cases": 30,
+    "failed_cases": 0,
+    "rule_tests": 25,
+    "rule_tests_covered": 25,
+    "rules": 17,
+    "rules_exercised": 17,
+    "title": "Req(component_not_present)"
+   },
+   "reach": {
+    "cases": 42,
+    "failed_cases": 0,
+    "rule_tests": 13,
+    "rule_tests_covered": 13,
+    "rules": 13,
+    "rules_exercised": 13,
+    "title": "Req(vulnerable_code_not_in_execute_path)"
+   }
+  },
+  "synthetic_only": true
+ },
+ "corpus": {
+  "agree": 208,
+  "cases": 208,
+  "disagree": 0,
+  "fixture_attribution_problems": 0
+ },
+ "disclaimer": "Controlled conformance and a weakening analysis over a hand-reviewed corpus. Category B is synthetic; category A is upstream format examples; category L is unedited output of live CodeQL 2.27.3 runs (integration behaviour for those artifacts only). No accuracy, precision, recall or false-positive/false-negative rate is reported: no independently labelled ground truth exists.",
+ "kind": "research-evaluation-report",
+ "limitations": [
+  "The corpus is hand-built or small: 9 upstream examples, 12 authentic CodeQL cases from 6 tiny JavaScript runs, the rest synthetic. Results show behaviour, not prevalence.",
+  "Expected outcomes were derived by hand from the rules; they validate the implementation against that reading of the specification, not the specification against reality.",
+  "The link between the analysed source and the assessed artifact S is an evaluator statement in every case (SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED).",
+  "An analysis-run record is an unauthenticated assertion; a record-derived absence rests on its declared coverage claim (A6) and is capped at Weak. It is not stronger than a caller-authored strict-input K1 report with the same claim.",
+  "No supported tool enumerates entry points; entry-point completeness is always a declaration. No stock CodeQL query is a locus-reachability analysis.",
+  "No authentic Joern output was obtained; all GraphML cases are synthetic and follow the exporter source.",
+  "Aggregation of several K1 reports takes the minimum provenance (§1.2 step 5), so adding a lower-provenance report can lower a verdict (case U12b); this is the specification's rule, not a defect, and it is why the weakening invariant is stated against the no-record verdict too.",
+  "Cryptographic verification is not implemented; verification results are consumed, not produced.",
+  "Open specification decisions (G7, G8/U-9, G15 conventions, G17, AI/AR conventions) are unconfirmed implementation choices; see docs/open_issues_register.md."
+ ],
+ "weakening_analysis": {
+  "cases": 82,
+  "invariant": "a weakened record never yields a verdict better than the larger of (the original verdict, the verdict without the record); 'raised' must be 0. 'returned to the no-record verdict' counts the pairs where a record-derived K1 absence of lower provenance had lowered a supplied K1 absence (minimum provenance, §1.2 step 5) and weakening the record removed that effect.",
+  "pairs": 820,
+  "per_weakening": {
+   "analysis stage failed": {
+    "lowered": 5,
+    "returned to the no-record verdict": 1,
+    "unchanged": 76
+   },
+   "coverage claim removed": {
+    "lowered": 5,
+    "returned to the no-record verdict": 1,
+    "unchanged": 76
+   },
+   "entry-point inventory incomplete": {
+    "lowered": 5,
+    "returned to the no-record verdict": 1,
+    "unchanged": 76
+   },
+   "output hash altered": {
+    "lowered": 5,
+    "refused (no verdict)": 1,
+    "returned to the no-record verdict": 1,
+    "unchanged": 75
+   },
+   "partial-analysis indicator": {
+    "lowered": 5,
+    "returned to the no-record verdict": 1,
+    "unchanged": 76
+   },
+   "record dropped": {
+    "lowered": 5,
+    "refused (no verdict)": 1,
+    "returned to the no-record verdict": 1,
+    "unchanged": 75
+   },
+   "source changed during run": {
+    "lowered": 5,
+    "refused (no verdict)": 1,
+    "returned to the no-record verdict": 1,
+    "unchanged": 75
+   },
+   "tool version removed": {
+    "lowered": 5,
+    "returned to the no-record verdict": 1,
+    "unchanged": 76
+   },
+   "tree digest altered": {
+    "lowered": 5,
+    "refused (no verdict)": 1,
+    "returned to the no-record verdict": 1,
+    "unchanged": 75
+   },
+   "working tree dirty": {
+    "lowered": 5,
+    "refused (no verdict)": 1,
+    "returned to the no-record verdict": 1,
+    "unchanged": 75
+   }
+  },
+  "raised_pairs": [],
+  "results": {
+   "lowered": 50,
+   "refused (no verdict)": 5,
+   "returned to the no-record verdict": 10,
+   "unchanged": 755
+  },
+  "unit": "(evaluated case with an analysis-run record) x (one weakening of that record)",
+  "verdict_changes": {
+   "Weak -> Insufficient": 50,
+   "Weak -> Supported": 10
+  },
+  "weakenings": [
+   "record dropped",
+   "output hash altered",
+   "tree digest altered",
+   "working tree dirty",
+   "source changed during run",
+   "analysis stage failed",
+   "entry-point inventory incomplete",
+   "coverage claim removed",
+   "tool version removed",
+   "partial-analysis indicator"
+  ]
+ }
+}

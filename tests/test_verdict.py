@@ -29,6 +29,20 @@ def test_render_stub_is_honestly_unimplemented():
         verdict.render_verdict(result)
 
 
-@pytest.mark.skip(reason="pending: rationale generation and code ordering are not implemented")
-def test_rationale_ordering():
-    raise AssertionError("placeholder")
+def _rule(rule_id, cls, code=None):
+    from evidence.rule_core import TriggeredRule
+    return TriggeredRule(rule_id, code or f"CODE_{rule_id}", verdict.Verdict.WEAK, cls, f"detail {rule_id}")
+
+
+def test_rationale_ordering_follows_section_3():
+    """§3: order by class rank (CONTRADICTORY, CANNOT, BELOW), then the alphabetic family prefix, then the numeric
+    suffix as an integer (R10 after R9), never the lexicographic order of the whole identifier."""
+    from evidence.rule_core import order_triggered, render_rationale
+    C, K, B = verdict.RationaleClass.CONTRADICTORY_EVIDENCE, verdict.RationaleClass.CANNOT_BE_ESTABLISHED, verdict.RationaleClass.BELOW_BAR
+    rules = [_rule("R10", B), _rule("N2", K), _rule("R9", B), _rule("R3", C), _rule("N10", B), _rule("N1", C), _rule("R2", K)]
+    ordered = [r.rule_id for r in order_triggered(rules)]
+    assert ordered == ["N1", "R3", "N2", "R2", "N10", "R9", "R10"]
+    assert [r.rule_id for r in order_triggered(reversed(rules))] == ordered     # independent of input order
+    text = render_rationale(order_triggered(rules))
+    assert text.startswith("CONTRADICTORY_EVIDENCE[CODE_N1,CODE_R3]:") and " | CANNOT_BE_ESTABLISHED[CODE_N2,CODE_R2]: " in text
+    assert text.endswith("BELOW_BAR[CODE_N10,CODE_R9,CODE_R10]: N10: detail N10; R9: detail R9; R10: detail R10")

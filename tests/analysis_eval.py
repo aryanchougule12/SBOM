@@ -102,14 +102,19 @@ def _verification(spec: Optional[dict], artifact_doc_id: Optional[str]) -> Optio
     return VerificationConfig(frozenset(spec["trust"]), tuple(results))
 
 
-def run_case(case: dict, defaults: dict) -> dict:
-    """Run one case; returns the observed result (never raises)."""
+KEEP_RUN = object()
+
+
+def run_case(case: dict, defaults: dict, run: Any = KEEP_RUN) -> dict:
+    """Run one case; returns the observed result (never raises). ``run`` replaces the case's analysis-run record (``None``: none)
+    - used by the weakening analysis of tests/research_report.py."""
     subject = parse_analysis_subject(_merged(defaults["subject"], case.get("subject")))
     locus = _merged(defaults["locus"], case.get("locus"))
     base = parse_reachability(_base_evidence(case.get("base", defaults["base"]), locus))
     artifacts = [] if case.get("file") is None else [str(ANALYSIS_DIR / case["file"])]
-    if case.get("file") is not None and case.get("run"):
-        artifacts = [AnalysisArtifactInput(artifacts[0], run=ANALYSIS_DIR / case["run"])]
+    chosen_run = (ANALYSIS_DIR / case["run"]) if (run is KEEP_RUN and case.get("run")) else (None if run is KEEP_RUN else run)
+    if case.get("file") is not None and chosen_run is not None:
+        artifacts = [AnalysisArtifactInput(artifacts[0], run=chosen_run)]
     doc_id = None
     if artifacts:
         try:

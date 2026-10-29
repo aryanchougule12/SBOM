@@ -370,3 +370,40 @@ def test_graph_root_in_the_export_must_agree_with_the_record():
     outcome = run("joern-graphml/synthetic_rec_no_path.graphml", parse_analysis_run(RUNS / "synthetic_graph_analysis_root_mismatch.run.json"),
                   subj=subject(source_content_hash=TREE, target_source_root="node_modules/lib-b"))
     assert outcome.analysis[0].assessment.binding is BindingStatus.CONTRADICTED and "ANALYSIS_ROOT_MISMATCH" in outcome.analysis[0].assessment.binding_reasons
+
+
+# ---- research-readiness invariants (final milestone) -----------------------------------------------------------------------------------
+
+def test_a_derived_absence_does_not_carry_the_text_that_says_no_absence_was_derived():
+    outcome = run(NO_PATH, record())
+    texts = " ".join(outcome.limitations)
+    assert "ABSENCE_RESTS_ON_DECLARED_COVERAGE_CLAIM" in texts and "NO_ABSENCE_EVIDENCE" not in texts
+    assert "NO_ABSENCE_EVIDENCE" in " ".join(run(NO_PATH, record(coverage_claim=None)).limitations)
+
+
+def test_every_evaluated_outcome_built_on_an_artifact_discloses_the_unverified_source_to_artifact_link():
+    """The relationship between the analysed source and the assessed artifact S is an evaluator statement in every case; no output may imply otherwise."""
+    from tests.analysis_eval import run_case
+    manifest = load_manifest()
+    checked = 0
+    for case in manifest["cases"]:
+        if case.get("file") is None:
+            continue
+        report = run_case(case, manifest["defaults"])
+        if report["outcome"] == "evaluated":
+            checked += 1
+            assert any("SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED" in lim for lim in report["limitations"]), case["id"]
+    assert checked > 150
+
+
+def test_the_subject_cannot_buy_more_than_weak_by_declaring_any_relationship():
+    """Whatever artifact/target/root a subject declares, a record-derived conclusion never exceeds Weak and never carries P2/P3."""
+    for changes in (dict(), dict(target_source_root="."), dict(artifact={"purl": "pkg:npm/unrelated@9"}, entered_by="someone")):
+        try:
+            subj = subject(source_content_hash=TREE, **changes)
+        except Exception:
+            continue
+        outcome = run(NO_PATH, record(), subj=subj)
+        if isinstance(outcome, ReachOutcome):
+            assert RANK[outcome.result.verdict] <= RANK[Verdict.WEAK]
+            assert outcome.prov_reach is None or outcome.prov_reach.name in ("P0", "P1")
