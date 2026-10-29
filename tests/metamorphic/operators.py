@@ -50,4 +50,6 @@ NEUTRAL = (
              applies=lambda s: bool(s.profile.get("inv_assertions"))),
 )
 
-OPERATORS = NEUTRAL
+from tests.metamorphic.operators_cnp import CNP_OPERATORS
+
+OPERATORS = NEUTRAL + CNP_OPERATORS
