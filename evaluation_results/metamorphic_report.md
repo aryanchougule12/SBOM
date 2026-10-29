@@ -18,6 +18,17 @@ Controlled synthetic mutations through the public evaluation entry point; relati
 | M-5 | 160 | 160 | 0 | 115 |
 | M-6 | 18 | 18 | 0 | 0 |
 
+## Candidate property (investigated, not assumed)
+
+**MR5-candidate (adding supporting evidence never lowers the verdict)**: not universally valid; 6 pairs, 2 held, 4 counterexamples.
+
+* reach-cdx-verified + S-K1-UNATTRIBUTED: Supported -> Weak ['ANALYSIS_PROVENANCE_BELOW_P3']
+* reach-cdx-verified + S-K1-ATTRIBUTED: Supported -> Weak ['ANALYSIS_PROVENANCE_BELOW_P3']
+* reach-spdx-verified + S-K1-UNATTRIBUTED: Supported -> Weak ['ANALYSIS_PROVENANCE_BELOW_P3']
+* reach-spdx-verified + S-K1-ATTRIBUTED: Supported -> Weak ['ANALYSIS_PROVENANCE_BELOW_P3']
+
+a bound, same-configuration K1 absence of lower provenance joins the existing one; the minimum provenance rule (section 1.2 step 5) lowers PROV_REACH and R13 lowers the verdict. Not a violation of M-1..M-6 (nothing was degraded); reported so the property is not assumed.
+
 M-1 degrading never raises a verdict; M-2 deleting never creates an Absent state; M-3 determinism; M-4 an injected positive observation gives Insufficient; M-5 every triggered rule is in the rationale; M-6 free text never changes the verdict.
 
 ## Operators

@@ -14,6 +14,7 @@ from typing import Optional
 
 from tests.analysis_eval import DEFAULT_OUT
 from tests.metamorphic.campaign import run_campaign
+from tests.metamorphic.candidates import run_candidates
 from tests.metamorphic.operators import OPERATORS
 from tests.metamorphic.scenarios import all_scenarios
 
@@ -46,6 +47,7 @@ def build() -> dict:
             "kind": operator.kind, "description": operator.description, "pairs": len(own), "changed_verdict_or_codes": sum(p.changed for p in own),
             "transitions": dict(sorted(transitions.items())), "violations": sum(bool(p.violations) for p in own),
         }
+    candidates = run_candidates(scenarios)
     report = {
         "kind": "metamorphic-campaign-report",
         "disclaimer": ("Controlled synthetic mutations through the public evaluation entry point; relations are the specification's invariants M-1..M-6. "
@@ -58,6 +60,14 @@ def build() -> dict:
                   "verdict_changed_or_codes_changed": sum(p.changed for p in pairs),
                   "mutant_without_verdict": dict(sorted(Counter(p.mutant.kind for p in pairs if p.mutant.kind != "evaluated").items()))},
         "relations": {k: dict(sorted(v.items())) for k, v in sorted(relation_stats.items())},
+        "candidate_properties": {
+            "MR5-candidate (adding supporting evidence never lowers the verdict)": {
+                "status": "not universally valid" if any(not c.holds for c in candidates) else "no counterexample found",
+                "pairs": len(candidates), "held": sum(c.holds for c in candidates), "counterexamples": sum(not c.holds for c in candidates),
+                "counterexample_cases": [f"{c.scenario_id} + {c.op_id}: {c.base.verdict} -> {c.mutant.verdict} {list(c.mutant.codes)}" for c in candidates if not c.holds],
+                "explanation": ("a bound, same-configuration K1 absence of lower provenance joins the existing one; the minimum provenance rule (section 1.2 step 5) "
+                                "lowers PROV_REACH and R13 lowers the verdict. Not a violation of M-1..M-6 (nothing was degraded); reported so the property is not assumed."),
+            }},
         "violations": [{"scenario": p.scenario_id, "operator": p.op_id, "relations": [r.relation for r in p.violations]} for p in pairs if p.violations],
         "operators_that_never_changed_a_verdict_or_codes": sorted(o for o, row in operator_rows.items() if row["changed_verdict_or_codes"] == 0),
         "operator_table": operator_rows,
@@ -80,6 +90,9 @@ def render_markdown(report: dict) -> str:
              "| Relation | Checked | Held | Violated | Exercised (mutation changed the outcome) |", "|---|---|---|---|---|"]
     for name, stats in report["relations"].items():
         lines.append(f"| {name} | {stats.get('checked', 0)} | {stats.get('held', 0)} | {stats.get('violated', 0)} | {stats.get('exercised', 0)} |")
+    for name, row in report["candidate_properties"].items():
+        lines += ["", "## Candidate property (investigated, not assumed)", "", f"**{name}**: {row['status']}; {row['pairs']} pairs, {row['held']} held, "
+                  f"{row['counterexamples']} counterexamples.", ""] + [f"* {c}" for c in row["counterexample_cases"]] + ["", row["explanation"]]
     lines += ["", "M-1 degrading never raises a verdict; M-2 deleting never creates an Absent state; M-3 determinism; M-4 an injected positive observation gives "
               "Insufficient; M-5 every triggered rule is in the rationale; M-6 free text never changes the verdict.",
               "", "## Operators", "", "| Operator | Kind | Pairs | Changed | Verdict transitions |", "|---|---|---|---|---|"]

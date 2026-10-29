@@ -69,3 +69,10 @@ def test_check_detects_a_stale_file(tmp_path, built):
     (tmp_path / R.MD_NAME).write_text("stale\n")
     assert R.main(["--check", "--out", str(tmp_path)]) == 1
     assert R.main(["--check", "--out", str(tmp_path / "missing")]) == 1
+
+
+def test_the_mr5_candidate_has_reproducible_counterexamples_and_is_not_counted_as_a_violation(built):
+    candidate = next(iter(built["candidate_properties"].values()))
+    assert candidate["status"] == "not universally valid" and candidate["pairs"] == 6 and candidate["held"] == 2 and candidate["counterexamples"] == 4
+    assert all("Supported -> Weak" in c and "ANALYSIS_PROVENANCE_BELOW_P3" in c for c in candidate["counterexample_cases"])
+    assert built["violations"] == []

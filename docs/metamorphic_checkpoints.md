@@ -11,6 +11,6 @@ specification's identifiers are used.
 | CP2 | CNP evidence operators: delete dependency edge/component/declaration, alter/remove version/identifier/digest, ambiguous identifier, orphan component, provenance degradation, remove verification, remove VEX justification; relations M-1, M-2, M-4 | done |
 | CP3 | Reachability operators (drop K1/coverage claim/entry points/hazard basis, weaken provenance, inject a positive path, unresolved evidence) over reachability scenarios | done |
 | CP4 | Campaign report (JSON/markdown, denominators, violations, "mutation changed the verdict" counts), `python -m tests.metamorphic [--check]`, wired into `tests.validate_all` | done |
-| CP5 | Documentation: relation/operator catalogue, MR mapping, findings (including candidate non-monotone behaviour), threats to validity; update the readiness document and register | planned |
+| CP5 | Documentation: relation/operator catalogue, MR mapping, findings (including candidate non-monotone behaviour), threats to validity; update the readiness document and register | done |
 
 Each checkpoint is committed and pushed only after `python -m tests.validate_all` passes.
