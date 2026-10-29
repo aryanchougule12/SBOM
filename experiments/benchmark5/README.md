@@ -9,7 +9,7 @@ Reproduce: see "Pipeline" below. Results: `RESULTS.md` (generated). Raw tool out
   `3.2`, Guava `24.1.1` → `24.1.1-jre`). Known inventory = `inventory_truth.json`.
 * **SBOMs** are real Syft 1.55.0 output (CycloneDX 1.6, `sbom_raw/`, unmodified). Syft's inventory equals the known inventory exactly. `prepare_sboms.py`
   derives `sbom_clean/` by dropping `file` components and the project's own self-component and adding an `application` subject with the SHA-256 of a
-  reproducible project tarball. CycloneDX 1.7 (Syft's default) is refused by this repository's parser (supported: 1.5, 1.6), so 1.6 was generated.
+  reproducible project tarball. CycloneDX 1.7 (Syft's default) was refused by this repository's parser when the benchmark was run (so 1.6 was generated); 1.7 support was added afterwards.
 * **Oracle** (`oracle.py` → `oracle_raw.json`): all non-withdrawn OSV advisories naming each package, from OSV bulk dumps downloaded 2026-10-28/29
   (npm 28 Oct 21:18Z, PyPI 29 Oct 11:33Z, Maven 29 Oct 10:33Z). Affected-version decision uses my own comparators (npm semver, PEP 440 via `packaging`, Maven
   ComparableVersion rules; unit-checked) over OSV `ranges` (events sorted, because real records are not in ascending order) and, independently, the explicit `versions`

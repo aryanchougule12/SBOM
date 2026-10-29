@@ -2,7 +2,7 @@
 
 Supported format and versions
 -----------------------------
-CycloneDX **JSON** documents whose ``specVersion`` is exactly ``"1.5"`` or ``"1.6"``
+CycloneDX **JSON** documents whose ``specVersion`` is exactly ``"1.5"``, ``"1.6"`` or ``"1.7"``
 (``SUPPORTED_SPEC_VERSIONS``). Any other ``specVersion`` raises
 ``UnsupportedVersionError``. XML, Protobuf and other serializations are not supported.
 
@@ -184,7 +184,7 @@ from sbom_parser.identifiers import build_identifier_variants
 SBOMSource = InputSource
 
 FORMAT_NAME = "CycloneDX"
-SUPPORTED_SPEC_VERSIONS = ("1.5", "1.6")
+SUPPORTED_SPEC_VERSIONS = ("1.5", "1.6", "1.7")
 
 _HANDLED_TOP_LEVEL = {
     "bomFormat",
@@ -356,6 +356,10 @@ def _read_component(
 def _component_from_obj(obj: dict[str, Any], locator: str) -> Component:
     """Read one CycloneDX ``component`` object into a ``Component`` (no recursion)."""
     name = require_str(obj, "name", locator)
+    if "versionRange" in obj:   # CycloneDX 1.7 field (refused in every version: it is never an exact version): a range, not an exact version; an exact-version matcher would silently miss it, so refuse instead
+        raise InvalidDocumentError(
+            "component 'versionRange' (CycloneDX 1.7) is not supported: an inventory entry that stands for a range of versions "
+            "cannot be matched by exact version, and ignoring it could make an absent component look absent", ptr_join(locator, "versionRange"))
     version = get_str(obj, "version", locator)
     purl = get_str(obj, "purl", locator)
     cpe = get_str(obj, "cpe", locator)
@@ -538,7 +542,7 @@ _DEFINED_REF_LOCATIONS: tuple[tuple[tuple[str, ...], str, str], ...] = (
     (("formulation", "*", "components", "*"), "component", "formulation_component"),
     (("formulation", "*", "services", "*"), "service", "formulation_service"),
 )
-# Present in the 1.6 schema only (declarations.targets uses the component/service definitions).
+# Present in the 1.6 and 1.7 schemas (declarations.targets uses the component/service definitions).
 _DEFINED_REF_LOCATIONS_1_6: tuple[tuple[tuple[str, ...], str, str], ...] = (
     (("declarations", "targets", "components", "*"), "component", "declaration_target_component"),
     (("declarations", "targets", "services", "*"), "service", "declaration_target_service"),
@@ -673,7 +677,7 @@ def _read_subject_and_refs(
     for index, item in enumerate(get_list(data, "components", ptr())):
         _visit_listed_component(item, ptr("components", index), ctx)
 
-    locations = _DEFINED_REF_LOCATIONS + (_DEFINED_REF_LOCATIONS_1_6 if spec_version == "1.6" else ())
+    locations = _DEFINED_REF_LOCATIONS + (_DEFINED_REF_LOCATIONS_1_6 if spec_version in ("1.6", "1.7") else ())
     for path, what, kind in locations:
         for obj, locator in _iter_path(data, path, ptr()):
             checked = require_object(obj, locator, what)

@@ -4,8 +4,8 @@ R1 is the only required structural check of this milestone (register D2): **depe
 relationship endpoint resolution**. It classifies each endpoint that the neutral observations
 report, using only reference rules that were verified against authoritative format sources:
 
-* **CycloneDX 1.5 and 1.6** (official JSON schemas, `CycloneDX/specification` tags 1.5 and 1.6,
-  checked for this milestone). `dependencies[].ref`, `dependsOn[]` and (1.6) `provides[]` are
+* **CycloneDX 1.5, 1.6 and 1.7** (official JSON schemas, `CycloneDX/specification`; 1.7 was checked by diffing the
+  `component`/`service` definition references and the `dependency` properties against 1.6: identical, so the same rules hold). `dependencies[].ref`, `dependsOn[]` and (1.6) `provides[]` are
   typed `refLinkType`: "an element identified by the attribute `bom-ref` in the same BOM
   document, in contrast to `bomLinkElementType`". A value that does not start with `urn:cdx:` and
   is not in the document's reference registry is therefore a **local unregistered reference** (a
@@ -62,7 +62,7 @@ from evidence.inventory_observations import InventoryObservations, observe_inven
 from evidence.stage1_records import FORMAT_CYCLONEDX, FORMAT_SPDX, ReferenceStatus, SbomRecord
 
 CHECK_R1 = "R1_ENDPOINT_RESOLUTION"
-CYCLONEDX_VERIFIED_VERSIONS = ("1.5", "1.6")
+CYCLONEDX_VERIFIED_VERSIONS = ("1.5", "1.6", "1.7")
 SPDX_VERIFIED_VERSIONS = ("SPDX-2.3",)
 BOM_LINK_PREFIX = "urn:cdx:"
 

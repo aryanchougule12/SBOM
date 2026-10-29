@@ -47,11 +47,11 @@ def covers(coverage, locator):
 
 # ---- supported versions -------------------------------------------------------------
 
-def test_supported_versions_are_exactly_1_5_and_1_6():
-    assert cyclonedx.SUPPORTED_SPEC_VERSIONS == ("1.5", "1.6")
+def test_supported_versions_are_exactly_1_5_1_6_and_1_7():
+    assert cyclonedx.SUPPORTED_SPEC_VERSIONS == ("1.5", "1.6", "1.7")
 
 
-@pytest.mark.parametrize("version", ["1.0", "1.3", "1.4", "1.7", "2.0", "1.6.1", ""])
+@pytest.mark.parametrize("version", ["1.0", "1.3", "1.4", "1.8", "2.0", "1.6.1", "1.7.0", ""])
 def test_unsupported_spec_versions_are_rejected_explicitly(version):
     data = load("complete_composition.json")
     data["specVersion"] = version
@@ -601,3 +601,43 @@ def test_dependency_endpoints_resolve_distinctly_and_missing_stays_unresolved():
         "truly-missing": None,
     }
     assert "truly-missing" in targets
+
+
+def test_version_1_7_parses_identically_to_1_6_apart_from_the_version_and_unextracted_citations():
+    d16, c16 = parse_cyclonedx(FIXTURES / "complete_composition.json")
+    d17, c17 = parse_cyclonedx(FIXTURES / "spec_1_7.json")
+    assert [(c.name, c.version, c.purl, c.bom_ref) for c in c17] == [(c.name, c.version, c.purl, c.bom_ref) for c in c16]
+    assert d17.declared_metadata["spec_version"] == "1.7"
+    assert d17.declared_metadata["composition_records"] == d16.declared_metadata["composition_records"]
+    assert json.loads(d17.declared_metadata["unextracted_top_level_fields"]) == ["citations"]
+
+
+def test_version_1_7_registers_the_declarations_targets_like_1_6():
+    data = load("complete_composition.json")
+    data["specVersion"] = "1.7"
+    data["declarations"] = {"targets": {"components": [{"type": "library", "name": "t", "bom-ref": "decl-target"}]}}
+    document, _ = parse_cyclonedx(encode(data))
+    assert "decl-target" in document.other_defined_refs
+
+
+@pytest.mark.parametrize("where", ["components", "nested", "subject"])
+def test_a_1_7_component_version_range_is_refused_rather_than_ignored(where):
+    data = load("complete_composition.json")
+    data["specVersion"] = "1.7"
+    ranged = {"type": "library", "name": "ranged-lib", "versionRange": "vers:npm/>=1.0.0|<2.0.0"}
+    if where == "components":
+        data["components"].append(ranged)
+    elif where == "nested":
+        data["components"][0].setdefault("components", []).append(ranged)
+    else:
+        data["metadata"]["component"].update(ranged)
+    with pytest.raises(InvalidDocumentError) as caught:
+        parse_cyclonedx(encode(data))
+    assert caught.value.locator.endswith("/versionRange")
+
+
+def test_a_version_range_is_refused_in_any_spec_version_since_it_is_never_an_exact_version():
+    data = load("complete_composition.json")
+    data["components"].append({"type": "library", "name": "x", "version": "1", "versionRange": "irrelevant"})
+    with pytest.raises(InvalidDocumentError):
+        parse_cyclonedx(encode(data))

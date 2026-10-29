@@ -290,3 +290,17 @@ def test_assembly_derives_nothing_and_imports_no_evaluation_module():
     assert not names & {"EvidenceState", "EvidenceItem", "evaluate_cnp", "evaluate_bind", "derive_inv",
                         "enumerate_decl_candidates", "extract", "ProvenanceLevel", "Verdict"}
     assert Finding  # the only model types used are Finding (and the record types)
+
+
+def test_a_cyclonedx_1_7_sbom_evaluates_exactly_like_its_1_6_twin():
+    from evidence.stage1_records import Stage1Index
+    from evidence.sufficiency import evaluate_finding
+    from tests.pipeline_support import cdx, make_profile, vex_findings, ABSENT
+
+    verdicts = []
+    for name in ("complete_composition.json", "spec_1_7.json"):
+        record = cdx(name)
+        outcome = evaluate_finding(make_profile(record.doc_id, target=ABSENT, location={"placement": "top_level"}),
+                                   vex_findings(), Stage1Index([record]), None, None)
+        verdicts.append((outcome.result.verdict, outcome.result.codes))
+    assert verdicts[0] == verdicts[1]
