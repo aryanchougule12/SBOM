@@ -1,13 +1,14 @@
 """Subject binding and derivation of reachability evidence from a ``NormalizedAnalysis``.
 
 This is where a parsed artifact is related to the finding under assessment. It converts neutral
-facts into at most **one** strict-input ``ReachDocument`` (kind K1, finding ``positive``) per
-artifact, and only when the artifact records a path that touches the declared vulnerable-code
-locus. It never produces a negative, incomplete, ambiguous or absent fact, and it sets no evidence
-state, provenance level or verdict: the existing derivation (``evidence.reach_derivation``) and
-rules (``evidence.reach_rules``) do that.
+facts into at most **one** strict-input ``ReachDocument`` (kind K1) per artifact: a ``positive`` one when the
+artifact records a path that touches the declared vulnerable-code locus, or - only when an analysis-run record
+(``evidence.analysis_run``) establishes every coverage fact of ``evidence.analysis_run_binding`` and nothing is recorded or
+undecidable - a ``negative`` one that forwards the record's *declared* full-coverage claim. It never produces an
+incomplete or ambiguous fact, and it sets no evidence state, provenance level or verdict: the existing derivation
+(``evidence.reach_derivation``) and rules (``evidence.reach_rules``) do that.
 
-Why only positives. The specification's REACH ``Absent`` needs a K1 report with a *declared
+Why only positives from an artifact alone. The specification's REACH ``Absent`` needs a K1 report with a *declared
 full-coverage claim over LOCUS and ENTRY* (§5.1 step 2). Neither SARIF nor a CPG export states
 such a claim; a run's ``executionSuccessful``, an empty ``results`` array or a graph without a path
 to the locus are statements about what a tool reported, not about coverage, and the formal rules
@@ -52,6 +53,8 @@ from typing import Any, Mapping, Optional
 
 from evidence.analysis_model import (
     AnalysisDiagnostic,
+    BindingStatus,
+    RunAssessment,
     AnalysisFormat,
     CallEdge,
     FlowCandidate,
@@ -62,6 +65,15 @@ from evidence.analysis_model import (
     SourceRef,
     ToolIdentity,
     UndecidableObservation,
+)
+from evidence.analysis_run import AnalysisRunRecord, RootRole
+from evidence.analysis_run_binding import (
+    BindingResult,
+    RootMapper,
+    assess_binding,
+    assess_coverage,
+    ends_with_file,
+    mapper_for,
 )
 from evidence.analysis_sarif import normalize_relative_path
 from evidence.reach_inputs import LocusInput, ReachDocument, ReachFinding, ReachKind, TargetRef
@@ -241,11 +253,15 @@ def could_be_locus(loose: Optional[str], expected: Mapping[str, str]) -> bool:
     ``<target_source_root>/<locus file>`` (whatever precedes it is the unknown mapping of the analysis
     root). A location that cannot satisfy it cannot be the locus file, so it is irrelevant; a location
     that carries no usable path at all cannot be excluded. This never establishes that it *is* the
-    locus: it only decides that it must not be discarded."""
+    locus: it only decides that it must not be discarded.
+
+    A path that ends with the bare locus file (``src/parse.js``) but not with the target root in front of it also
+    cannot be excluded: the analysed tree may lay the component out differently from the declared root (a copy
+    vendored elsewhere). This only ever widens the set of undecidable locations."""
     if loose is None:
         return True
     have = _segments(loose)
-    for path in expected:
+    for path in list(expected) + list(expected.values()):
         want = _segments(path)
         if want and have[-len(want):] == want:
             return True
@@ -256,14 +272,33 @@ def could_be_locus(loose: Optional[str], expected: Mapping[str, str]) -> bool:
 class SarifClassification:
     established: list[tuple[FlowCandidate, str]]
     undecidable: list[tuple[FlowCandidate, str, tuple[str, ...]]]
+    expected: Mapping[str, str] = None  # type: ignore[assignment]   # '<target root>/<locus file>' -> locus file
+    mapping: Mapping[str, int] = None   # type: ignore[assignment]   # mapped / not_mapped_irrelevant / external_undecidable
+
+
+def _effective(step, mapper: Optional[RootMapper]) -> tuple[Optional[str], str, Optional[str]]:
+    """``(path, kind, relative-in-other-root)`` of a step: ``resolved`` (the artifact's own relative path), ``mapped`` (an absolute
+    location inside the record's primary root), ``external`` (inside another declared root) or ``unresolved``."""
+    if step.path is not None:
+        return step.path, "resolved", None
+    if mapper is not None and step.raw_uri:
+        located, _ = mapper.map_uri(step.raw_uri)
+        if located is not None:
+            if located.role is RootRole.PRIMARY:
+                return located.relative, "mapped", None
+            return None, "external", located.relative
+    return None, "unresolved", None
 
 
 def _sarif_observations(analysis: NormalizedAnalysis, subject: AnalysisSubject, locus: Optional[LocusInput],
-                        diagnostics: list[AnalysisDiagnostic]) -> SarifClassification:
+                        diagnostics: list[AnalysisDiagnostic], mapper: Optional[RootMapper] = None) -> SarifClassification:
     """Classify every recorded flow as **established** (a visited location is the locus file inside the
     target root), **undecidable** (not established, but some visited location is unresolved and nothing
     excludes it from being the locus) or irrelevant (every visited location is resolved and elsewhere,
-    or unresolved yet unable to be the locus). An undecidable flow is kept, with its raw locators."""
+    or unresolved yet unable to be the locus). An undecidable flow is kept, with its raw locators.
+
+    ``mapper`` (only given when an analysis-run record's binding to the assessed source is established) maps an
+    absolute ``file`` location through an explicit root of that record; without it nothing is mapped."""
     expected: dict[str, str] = {}
     blocker: Optional[str] = None
     if locus is None or not locus.files:
@@ -282,17 +317,21 @@ def _sarif_observations(analysis: NormalizedAnalysis, subject: AnalysisSubject, 
                 expected[_join(subject.target_source_root, normalized)] = normalized
         if not expected:
             blocker = "no locus file could be normalized"
+    locus_names = tuple(expected.values())
     established: list[tuple[FlowCandidate, str]] = []
     undecidable: list[tuple[FlowCandidate, str, tuple[str, ...]]] = []
     not_touching = unreachable = excluded_unresolved = 0
+    counts = {"mapped": 0, "not_mapped_irrelevant": 0, "external_undecidable": 0}
     for candidate in analysis.candidates:
         visited = [step for step in candidate.steps if "unreachable" not in {k.lower() for k in step.kinds}]
         if blocker is not None:   # relevance cannot be judged at all: every flow that visits something is undecidable
             if visited:
                 undecidable.append((candidate, blocker, tuple(step.locator for step in visited)))
             continue
-        touched = sorted({step.path for step in visited if step.path in expected})
+        resolved = [(step, *_effective(step, mapper)) for step in visited]
+        touched = sorted({path for _, path, _, _ in resolved if path in expected})
         if touched:
+            counts["mapped"] += sum(1 for _, path, kind, _ in resolved if kind == "mapped" and path in expected)
             established.append((candidate, touched[0]))
             continue
         if any(step.path in expected for step in candidate.steps):
@@ -300,14 +339,29 @@ def _sarif_observations(analysis: NormalizedAnalysis, subject: AnalysisSubject, 
             diagnostics.append(AnalysisDiagnostic("LOCUS_STEP_MARKED_UNREACHABLE",
                                                   "a location in the locus file is marked kind 'unreachable' in the flow: not counted as visited", candidate.locator))
             continue
-        unresolved = [step for step in visited if step.path is None and could_be_locus(step.loose_path, expected)]
-        if unresolved:
-            undecidable.append((candidate, "; ".join(dict.fromkeys(step.unresolved or "unresolved" for step in unresolved)),
-                                tuple(step.locator for step in unresolved)))
-        elif any(step.path is None for step in visited):
+        relevant: list = []
+        for step, path, kind, other in resolved:
+            if path is not None:
+                continue
+            if kind == "external":
+                if ends_with_file(other or "", locus_names):
+                    relevant.append(step)
+                    counts["external_undecidable"] += 1
+            elif could_be_locus(step.loose_path, expected):
+                relevant.append(step)
+        if relevant:
+            undecidable.append((candidate, "; ".join(dict.fromkeys(step.unresolved or "unresolved" for step in relevant)),
+                                tuple(step.locator for step in relevant)))
+        elif any(path is None for _, path, _, _ in resolved):
             excluded_unresolved += 1   # unresolved, but its path cannot end with <target root>/<locus file>
+            counts["not_mapped_irrelevant"] += 1
         else:
             not_touching += 1
+    if counts["mapped"]:
+        diagnostics.append(AnalysisDiagnostic(
+            "URI_MAPPED_BY_RUN_ROOT",
+            f"{counts['mapped']} absolute location(s) of the locus were mapped into the analysis root through the primary root of the "
+            "analysis-run record (binding established); no file name or path suffix was used"))
     if excluded_unresolved:
         diagnostics.append(AnalysisDiagnostic(
             "UNRESOLVED_LOCATIONS_EXCLUDED",
@@ -319,7 +373,7 @@ def _sarif_observations(analysis: NormalizedAnalysis, subject: AnalysisSubject, 
     for candidate, reason, locators in undecidable:
         diagnostics.append(AnalysisDiagnostic("UNDECIDABLE_FLOW",
                                               f"may touch the locus but cannot be resolved ({reason}); kept, not discarded", candidate.locator))
-    return SarifClassification(established, undecidable)
+    return SarifClassification(established, undecidable, expected, counts)
 
 
 def _summary(candidate: FlowCandidate) -> str:
@@ -333,10 +387,11 @@ def _summary(candidate: FlowCandidate) -> str:
 class GraphClassification:
     established: list[tuple[str, str, tuple[str, ...], tuple[str, ...], str]]   # (id, matched symbol, step locators, node ids, route)
     undecidable: list[UndecidableObservation]
+    locus_methods: int = 0   # locus-symbol METHOD nodes found inside the target root
 
 
 def _graph_observations(analysis: NormalizedAnalysis, subject: AnalysisSubject, locus: Optional[LocusInput],
-                        diagnostics: list[AnalysisDiagnostic]) -> GraphClassification:
+                        diagnostics: list[AnalysisDiagnostic], mapper: Optional[RootMapper] = None) -> GraphClassification:
     """Paths from a declared entry method to a locus method over method-level ``CALL`` edges, plus the
     ``CALL`` edges whose caller is unknown but whose callee can reach a locus method (undecidable).
 
@@ -368,6 +423,10 @@ def _graph_observations(analysis: NormalizedAnalysis, subject: AnalysisSubject, 
         for method in by_name.get(symbol, []):
             if root is not None and method.filename:
                 path, _ = normalize_relative_path(method.filename, None)
+                if path is None and mapper is not None:
+                    located, _why = mapper.map_path(method.filename)
+                    if located is not None and located.role is RootRole.PRIMARY:
+                        path = located.relative
                 if path is None or not (root == "." or path == root or path.startswith(root + "/")):
                     diagnostics.append(AnalysisDiagnostic("LOCUS_METHOD_OUTSIDE_TARGET_ROOT",
                                                           f"{symbol!r} is defined in {method.filename!r}, outside {root!r}", method.locator))
@@ -429,21 +488,51 @@ def _graph_observations(analysis: NormalizedAnalysis, subject: AnalysisSubject, 
                 (f"#/graphml/node/{call.call_node}", call.locator, by_id[call.callee].locator if call.callee in by_id else call.locator)))
     for item in undecidable:
         diagnostics.append(AnalysisDiagnostic("UNDECIDABLE_CALL_EDGE", f"{item.reason}; kept, not discarded", item.locator))
-    return GraphClassification(found, undecidable)
+    return GraphClassification(found, undecidable, len(targets))
 
 
-def derive_document(analysis: NormalizedAnalysis, subject: AnalysisSubject, locus: Optional[LocusInput]) -> DerivedEvidence:
-    """Bind ``analysis`` to ``subject`` and derive at most one positive-path ``ReachDocument`` from the
-    *established* observations, plus a worst-case document that also counts every undecidable
-    observation as a path. Pure."""
+RECORD_LIMITATION = ("RUN_RECORD_UNAUTHENTICATED: the analysis-run record is an unauthenticated statement; matching the artifact's SHA-256 shows "
+                     "that it describes this file, not that the analyzer ran or that its result is trustworthy. It confers no P2 or P3")
+ABSENCE_LIMITATION = ("ABSENCE_RESTS_ON_DECLARED_COVERAGE_CLAIM: the K1 absence forwards the record's declared full-coverage claim (§5.1 step 2, "
+                      "assumption A6: soundness is recorded as claimed, not verified); every coverage fact below was established first")
+
+
+def _legacy_status(blockers: list[str]) -> Optional[BindingStatus]:
+    if not blockers:
+        return BindingStatus.ESTABLISHED
+    codes = {b.split(":")[0] for b in blockers}
+    if codes & {"REPOSITORY_MISMATCH", "REVISION_MISMATCH", "GRAPH_CONTENT_HASH_MISMATCH"}:
+        return BindingStatus.CONTRADICTED
+    if "REVISION_AMBIGUOUS" in codes:
+        return BindingStatus.AMBIGUOUS
+    return BindingStatus.MISSING
+
+
+def derive_document(analysis: NormalizedAnalysis, subject: AnalysisSubject, locus: Optional[LocusInput],
+                    record: Optional[AnalysisRunRecord] = None) -> DerivedEvidence:
+    """Bind ``analysis`` to ``subject`` and derive from the *established* observations at most one positive-path
+    ``ReachDocument`` (plus a worst-case document that also counts every undecidable observation as a path), or, when
+    nothing is recorded and an analysis-run ``record`` establishes every coverage fact, one negative K1 document that forwards
+    the record's declared coverage claim. Pure."""
     diagnostics = list(analysis.diagnostics)
     traces: list[ObservationTrace] = []
     undecidable: list[UndecidableObservation] = []
     contributing: list[RunFacts] = []
     limitations = [NO_NEGATIVE_LIMITATION, LINK_LIMITATION]
 
+    binding: Optional[BindingResult] = assess_binding(record, analysis, subject) if record is not None else None
+    mapper = mapper_for(record, binding)
+    if record is not None:
+        limitations.append(RECORD_LIMITATION)
+        if binding is not None and binding.status is not BindingStatus.ESTABLISHED:
+            diagnostics.append(AnalysisDiagnostic("RUN_BINDING_NOT_ESTABLISHED", f"{binding.status.value}: {', '.join(binding.reasons)}"))
+
+    expected: Mapping[str, str] = {}
+    mapping_counts: Mapping[str, int] = {}
+    graph_locus_methods = 0
     if analysis.source.format is AnalysisFormat.SARIF:
-        classified = _sarif_observations(analysis, subject, locus, diagnostics)
+        classified = _sarif_observations(analysis, subject, locus, diagnostics, mapper)
+        expected, mapping_counts = classified.expected, classified.mapping
         for candidate, matched in classified.established:
             traces.append(ObservationTrace(candidate.candidate_id, candidate.locator, "static_dataflow_trace", matched,
                                            tuple(s.locator for s in candidate.steps), _summary(candidate), candidate.suppressed))
@@ -457,15 +546,22 @@ def derive_document(analysis: NormalizedAnalysis, subject: AnalysisSubject, locu
                                                   "no path is derived from them and none is excluded by them"))
         if any(t.suppressed for t in traces):
             limitations.append("SUPPRESSED_RESULT_COUNTED: a path in a suppressed result is kept (it can only lower the verdict)")
-        blockers = _sarif_blockers(contributing or list(analysis.runs), subject) if (traces or undecidable) else []
+        if record is not None:
+            blockers = _record_blockers(binding) if (traces or undecidable) else []
+        else:
+            blockers = _sarif_blockers(contributing or list(analysis.runs), subject) if (traces or undecidable) else []
     else:
-        classified_graph = _graph_observations(analysis, subject, locus, diagnostics)
+        classified_graph = _graph_observations(analysis, subject, locus, diagnostics, mapper)
+        graph_locus_methods = classified_graph.locus_methods
         for obs_id, matched, step_locators, _, route in classified_graph.established:
             traces.append(ObservationTrace(obs_id, "#/graphml", "call_graph_path", matched, step_locators, route))
         undecidable = list(classified_graph.undecidable)
         contributing = list(analysis.runs)
         blockers = []
-        if traces or undecidable:
+        if record is not None:
+            if traces or undecidable:
+                blockers = _record_blockers(binding)
+        elif traces or undecidable:
             run = analysis.runs[0]
             declared = (subject.source_content_hash or "").strip().lower()
             recorded = (run.content_hash or "").strip().lower()
@@ -484,31 +580,71 @@ def derive_document(analysis: NormalizedAnalysis, subject: AnalysisSubject, locu
         limitations.append(UNDECIDABLE_LIMITATION.format(n=len(undecidable)))
     tool, notes = _tool_for(contributing or list(analysis.runs))
     limitations.extend(notes)
+
+    coverage = assess_coverage(record, analysis, subject, locus, binding, expected, len(undecidable), len(traces), graph_locus_methods)
+    negative = bool(record is not None and coverage.negative_derivable and not traces and not undecidable)
+    if record is not None:
+        for note in coverage.notes:
+            diagnostics.append(AnalysisDiagnostic("COVERAGE_NOTE", note))
+        if not negative and record.coverage_claim is not None:
+            diagnostics.append(AnalysisDiagnostic("COVERAGE_CLAIM_NOT_CONSUMED",
+                                                  "the record declares a coverage claim, but these conditions are not established: " + ", ".join(coverage.preventing)))
+    if negative:
+        limitations.append(ABSENCE_LIMITATION)
+        blockers = []
     limitation_tuple = tuple(dict.fromkeys(limitations))
 
-    def build(trace_list: list[ObservationTrace]) -> tuple[Optional[ReachDocument], SourceRef]:
+    status = binding.status if binding is not None else (_legacy_status(blockers) if (traces or undecidable) else None)
+    identity = binding.source_identity if binding is not None else ("not_assessed" if status is None else
+                                                                      ("commit_only" if status is BindingStatus.ESTABLISHED else "not_established"))
+    assessment = RunAssessment(
+        record_id=record.run_id if record is not None else None, binding=status,
+        binding_reasons=binding.reasons if binding is not None else tuple(blockers),
+        source_identity=identity, uri_mapping=tuple(sorted(mapping_counts.items())), execution=coverage.execution,
+        coverage=coverage.facts, entry_points_known=coverage.entry_points_known, negative_derived=negative,
+        preventing=coverage.preventing if record is not None else (),
+        field_sources=tuple((g, record.source_of(g).value) for g in ("tool", "source", "target", "configuration", "stages", "outputs", "scope", "coverage_claim"))
+        if record is not None else (),
+    )
+
+    created_from_record = None
+    if record is not None and binding is not None and binding.status is BindingStatus.ESTABLISHED and tool is not None and tool.version \
+            and record.tool.version and tool.name and tool.name.lower() == record.tool.name.lower() \
+            and tool.version.split("+")[0] == record.tool.version.split("+")[0]:
+        analysis_stages = [t.started for t in record.stages if t.role.value == "analysis" and t.started]
+        created_from_record = analysis_stages[0] if len(analysis_stages) == 1 else None
+
+    def build(trace_list: list[ObservationTrace], absence: bool = False) -> tuple[Optional[ReachDocument], SourceRef]:
         source = SourceRef(analysis.source, tool, tuple(t.locator for t in trace_list), tuple(trace_list), tuple(blockers),
-                           limitation_tuple, tuple(diagnostics), subject.entered_by, tuple(undecidable))
-        if not trace_list:
+                           limitation_tuple, tuple(diagnostics), subject.entered_by, tuple(undecidable), assessment)
+        if not trace_list and not absence:
             return None, source
-        started = {run.started for run in contributing}
+        started = {run.started for run in contributing or analysis.runs}
+        created = next(iter(started)) if len(started) == 1 and None not in started else created_from_record
         artifact = None
         if not blockers:
             artifact = Component(name=subject.artifact.purl, version=subject.artifact.version, purl=subject.artifact.purl,
                                  identifier_variants=build_identifier_variants(subject.artifact.purl, subject.artifact.version,
                                                                               subject.artifact.purl, [], []))
         return ReachDocument(
-            doc_id=analysis.source.doc_id, kind=ReachKind.K1, finding=ReachFinding.POSITIVE,
+            doc_id=analysis.source.doc_id, kind=ReachKind.K1, finding=ReachFinding.NEGATIVE if absence else ReachFinding.POSITIVE,
             producer=tool.organization if tool else None, producer_class="static-analysis-tool",
             tool_name=tool.name if tool else None, tool_version=tool.version if tool else None,
-            created=next(iter(started)) if len(started) == 1 else None,
-            artifact=artifact, target=subject.target, source=source,
+            created=created, artifact=artifact, target=subject.target, source=source,
+            full_coverage_claim=absence, entry_points_complete=True if absence else None,
+            analyzed_configurations=(record.analyzed_configurations if (absence and record is not None) else ()),
         ), source
 
-    document, source = build(traces)
+    document, source = build(traces, absence=negative)
     worst_document = None
     if undecidable:
         as_paths = [ObservationTrace(u.observation_id, u.locator, "undecidable_counted_as_path", "<unresolved>", u.step_locators,
                                      f"UNDECIDABLE: {u.reason}") for u in undecidable]
         worst_document, _ = build(traces + as_paths)
     return DerivedEvidence(document, source, worst_document)
+
+
+def _record_blockers(binding: Optional[BindingResult]) -> list[str]:
+    if binding is None or binding.status is BindingStatus.ESTABLISHED:
+        return []
+    return [f"RUN_BINDING_{binding.status.value.upper()}:{reason}" for reason in binding.reasons]

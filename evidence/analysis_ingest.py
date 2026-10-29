@@ -13,6 +13,10 @@ A well-formed artifact that records no path touching the locus is not an error: 
 document, REACH stays ``Unknown`` (verdict Insufficient, R2 ``NO_ANALYSIS``) and its diagnostics and
 limitations are reported.
 
+``AnalysisArtifactInput(artifact, run=<analysis-run record>)`` adds an unauthenticated record of the run (``evidence.analysis_run``): it can
+establish the exact source binding of the artifact, map absolute locations through its declared roots and, only when every coverage fact of
+``evidence.analysis_run_binding`` holds, supply a declared full-coverage claim (never P2/P3). Without it nothing about the run is assumed.
+
 The existing strict ``reachability=`` input is untouched and can be combined with artifacts: derived
 documents are *added* to it (a directly supplied K1 absence next to a derived positive path is a
 REACH ``Contradictory``, R3). Direct callers of ``evaluate_reachability`` / ``evaluate_finding`` with
@@ -28,6 +32,7 @@ from typing import Optional, Sequence, Union
 
 from evidence.analysis_binding import AnalysisSubject, DerivedEvidence, derive_document
 from evidence.analysis_graphml import parse_joern_graphml
+from evidence.analysis_run import AnalysisRunError, AnalysisRunRecord, parse_analysis_run
 from evidence.analysis_model import (
     AnalysisArtifactError,
     AnalysisArtifactErrorCode as E,
@@ -54,6 +59,10 @@ class AnalysisArtifactInput:
     source: InputSource
     format: Optional[AnalysisFormat] = None
     label: Optional[str] = None
+    # The analysis-run record describing the run that produced this artifact (an unauthenticated assertion, see
+    # evidence.analysis_run). Optional: without it nothing about the run is assumed.
+    # A parsed ``AnalysisRunRecord``, or the record's path/bytes (parsed strictly; an unusable record is a structured refusal).
+    run: Union[AnalysisRunRecord, InputSource, None] = None
 
 
 def detect_format(raw: bytes) -> AnalysisFormat:
@@ -112,7 +121,13 @@ def ingest_artifacts(
         if analysis.source.doc_id in seen:
             raise AnalysisArtifactError(E.CONTRADICTORY, f"artifact #{position} ({analysis.source.doc_id}) is already present in the evidence")
         seen.add(analysis.source.doc_id)
-        derived: DerivedEvidence = derive_document(analysis, subject, evidence.locus)
+        run = entry.run
+        if run is not None and not isinstance(run, AnalysisRunRecord):
+            try:
+                run = parse_analysis_run(run)
+            except AnalysisRunError as error:
+                raise AnalysisArtifactError(E.RUN_RECORD_INVALID, f"artifact #{position}: analysis-run record: {error}") from None
+        derived: DerivedEvidence = derive_document(analysis, subject, evidence.locus, run)
         sources.append(derived.source)
         if derived.document is not None:
             documents.append(derived.document)

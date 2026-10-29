@@ -159,9 +159,9 @@ def loose_path(uri: Optional[str]) -> Optional[str]:
 
 def resolve_location_detail(
     location: Any, artifacts: list, locator: str
-) -> tuple[Optional[str], Optional[str], Optional[str]]:
+) -> tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
     """Like ``resolve_artifact_location`` but also returns the ``loose_path`` of the location (for an
-    unresolved one, so that its relevance can still be judged)."""
+    unresolved one, so that its relevance can still be judged) and the recorded URI itself."""
     loc = _obj(location, locator, "artifactLocation")
     uri, base, index = _location_key(loc, locator)
     if index is not None and index >= 0:
@@ -177,9 +177,9 @@ def resolve_location_detail(
         if uri is None:
             uri, base = t_uri, t_base
     if uri is None:
-        return None, "no uri and no resolvable index", None
+        return None, "no uri and no resolvable index", None, None
     path, reason = normalize_relative_path(uri, base)
-    return path, reason, loose_path(uri)
+    return path, reason, loose_path(uri), uri
 
 
 def resolve_artifact_location(
@@ -189,7 +189,7 @@ def resolve_artifact_location(
     normalized path, or ``(None, reason)``. An ``index`` outside ``run.artifacts`` is a
     ``REFERENCE_UNRESOLVED`` error; an ``index`` whose artifact disagrees with an explicit ``uri``
     is a ``CONTRADICTORY`` error."""
-    path, reason, _ = resolve_location_detail(location, artifacts, locator)
+    path, reason, _, _ = resolve_location_detail(location, artifacts, locator)
     return path, reason
 
 
@@ -250,6 +250,69 @@ def _vcs(run: Mapping[str, Any], locator: str) -> tuple[VcsProvenance, ...]:
     return tuple(found)
 
 
+def _query_packs(run: Mapping[str, Any], locator: str) -> tuple[tuple[str, str], ...]:
+    """``tool.extensions[]`` (name, semanticVersion): for CodeQL, the query pack and libraries that ran."""
+    tool = run.get("tool")
+    extensions = tool.get("extensions") if isinstance(tool, dict) else None
+    if extensions is None:
+        return ()
+    if not isinstance(extensions, list):
+        raise _invalid("tool.extensions must be an array", f"{locator}/tool/extensions")
+    found = []
+    for i, extension in enumerate(extensions):
+        item = _obj(extension, f"{locator}/tool/extensions/{i}", "toolComponent")
+        name = _opt_str(item, "name", f"{locator}/tool/extensions/{i}")
+        version = _opt_str(item, "semanticVersion", f"{locator}/tool/extensions/{i}") or _opt_str(item, "version", f"{locator}/tool/extensions/{i}")
+        if name:
+            found.append((name, version or ""))
+    return tuple(found)
+
+
+def _rule_ids(run: Mapping[str, Any], locator: str) -> tuple[str, ...]:
+    driver = _obj(_obj(run.get("tool"), f"{locator}/tool", "tool").get("driver"), f"{locator}/tool/driver", "tool.driver")
+    rules = driver.get("rules")
+    if rules is None:
+        return ()
+    if not isinstance(rules, list):
+        raise _invalid("tool.driver.rules must be an array", f"{locator}/tool/driver/rules")
+    ids = []
+    for i, rule in enumerate(rules):
+        rule_id = _opt_str(_obj(rule, f"{locator}/tool/driver/rules/{i}", "reportingDescriptor"), "id", f"{locator}/tool/driver/rules/{i}")
+        if rule_id:
+            ids.append(rule_id)
+    return tuple(ids)
+
+
+def _expected_extracted_files(run: Mapping[str, Any], artifacts: list, locator: str) -> tuple[Optional[tuple[str, ...]], int]:
+    """Locations of the tool notifications whose descriptor id ends in ``/baseline/expected-extracted-files``
+    (CodeQL writes one per file in the source archive that the extractor is expected to extract). They state
+    which files were in scope of the extraction, not that the analysis of them completed or was sound.
+    ``None``: the run has no such notification (the artifact states no file scope)."""
+    found: list[str] = []
+    unresolved = 0
+    seen_descriptor = False
+    for ii, invocation in enumerate(_list(run, "invocations", locator)):
+        for ni, note in enumerate(_list(invocation, "toolExecutionNotifications", f"{locator}/invocations/{ii}")):
+            here = f"{locator}/invocations/{ii}/toolExecutionNotifications/{ni}"
+            descriptor = note.get("descriptor") if isinstance(note, dict) else None
+            descriptor_id = descriptor.get("id") if isinstance(descriptor, dict) else None
+            if not (isinstance(descriptor_id, str) and descriptor_id.endswith("/baseline/expected-extracted-files")):
+                continue
+            seen_descriptor = True
+            for li, location in enumerate(note.get("locations", []) if isinstance(note.get("locations", []), list) else []):
+                physical = location.get("physicalLocation") if isinstance(location, dict) else None
+                if not isinstance(physical, dict) or "artifactLocation" not in physical:
+                    unresolved += 1
+                    continue
+                path, _, _, _ = resolve_location_detail(physical["artifactLocation"], artifacts,
+                                                       f"{here}/locations/{li}/physicalLocation/artifactLocation")
+                if path is None:
+                    unresolved += 1
+                else:
+                    found.append(path)
+    return (tuple(sorted(set(found))) if seen_descriptor else None), unresolved
+
+
 def _is_suppressed(result: Mapping[str, Any], locator: str) -> bool:
     return bool(_list(result, "suppressions", locator))
 
@@ -285,9 +348,13 @@ def parse_sarif(raw: bytes) -> NormalizedAnalysis:
             diagnostics.append(AnalysisDiagnostic(
                 "RUN_WITHOUT_RESULTS_ARRAY", "no `results` array: SARIF allows this only for a run that exports rule metadata, "
                 "not an actual scan; it records nothing about the analysed code", f"{here}/results"))
+        extracted, unresolved_extracted = _expected_extracted_files(run, artifacts, here)
         runs.append(RunFacts(locator=here, tool=tool, started=started, execution_successful=successful,
                              error_notifications=errors, warning_notifications=warnings, vcs=_vcs(run, here),
-                             result_count=len(results), results_present="results" in run))
+                             result_count=len(results), results_present="results" in run,
+                             extracted_files=extracted, extracted_files_unresolved=unresolved_extracted,
+                             query_packs=_query_packs(run, here), rule_ids=_rule_ids(run, here),
+                             suppressed_results=sum(1 for r in results if isinstance(r, dict) and r.get("suppressions"))))
         for xi, result_raw in enumerate(results):
             rloc = f"{here}/results/{xi}"
             result = _obj(result_raw, rloc, "result")
@@ -333,11 +400,11 @@ def parse_sarif(raw: bytes) -> NormalizedAnalysis:
                         if "artifactLocation" not in physical:
                             steps.append(PathStep(f"{sloc}/location", None, "no artifactLocation", kinds=tuple(kinds)))
                             continue
-                        path, reason, loose = resolve_location_detail(
+                        path, reason, loose, raw_uri = resolve_location_detail(
                             physical["artifactLocation"], artifacts, f"{sloc}/location/physicalLocation/artifactLocation")
                         region = physical.get("region")
                         line = region.get("startLine") if isinstance(region, dict) and isinstance(region.get("startLine"), int) else None
-                        steps.append(PathStep(f"{sloc}/location", path, reason, line, loose, tuple(kinds)))
+                        steps.append(PathStep(f"{sloc}/location", path, reason, line, loose, tuple(kinds), raw_uri))
                     candidates.append(FlowCandidate(
                         candidate_id=f"r{ri}.x{xi}.c{ci}.t{ti}", locator=tloc,
                         run_index=ri, rule_id=_opt_str(result, "ruleId", rloc), steps=tuple(steps),

@@ -13,7 +13,7 @@ raw artifact --parse--> NormalizedAnalysis --bind/derive--> strict ReachDocument
 |---|---|---|
 | Neutral model | `evidence/analysis_model.py` | Typed facts, locator conventions, stable error codes. No interpretation. |
 | Raw format | `evidence/analysis_sarif.py`, `evidence/analysis_graphml.py` | Parse, structurally validate, identify tool/format version, content digest, resolve references **within the document**. |
-| Binding/derivation | `evidence/analysis_binding.py` | Relate the facts to the finding (evaluator-entered `AnalysisSubject` + locus), classify binding blockers, derive at most one positive `ReachDocument` per artifact. |
+| Binding/derivation | `evidence/analysis_binding.py` | Relate the facts to the finding (evaluator-entered `AnalysisSubject` + locus), classify binding blockers, derive at most one `ReachDocument` per artifact: a positive-path report, or - only with an analysis-run record satisfying every coverage fact - a negative K1 report that forwards the record's declared claim. |
 | API | `evidence/analysis_ingest.py` | `parse_analysis_artifact`, `ingest_artifacts`, `evaluate_with_analysis`. |
 | Evaluation | `evidence/reach_*` (unchanged rules) | REACH §5.1 derivation, BIND, provenance, R1-R13. |
 
@@ -38,12 +38,11 @@ loader cannot set.
 | Not consumed (deliberately) | a result's own `locations`, `level`, `message`, `relatedLocations`, `stacks`, `graphs`, `results` being empty, the tool's success flag as proof of coverage | AST, CFG, PDG, REACHING_DEF, ARGUMENT edges and every other property: not call-graph evidence |
 
 Neither format states a **full-coverage claim over LOCUS and ENTRY**, which is what §5.1 step 2 requires
-for REACH `Absent`. The adapters therefore derive **only positive observations**; every other fact
+for REACH `Absent`. From an artifact alone the adapters therefore derive **only positive observations**; every other fact
 (empty results, failed runs, missing path, unresolved locations) is kept as a diagnostic or limitation and
-REACH stays `Unknown`. Consequence for the research: *no artifact of these two formats can by itself make
-a `vulnerable_code_not_in_execute_path` claim Weak or Supported*; the best case is Insufficient. A
-supportive K1 report must be supplied through the strict input (or come from a future adapter for a
-format that declares coverage). This is a finding about the evidence, not a limitation of the code.
+REACH stays `Unknown`. *Milestone 5:* an analysis-run record may add a **declared** claim; it is consumed only when every coverage fact is established
+(see "Analysis-run records" below) and then yields at most Weak. A stock CodeQL taint query, a graph without an entry-point inventory and a successful process
+are never enough. This is a finding about the evidence, not a limitation of the code.
 
 ## Mapping from the formal rules to artifact fields
 
@@ -170,16 +169,90 @@ Joern (about 1.7 GB; not needed for a contract audit):
 A mismatching revision, repository, hash or root can never produce a better verdict than the matching subject
 (`tests/test_analysis_soundness.py`, G08/G09).
 
+## Analysis-run records, exact source binding and coverage (Milestone 5)
+
+Contract: `evidence/analysis_run.py` (schema `analysis-run/1`, strict, deterministic serialization); binding, URI mapping and coverage
+gates: `evidence/analysis_run_binding.py`; recorder: `analysis_runner/` (outside `evidence/`: it runs processes and hashes files, which the
+evidence pipeline must never do). Readings: `docs/spec_addendum_v0.2.5.md`.
+
+```python
+AnalysisArtifactInput("scan.sarif", run="scan.run.json")      # or run=AnalysisRunRecord; an unusable record is a structured refusal
+```
+
+**The record is an assertion.** It never carries a state, a provenance level, a BIND result, a trust statement, a coverage verdict or a
+verdict (refused at any depth), cannot say that a field was verified, and cannot make a document P2 or P3. Each field group has a stated
+source (`observed_by_runner`, `caller_supplied`; `extracted_from_artifact` is a value the evaluation reports, `established_by_verification`
+is refused from input). `null` means not observed and is not the same as `false` or `0`.
+
+| Group | Fields (all optional except `schema`, `run_id`, `origin`, `tool.name`) |
+|---|---|
+| `tool` | name, version, output format version, executable SHA-256 |
+| `source` | repository, **full** revision, analysis subpath, tree digest (`git-tree:` or `sha256-worktree:`), worktree clean, untracked/ignored file count, submodules, changed during run, roots (id, absolute path, role, repository, revision) |
+| `target` | purl, source root |
+| `configuration` | languages, query (pack, version, digest, suite, ids, **claim semantics**), redacted command |
+| `stages[]` | name, role (`extraction`/`analysis`/`other`), status, exit code, start, finish |
+| `outputs[]` | path, SHA-256 (`null`: absent when looked for), size |
+| `scope` | file inventory (complete, included, excluded), entry-point inventory (complete, source, methods), partial-analysis indicators, analysed configurations |
+| `coverage_claim` | kind, locus files and symbols, entry methods, declared by |
+
+### The recorder
+
+```bash
+python -m analysis_runner run PLAN.json --out RUN.json      # exit 0 complete, 1 written but a stage failed / output missing, 2 unusable plan
+python -m analysis_runner check RUN.json FILE [FILE...]     # re-hash files against the record's outputs (exit 1 on mismatch)
+```
+
+It records the redacted argument vector of each stage (credential-looking flags, `NAME=value` and URL userinfo are redacted; no environment value
+is ever recorded), start/finish instants, exit status, timeout, the tool's reported version, the git identity of the analysed directory before the run
+(commit, tree id of the analysed subpath, tracked changes, untracked **and ignored** files, submodules), a digest of every file under the analysis root
+before and after the run (a change is `changed_during_run`), and each output's SHA-256 and size. A failed or timed-out stage ends the run (later stages are
+`not_run`). It does not modify the analysed project. Plan fields that are not observations (languages, query identity and semantics, scope, claim) are
+recorded as `caller_supplied`. **Process success is execution metadata, not proof of coverage.** Validated with a fake executable
+(`tests/test_analysis_runner.py`: success, failure, timeout, missing output, source change during the run, dirty tree, redaction, determinism) and against
+live CodeQL 2.27.3 (`fixtures/analysis/authentic/codeql/recorded/`; `tests/test_analysis_live.py`).
+
+### Binding of the run to the assessed source
+
+Five statuses (`established`, `missing`, `contradicted`, `ambiguous`, `impossible`; addendum v0.2.5 §2). Established needs: output hash equal to the artifact's;
+tool/version consistent with the artifact; equal repository and equal **full** revision (an abbreviation is ambiguous); equal tree digest when the evaluator
+declared one; clean, observed tree without untracked or ignored files and without unpinned submodules, unchanged during the run (unless the evaluator's declared
+identity is a digest of the dirty contents); consistent target, source root and (GraphML) `META_DATA ROOT`; and an artifact-stated VCS provenance that does not
+contradict the record. Anything else keeps the observations and leaves BIND Unknown (R6). Identity levels reported: `exact` (digest compared), `commit_only`,
+`not_established`. The link to the assessed artifact S remains evaluator-asserted.
+
+### Absolute URI and root mapping
+
+See addendum v0.2.5 §3. Table of decisions (all tested in `tests/test_analysis_run_binding.py` and corpus cases U01-U18):
+
+| Location | Result |
+|---|---|
+| `file:///<primary root>/rel` with binding established | mapped to `rel` in the analysis root, then matched as any relative location |
+| same, binding not established / no record / no roots | unmapped: undecidable if its path ends with a locus file (refusal beside a K1 absence), else irrelevant |
+| under a vendored/external root | never the assessed tree: undecidable if its path inside that root ends with a locus file, else irrelevant |
+| `..`/`.`/empty segment, `%2e%2e`, `%2F`, `%00`, remote host, `https:`, query, fragment, outside every root, root-name prefix only | unmapped |
+| a file name alone | never maps |
+
+### Coverage facts and when a negative K1 report is derived
+
+Fourteen separate facts (addendum v0.2.5 §4): `binding_established`, `tool_declared`, `process_completed`, `extraction_completed`, `language_scope`,
+`locus_included`, `query_suite_completed`, `claim_semantics`, `entry_points_enumerated`, `exclusions_accounted`, `suppressions_accounted`,
+`no_partial_indicators`, `no_undecidable_evidence`, `coverage_claim_declared`; each `established`, `not_established`, `contradicted` or `not_recorded`.
+A negative K1 report with the record's **declared** full-coverage claim is derived only if all hold and no path is recorded; the result is then decided by the
+unchanged rules and is at most **Weak** (P1; a record cannot reach P2/P3). Otherwise REACH stays Unknown and the conditions that prevented a stronger
+decision are listed (`outcome.analysis[i].assessment.preventing`). For the authentic CodeQL runs the stock taint query (`claim_semantics =
+taint_path_query`), the absent entry-point inventory and the absent claim keep the absence from being derived, as they should.
+
 ## Limitations
 
-* Live CodeQL 2.27.3 output exists (category L, three files, JavaScript queries); no authentic Joern output
+* Live CodeQL 2.27.3 output exists (category L: three earlier files plus three runs recorded by the runner, JavaScript queries); no authentic Joern output
   was obtained, and the GraphML fixtures follow the exporter's source, not a real export.
 * A code flow is a static data-flow trace; counting it as a path observation is a convention (register
   AI-D3). Suppressed results are counted. A flow of one location counts (SARIF: a visited location).
   Abbreviated revisions never bind. Real CodeQL logs carry no `versionControlProvenance`, so they bind Unknown.
 * Locations that cannot be resolved against the analysis root are not matched as locus files; if they might
-  be the locus the evaluation is refused when that could change the verdict (see the procedure above). An
-  approved absolute-URI-to-root mapping would reduce refusals; it is not invented.
+  be the locus the evaluation is refused when that could change the verdict (see the procedure above). An absolute URI is mapped only through an
+  explicit root of an established run record (above); there is no rule that maps by file name or suffix.
+* No supported tool enumerates entry points: entry-point completeness is a declaration. No query of a stock CodeQL pack is a locus-reachability analysis.
 * Entry points for call graphs are evaluator-declared; entry-point completeness is not derived.
 * `CONTAINS` is read in the semanticcpg direction (METHOD → node) only; a reversed edge is reported and not used;
   `IS_EXTERNAL` is recorded, not used.

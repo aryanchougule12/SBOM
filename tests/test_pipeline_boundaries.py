@@ -142,7 +142,8 @@ def test_the_parsers_still_extract_no_reachability_facts():
 
 # ---- analyzer-artifact adapter layering ----------------------------------------------------------------------------------------
 
-ANALYSIS_MODULES = ["analysis_model", "analysis_sarif", "analysis_graphml", "analysis_binding", "analysis_ingest"]
+ANALYSIS_MODULES = ["analysis_model", "analysis_sarif", "analysis_graphml", "analysis_binding", "analysis_ingest", "analysis_run",
+                    "analysis_run_binding"]
 
 
 @pytest.mark.parametrize("module", ANALYSIS_MODULES)
@@ -158,7 +159,15 @@ def test_the_raw_format_parsers_depend_only_on_the_neutral_model():
 
 
 def test_binding_depends_on_the_model_the_parsers_helper_and_the_strict_input_only():
-    assert _evidence_imports("analysis_binding") == {"analysis_model", "analysis_sarif", "reach_inputs"}
+    assert _evidence_imports("analysis_binding") == {"analysis_model", "analysis_sarif", "reach_inputs", "analysis_run", "analysis_run_binding"}
+
+
+def test_the_run_record_is_a_leaf_and_its_binding_depends_only_on_the_model_the_record_and_the_sarif_helpers():
+    """The record is parsed with no knowledge of subjects, rules or the evaluator; nothing in the evaluation path imports the runner."""
+    assert _evidence_imports("analysis_run") == set()
+    assert _evidence_imports("analysis_run_binding") == {"analysis_model", "analysis_run", "analysis_sarif"}
+    for path in sorted((ROOT / "evidence").glob("*.py")):
+        assert "analysis_runner" not in _imports(_tree(f"evidence/{path.name}")), path.name
 
 
 def test_the_reachability_rule_engine_and_the_cnp_modules_do_not_import_the_adapters():

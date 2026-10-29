@@ -1,0 +1,111 @@
+{
+  "configuration": {
+    "command": [
+      "joern-export",
+      "--format",
+      "graphml"
+    ],
+    "languages": [
+      "java"
+    ],
+    "query": {
+      "claim_semantics": "call_graph_export",
+      "pack": null,
+      "pack_digest": null,
+      "pack_version": null,
+      "query_ids": [],
+      "suite": null
+    }
+  },
+  "coverage_claim": {
+    "declared_by": "corpus-reviewer",
+    "entry_methods": [
+      "app.Main.main:void(java.lang.String[])"
+    ],
+    "kind": "locus_unreachable_from_declared_entry_points",
+    "locus_files": [
+      "src/parse.js"
+    ],
+    "locus_symbols": [
+      "lib.b.Parser.parse:java.lang.Object(java.lang.String)"
+    ]
+  },
+  "diagnostics": [],
+  "field_sources": {},
+  "origin": "caller",
+  "outputs": [
+    {
+      "path": "synthetic_rec_entry_not_in_export.graphml",
+      "sha256": "af75284332230a01a57994d76d8db8cee9f67bae0bfbea334efc165ee3882750",
+      "size": 3684
+    }
+  ],
+  "run_id": "synthetic-synthetic_rec_entry_not_in_export",
+  "schema": "analysis-run/1",
+  "scope": {
+    "analyzed_configurations": [],
+    "entry_points": {
+      "complete": true,
+      "methods": [
+        "app.Main.main:void(java.lang.String[])"
+      ],
+      "source": "caller_declared"
+    },
+    "files": {
+      "complete": true,
+      "excluded": [],
+      "included": [
+        "node_modules/lib-b/src/parse.js",
+        "src/app.js"
+      ]
+    },
+    "partial_indicators": []
+  },
+  "source": {
+    "analysis_subpath": ".",
+    "changed_during_run": false,
+    "repository": "https://example.org/git/app.git",
+    "revision": "0123456789abcdef0123456789abcdef01234567",
+    "roots": [
+      {
+        "id": "analysis-root",
+        "path": "/work/app",
+        "repository": "https://example.org/git/app.git",
+        "revision": "0123456789abcdef0123456789abcdef01234567",
+        "role": "primary"
+      }
+    ],
+    "submodules": [],
+    "tree_digest": "git-tree:abababababababababababababababababababab",
+    "untracked_files": 0,
+    "worktree_clean": true
+  },
+  "stages": [
+    {
+      "exit_code": 0,
+      "finished": "2026-01-16T08:59:00Z",
+      "name": "extract",
+      "role": "extraction",
+      "started": "2026-01-16T08:55:00Z",
+      "status": "completed"
+    },
+    {
+      "exit_code": 0,
+      "finished": "2026-01-16T09:05:00Z",
+      "name": "analyze",
+      "role": "analysis",
+      "started": "2026-01-16T09:00:00Z",
+      "status": "completed"
+    }
+  ],
+  "target": {
+    "purl": "pkg:npm/lib-b@2.0",
+    "source_root": "node_modules/lib-b"
+  },
+  "tool": {
+    "executable_sha256": null,
+    "name": "Joern",
+    "output_format_version": "graphml",
+    "version": "4.0.0"
+  }
+}

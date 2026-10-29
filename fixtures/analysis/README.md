@@ -4,7 +4,9 @@ Inputs and reviewed expectations for the analyzer-artifact adapters (`evidence/a
 `manifest.json` lists every case; each case records its source, its expected outcome and **why** the
 expectation follows from the formal rules. Run the corpus with `python -m tests.analysis_eval`.
 
-Categories are kept strictly apart. **Category L** (`authentic/codeql/`) is unedited output of live
+Categories are kept strictly apart. **Run records** (`runs/`, `authentic/codeql/recorded/*.run.json`) are separate from the artifacts they describe: the synthetic ones
+(`origin: caller`) are authored for this repository to isolate one rule each; the three in `authentic/codeql/recorded/` were written by `python -m analysis_runner` during the live
+runs and are stored unedited. **Category L** (`authentic/codeql/`) is unedited output of live
 CodeQL 2.27.3 runs made for this repository (provenance and exact commands in
 `authentic/codeql/REPRODUCE.md`). Category A is upstream example/test data; category B is synthetic.
 **No authentic Joern output was obtained** (the distribution is about 1.7 GB; not installed), so every
@@ -17,7 +19,8 @@ checks the adapters against hand-reviewed expectations.
 |---|---|---|
 | **A** | `upstream/` | Files copied **byte-for-byte** from public repositories (provenance below). They are format examples / upstream test data, not verified-unmodified outputs of a live run. |
 | **L** | `authentic/codeql/` | **Live CodeQL 2.27.3 output** (3 SARIF files from two tiny JavaScript projects written for this repository; the SARIF is tool output, the sources are MIT-licensed here; CodeQL bundle and queries are GitHub's, MIT). Not a labelled ground truth. |
-| **B** | `sarif/`, `joern-graphml/` | **Synthetic** controlled fixtures written for this repository to the documented formats, each testing one edge case. |
+| **L** (recorded) | `authentic/codeql/recorded/` | **Live CodeQL 2.27.3 output plus the runner's record**, produced by `python -m analysis_runner` on a clean checkout of commit `941e384b4a75820cb0f11fe879f2d9ce1384a626` of this repository (analysed directories `fixtures/analysis/authentic/codeql/project` and `project-app-only`, git tree ids in the records). Same licences as above. |
+| **B** | `sarif/`, `joern-graphml/`, `runs/` | **Synthetic** controlled fixtures written for this repository to the documented formats, each testing one edge case. |
 
 ## Category A provenance
 

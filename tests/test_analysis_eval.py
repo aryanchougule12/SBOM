@@ -47,12 +47,12 @@ def test_the_report_keeps_upstream_and_synthetic_results_apart_and_reports_no_ac
 def test_formats_artifacts_refusals_and_distributions_are_reported_per_category(report):
     a, b = report["categories"]["A"], report["categories"]["B"]
     assert a["by_format"]["sarif"]["artifacts"] == 9 and set(a["by_format"]) == {"sarif"}
-    assert {"sarif", "joern-graphml", "none"} == set(b["by_format"]) and b["by_format"]["joern-graphml"]["refused"] == 11
+    assert {"sarif", "joern-graphml", "none"} == set(b["by_format"]) and b["by_format"]["joern-graphml"]["refused"] == 12
     assert sum(b["refusals_by_cause"].values()) == b["by_format"]["sarif"]["refused"] + b["by_format"]["joern-graphml"]["refused"]
     assert set(a["verdict_distribution"]) == {"Insufficient"} and "Supported" in b["verdict_distribution"]
     assert b["cases_open_semantics"] and b["cases_unbound"] and b["cases_with_positive_path"]
     ell = report["categories"]["L"]
-    assert set(ell["by_format"]) == {"sarif"} and ell["by_format"]["sarif"]["artifacts"] == 5 and ell["cases"] == 5
+    assert set(ell["by_format"]) == {"sarif"} and ell["by_format"]["sarif"]["artifacts"] == 12 and ell["cases"] == 12
     assert any("B11" in c or "B13" in c for c in b["cases_with_incomplete_or_unverified_run_info"])
 
 
@@ -203,7 +203,15 @@ def test_every_corpus_file_is_listed_in_the_manifest_and_vice_versa(manifest):
     listed = {c["file"] for c in manifest["cases"] if c.get("file")}
     on_disk = {str(p.relative_to(ANALYSIS_DIR)) for sub in ("upstream", "sarif", "joern-graphml") for p in (ANALYSIS_DIR / sub).iterdir() if p.is_file()}
     on_disk |= {str(p.relative_to(ANALYSIS_DIR)) for p in (ANALYSIS_DIR / "authentic" / "codeql").glob("*.sarif")}
+    on_disk |= {str(p.relative_to(ANALYSIS_DIR)) for p in (ANALYSIS_DIR / "authentic" / "codeql" / "recorded").glob("*.sarif")}
     assert listed == on_disk
+
+
+def test_every_run_record_file_is_used_by_a_case_and_vice_versa(manifest):
+    used = {c["run"] for c in manifest["cases"] if c.get("run")}
+    on_disk = {str(p.relative_to(ANALYSIS_DIR)) for p in (ANALYSIS_DIR / "runs").glob("*.json")}
+    on_disk |= {str(p.relative_to(ANALYSIS_DIR)) for p in (ANALYSIS_DIR / "authentic" / "codeql" / "recorded").glob("*.run.json")}
+    assert used == on_disk
 
 
 def test_only_category_l_is_a_live_run_and_no_joern_file_claims_to_be_upstream_or_live(manifest):

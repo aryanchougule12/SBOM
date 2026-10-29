@@ -41,7 +41,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from evidence.analysis_binding import parse_analysis_subject
-from evidence.analysis_ingest import evaluate_with_analysis, parse_analysis_artifact
+from evidence.analysis_ingest import AnalysisArtifactInput, evaluate_with_analysis, parse_analysis_artifact
 from evidence.evaluator import EvaluationRefusal
 from evidence.reach_evaluator import ReachOutcome
 from evidence.reach_inputs import parse_reachability
@@ -78,6 +78,15 @@ def _base_evidence(name: str, locus: dict) -> dict:
     elif name == "supported_k1":
         data = json.loads((FIXTURES / "reachability" / "synthetic_baseline.json").read_text(encoding="utf-8"))
         data["locus"] = locus
+    elif name in ("baseline_no_k1", "baseline_all_hazards_no_k1"):
+        # everything the strict input can supply except the K1 report: an analyzer artifact has to provide it
+        data = json.loads((FIXTURES / "reachability" / "synthetic_baseline.json").read_text(encoding="utf-8"))
+        data["locus"] = locus
+        data["documents"] = [d for d in data["documents"] if d["doc_id"] != "k1-analysis"]
+        if name == "baseline_all_hazards_no_k1":
+            classes = ("DYNAMIC_LOADING", "CONFIGURATION_DEPENDENT_PATHS", "NATIVE_FFI", "SERIALIZATION_GADGETS", "GENERATED_CODE",
+                       "INTER_PROCESS_CALLS", "BUILD_TIME_PRUNING")
+            data["hazards"] += [{"class": c, "disposition": "excluded_by_evidence", "basis_ref": "reflection-basis"} for c in classes]
     elif name != "empty":
         raise ValueError(f"unknown base evidence {name!r}")
     return data
@@ -99,10 +108,12 @@ def run_case(case: dict, defaults: dict) -> dict:
     locus = _merged(defaults["locus"], case.get("locus"))
     base = parse_reachability(_base_evidence(case.get("base", defaults["base"]), locus))
     artifacts = [] if case.get("file") is None else [str(ANALYSIS_DIR / case["file"])]
+    if case.get("file") is not None and case.get("run"):
+        artifacts = [AnalysisArtifactInput(artifacts[0], run=ANALYSIS_DIR / case["run"])]
     doc_id = None
     if artifacts:
         try:
-            doc_id = parse_analysis_artifact(artifacts[0]).source.doc_id
+            doc_id = parse_analysis_artifact(str(ANALYSIS_DIR / case["file"])).source.doc_id
         except Exception:  # noqa: BLE001 - an invalid artifact has no id; the refusal is what is under test
             doc_id = None
     record = equivalent("cdx")
@@ -112,7 +123,14 @@ def run_case(case: dict, defaults: dict) -> dict:
         return {"outcome": "refused", "refusal_code": outcome.code.value, "cause": outcome.cause}
     assert isinstance(outcome, ReachOutcome)
     sources = outcome.analysis
+    assessed = next((x.assessment for x in sources if x.assessment is not None), None)
     return {
+        "assessment": None if assessed is None else {
+            "binding": assessed.binding.value if assessed.binding is not None else None,
+            "binding_reasons": list(assessed.binding_reasons), "source_identity": assessed.source_identity,
+            "uri_mapping": dict(assessed.uri_mapping), "execution": assessed.execution, "coverage": dict(assessed.coverage),
+            "entry_points_known": assessed.entry_points_known, "negative_derived": assessed.negative_derived,
+            "preventing": list(assessed.preventing), "record_id": assessed.record_id},
         "outcome": "evaluated",
         "reach": outcome.dimension_states["REACH"], "bind": outcome.dimension_states["BIND"],
         "verdict": outcome.result.verdict.value, "rules": list(outcome.evaluation.rule_ids), "codes": list(outcome.result.codes),
@@ -143,12 +161,38 @@ def compare(expected: dict, actual: dict) -> list[str]:
         problems.append(f"result_limitations: expected {expected['result_limitations']!r}, got {actual['result_limitations']!r}")
     if "first_code" in expected and actual["codes"][:1] != [expected["first_code"]]:
         problems.append(f"first_code: expected {expected['first_code']!r}, got {actual['codes'][:1]!r}")
+    problems.extend(_compare_assessment(expected.get("assessment"), actual.get("assessment")))
     for code in expected.get("diagnostics_include", []):
         if code not in actual["diagnostic_codes"]:
             problems.append(f"diagnostic {code!r} not reported")
     for text in expected.get("limitations_include", []):
         if not any(text in lim for lim in actual["limitations"]):
             problems.append(f"limitation containing {text!r} not reported")
+    return problems
+
+
+def _compare_assessment(expected: Optional[dict], actual: Optional[dict]) -> list[str]:
+    """The reviewed expectation about the analysis run: binding, source identity, URI mapping, execution, separate coverage facts,
+    whether a negative K1 document was derived, and what prevented it. Only the keys the case states are compared."""
+    if expected is None:
+        return []
+    if actual is None:
+        return ["assessment: expected one, none reported"]
+    problems = []
+    for key in ("binding", "source_identity", "execution", "entry_points_known", "negative_derived"):
+        if key in expected and expected[key] != actual[key]:
+            problems.append(f"assessment.{key}: expected {expected[key]!r}, got {actual[key]!r}")
+    for key, field in (("reasons_include", "binding_reasons"), ("preventing_include", "preventing")):
+        for item in expected.get(key, []):
+            if item not in actual[field]:
+                problems.append(f"assessment.{field}: {item!r} not reported (got {actual[field]!r})")
+    for item in expected.get("preventing_exclude", []):
+        if item in actual["preventing"]:
+            problems.append(f"assessment.preventing: {item!r} must not be reported")
+    for key in ("coverage", "uri_mapping"):
+        for name, value in expected.get(key, {}).items():
+            if actual[key].get(name) != value:
+                problems.append(f"assessment.{key}[{name}]: expected {value!r}, got {actual[key].get(name)!r}")
     return problems
 
 
@@ -172,8 +216,38 @@ def check_fixture(case: dict) -> list[str]:
         problems.extend(_check_live(case, path))
     elif not source.get("synthetic"):
         problems.append("category B must be flagged synthetic")
+    problems.extend(_check_run_record(case))
     if source.get("live_run") and case["category"] != "L":
         problems.append("only category L may be a live analyzer run")
+    return problems
+
+
+def _check_run_record(case: dict) -> list[str]:
+    """The analysis-run record of a case: its recorded digest matches the file; a synthetic case's record is caller-authored and
+    never presented as runner output; a category-L record was written by the runner and describes exactly the artifact it sits with."""
+    if not case.get("run"):
+        return []
+    path = ANALYSIS_DIR / case["run"]
+    source = case["source"]
+    if not path.is_file():
+        return [f"run record missing: {case['run']}"]
+    problems = []
+    if hashlib.sha256(path.read_bytes()).hexdigest() != source.get("run_sha256"):
+        problems.append("recorded run_sha256 does not match the run record")
+    try:
+        data = json.loads(path.read_bytes())
+    except ValueError:
+        return problems     # a deliberately invalid record: the refusal is what is under test
+    origin = data.get("origin") if isinstance(data, dict) else None
+    if case["category"] == "L":
+        if origin != "runner" or source.get("run_record_origin") != "written by analysis_runner during the live run":
+            problems.append("a category L run record must be the runner's own output")
+        outputs = data.get("outputs", [])
+        file_sha = hashlib.sha256((ANALYSIS_DIR / case["file"]).read_bytes()).hexdigest()
+        if case.get("record_matches_artifact", True) and file_sha not in [o.get("sha256") for o in outputs]:
+            problems.append("the runner record does not list the artifact's SHA-256")
+    elif origin == "runner":
+        problems.append("a synthetic run record must not present itself as runner output")
     return problems
 
 
@@ -206,6 +280,31 @@ CATEGORY_LABELS = {
 }
 AUTHENTIC_JOERN = ("authentic Joern output: 0 artifacts. Not obtained: the Joern distribution is about 1.7 GB and was not installed "
                    "for this task; every Joern GraphML here is category B (synthetic), checked against the exporter source and CPG schema only.")
+
+
+def _run_summary(evaluated: list) -> dict:
+    """What was established about the analysis runs of the evaluated cases (counts of cases, never rates)."""
+    assessed = [r for r in evaluated if r["actual"].get("assessment")]
+    with_record = [r for r in assessed if r["actual"]["assessment"]["record_id"] is not None]
+    facts: Counter = Counter()
+    for r in with_record:
+        for name, status in r["actual"]["assessment"]["coverage"].items():
+            facts[(name, status)] += 1
+    return {
+        "cases_with_run_record": len(with_record),
+        "binding": _distribution(r["actual"]["assessment"]["binding"] for r in with_record if r["actual"]["assessment"]["binding"]),
+        "binding_by_artifact_provenance_only": _distribution(
+            r["actual"]["assessment"]["binding"] for r in assessed
+            if r["actual"]["assessment"]["record_id"] is None and r["actual"]["assessment"]["binding"]),
+        "source_identity": _distribution(r["actual"]["assessment"]["source_identity"] for r in with_record),
+        "execution": _distribution(r["actual"]["assessment"]["execution"] for r in with_record),
+        "uri_mapped_locations": sum(r["actual"]["assessment"]["uri_mapping"].get("mapped", 0) for r in with_record),
+        "uri_undecidable_in_other_roots": sum(r["actual"]["assessment"]["uri_mapping"].get("external_undecidable", 0) for r in with_record),
+        "entry_point_completeness_known": sum(1 for r in with_record if r["actual"]["assessment"]["entry_points_known"]),
+        "negative_observation_derived": sorted(r["id"] for r in with_record if r["actual"]["assessment"]["negative_derived"]),
+        "coverage_facts": {f"{name}={status}": count for (name, status), count in sorted(facts.items())},
+        "conditions_preventing_a_stronger_decision": _distribution(c for r in with_record for c in r["actual"]["assessment"]["preventing"]),
+    }
 
 
 def _distribution(values) -> dict:
@@ -262,6 +361,7 @@ def build_report() -> dict:
                 r["id"] for r in evaluated
                 if any(("UNSUCCESSFUL_EXECUTION" in l or "NO_INVOCATION_RECORD" in l or "ERROR_NOTIFICATIONS" in l) for l in r["actual"]["limitations"])),
             "cases_open_semantics": sorted(r["id"] for r in part if r["open_questions"]),
+            "analysis_runs": _run_summary(evaluated),
         }
     seen = Counter(rule for r in rows if r["actual"]["outcome"] == "evaluated" for rule in r["actual"]["rules"])
     report["rule_coverage"] = {
@@ -280,12 +380,16 @@ def render_csv(report: dict) -> str:
     out = io.StringIO()
     writer = csv.writer(out, lineterminator="\n")
     writer.writerow(["id", "category", "format", "file", "expected_outcome", "actual_outcome", "expected_verdict", "actual_verdict",
-                     "expected_reach", "actual_reach", "bind", "observations", "prov_reach", "rules", "agree"])
+                     "expected_reach", "actual_reach", "bind", "observations", "prov_reach", "rules", "run_binding", "source_identity", "execution",
+                     "negative_derived", "preventing", "agree"])
     for r in report["cases"]:
         e, a = r["expected"], r["actual"]
+        run = a.get("assessment") or {}
         writer.writerow([r["id"], r["category"], r["format"], r["file"] or "", e["outcome"], a["outcome"], e.get("verdict", ""),
                          a.get("verdict", ""), e.get("reach", ""), a.get("reach", ""), a.get("bind", ""), a.get("observations", ""),
-                         a.get("prov_reach") or "", " ".join(a.get("rules", [])), "yes" if r["agree"] else "NO"])
+                         a.get("prov_reach") or "", " ".join(a.get("rules", [])), run.get("binding") or "", run.get("source_identity", ""),
+                         run.get("execution", ""), "yes" if run.get("negative_derived") else ("no" if run else ""),
+                         " ".join(run.get("preventing", [])), "yes" if r["agree"] else "NO"])
     return out.getvalue()
 
 
@@ -303,6 +407,12 @@ def render_summary(report: dict) -> str:
             lines.append(f"  {fmt}: artifacts {row['artifacts']}, evaluated {row['evaluated']}, refused {row['refused']}, agree {row['agree']}/{row['cases']}")
         lines.append(f"  REACH states {part['reach_state_distribution']}; verdicts {part['verdict_distribution']}; refusals {part['refusals_by_cause']}")
         lines.append(f"  unbound {len(part['cases_unbound'])}, positive path {len(part['cases_with_positive_path'])}, open semantics {len(part['cases_open_semantics'])}")
+        runs = part["analysis_runs"]
+        if runs["cases_with_run_record"]:
+            lines.append(f"  analysis-run records: {runs['cases_with_run_record']} cases; binding {runs['binding']}; identity {runs['source_identity']}; "
+                         f"execution {runs['execution']}")
+            lines.append(f"  absolute locations mapped {runs['uri_mapped_locations']}; undecidable in other roots {runs['uri_undecidable_in_other_roots']}; "
+                         f"entry-point completeness known {runs['entry_point_completeness_known']}; negative K1 derived {len(runs['negative_observation_derived'])}")
     lines.append("\n" + report["not_obtained"]["authentic_joern"])
     cov = report["rule_coverage"]
     lines.append(f"\nrules triggered in this corpus: {sum(1 for v in cov['triggered'].values() if v)}/{len(RULE_IDS)}; never: {', '.join(cov['never_triggered']) or '-'}")

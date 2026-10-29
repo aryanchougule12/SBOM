@@ -1,0 +1,99 @@
+{
+  "configuration": {
+    "command": [
+      "/tmp/claude-0/cq/codeql/codeql database create db-flow-via-vendor-lib --language=javascript --source-root=fixtures/analysis/authentic/codeql/project --overwrite",
+      "/tmp/claude-0/cq/codeql/codeql database analyze db-flow-via-vendor-lib /tmp/claude-0/cq/codeql/qlpacks/codeql/javascript-queries/2.4.8/Security/CWE-078/CommandInjection.ql --format=sarif-latest --no-sarif-minify --output=out/flow-via-vendor-lib.sarif --rerun"
+    ],
+    "languages": [
+      "javascript"
+    ],
+    "query": {
+      "claim_semantics": "taint_path_query",
+      "pack": "codeql/javascript-queries",
+      "pack_digest": null,
+      "pack_version": "2.4.8",
+      "query_ids": [
+        "js/command-line-injection"
+      ],
+      "suite": null
+    }
+  },
+  "coverage_claim": null,
+  "diagnostics": [],
+  "field_sources": {
+    "configuration": "caller_supplied",
+    "scope": "caller_supplied",
+    "target": "caller_supplied"
+  },
+  "origin": "runner",
+  "outputs": [
+    {
+      "path": "out/flow-via-vendor-lib.sarif",
+      "sha256": "ba236e082dc572629dd0ce4ed47997d4217349e74d553971d7e450ea06b94513",
+      "size": 13592
+    }
+  ],
+  "run_id": "codeql-2.27.3-flow-via-vendor-lib",
+  "schema": "analysis-run/1",
+  "scope": {
+    "analyzed_configurations": [],
+    "entry_points": {
+      "complete": null,
+      "methods": [],
+      "source": null
+    },
+    "files": {
+      "complete": null,
+      "excluded": [],
+      "included": []
+    },
+    "partial_indicators": []
+  },
+  "source": {
+    "analysis_subpath": "fixtures/analysis/authentic/codeql/project",
+    "changed_during_run": false,
+    "repository": "https://github.com/aryanchougule12/SBOM.git",
+    "revision": "941e384b4a75820cb0f11fe879f2d9ce1384a626",
+    "roots": [
+      {
+        "id": "analysis-root",
+        "path": "/tmp/claude-0/-home-user-SBOM/98159206-2371-57a0-870d-a852a78d3a65/scratchpad/wt/fixtures/analysis/authentic/codeql/project",
+        "repository": "https://github.com/aryanchougule12/SBOM.git",
+        "revision": "941e384b4a75820cb0f11fe879f2d9ce1384a626",
+        "role": "primary"
+      }
+    ],
+    "submodules": [],
+    "tree_digest": "git-tree:0114c001fcd79f7e7dbb0bc791766d5c5a971a53",
+    "untracked_files": 0,
+    "worktree_clean": true
+  },
+  "stages": [
+    {
+      "exit_code": 0,
+      "finished": "2026-10-29T05:41:59.387428Z",
+      "name": "database-create",
+      "role": "extraction",
+      "started": "2026-10-29T05:41:50.845054Z",
+      "status": "completed"
+    },
+    {
+      "exit_code": 0,
+      "finished": "2026-10-29T05:42:13.058662Z",
+      "name": "database-analyze",
+      "role": "analysis",
+      "started": "2026-10-29T05:41:59.387443Z",
+      "status": "completed"
+    }
+  ],
+  "target": {
+    "purl": "pkg:npm/lib-b@2.0",
+    "source_root": "vendor/lib-b"
+  },
+  "tool": {
+    "executable_sha256": null,
+    "name": "CodeQL",
+    "output_format_version": "sarif-latest",
+    "version": "2.27.3"
+  }
+}

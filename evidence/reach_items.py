@@ -111,7 +111,7 @@ def build_reach_items(
         if document.kind is ReachKind.HAZARD_BASIS:
             continue
         assessment = assessments[document.doc_id]
-        if document.source is not None:  # one item per recorded path, at its raw-artifact locator
+        if document.source is not None and document.finding is ReachFinding.POSITIVE:  # one item per recorded path, at its raw-artifact locator
             for trace in document.source.traces:
                 ep = assessment.level_at(trace.locator)
                 state, basis, reason = observation_state(document, ep)

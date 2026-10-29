@@ -3959,6 +3959,5374 @@
     "target_source_root": "node_modules/lib-b"
    },
    "base": "empty"
+  },
+  {
+   "id": "N01-record-exact-binding-positive-path",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "27cba1ddee53f0622e7e5e21b314cafdb26d86c5c965b6bb99a8f61bfe9aaa57",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "RUN_RECORD_UNAUTHENTICATED",
+     "SOURCE_TO_ARTIFACT_LINK_EVALUATOR_ASSERTED"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "binding_established": "established",
+      "tool_declared": "established",
+      "process_completed": "established",
+      "extraction_completed": "established",
+      "language_scope": "established",
+      "locus_included": "established",
+      "query_suite_completed": "established",
+      "claim_semantics": "established",
+      "entry_points_enumerated": "established",
+      "exclusions_accounted": "established",
+      "suppressions_accounted": "established",
+      "no_partial_indicators": "established",
+      "no_undecidable_evidence": "established",
+      "coverage_claim_declared": "established"
+     },
+     "preventing_include": [
+      "path_recorded"
+     ],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     },
+     "entry_points_known": true
+    }
+   },
+   "why": "A CodeQL-style log without versionControlProvenance, bound by an analysis-run record: same repository, full revision, tree digest, clean tree, output SHA-256 equal to the file's, tool and version equal to the artifact's. A recorded path touching the locus is a positive observation (\u00a75.1 step 1) -> Present, R1. Binding established -> BIND Present, no R6. The attribution P1 (tool, version, time) takes the time from the record because the artifact names the same tool and version; the record never confers P2 or P3, so R13 stays. Entry points, hazards and configuration are not supplied by this base: R5, R11, R12.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "locus_only",
+   "run": "runs/synthetic_good_path.run.json"
+  },
+  {
+   "id": "N02-record-other-revision",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "4e7593b5e9e60b7535b82c1779d47522c23b2b607b304f6ef5d1b53b38f84f4e",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_CONTRADICTED:REVISION_MISMATCH"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "REVISION_MISMATCH"
+     ],
+     "coverage": {
+      "binding_established": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record says the analysis ran at another full commit than the one the evaluator assesses. Two exact identifiers differ: binding CONTRADICTED. The recorded path is kept (an unbound positive can only lower a verdict, P-3) but BIND is Unknown (R6); with no bound record the P1 time is not taken -> P0.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_other_revision.run.json"
+  },
+  {
+   "id": "N03-record-other-repository-same-file-names",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "8e06e70906b8fc3a4980b528b064638611215d03cbb260d1b6fb8a65b37b2e35",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_CONTRADICTED:REPOSITORY_MISMATCH"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "REPOSITORY_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "An artifact of a different repository that happens to contain the same relative file names. File names carry no identity: the repository differs, so the revision is not even compared. BIND Unknown (R6); the path observation stays.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_other_repository.run.json"
+  },
+  {
+   "id": "N04-record-abbreviated-revision",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "1f243904abcf48b96b89aa167bd773a833031c64545029d25259a45569f14fe8",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_AMBIGUOUS:REVISION_ABBREVIATED"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "ambiguous",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "REVISION_ABBREVIATED"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A 7-character revision is a prefix of the evaluator's 40-character commit: it is consistent with it but could name another commit. An abbreviated identifier is not an exact identity: AMBIGUOUS, not ESTABLISHED, so BIND Unknown (R6).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abbreviated_revision.run.json"
+  },
+  {
+   "id": "N05-record-dirty-worktree",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "ffb7e4c43e7e0ea69e45a3da1c44c7ccf22328c182add3b0164631788edaad96",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_IMPOSSIBLE:WORKTREE_NOT_CLEAN",
+     "RUN_BINDING_IMPOSSIBLE:UNTRACKED_FILES_PRESENT"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "impossible",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "WORKTREE_NOT_CLEAN",
+      "UNTRACKED_FILES_PRESENT"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The commit and tree digest match, but the record says the working tree was modified and held an untracked file: the analysed bytes are not the committed bytes, so the commit cannot identify them. IMPOSSIBLE to establish; BIND Unknown (R6).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_dirty_tree.run.json"
+  },
+  {
+   "id": "N06-record-dirty-worktree-identified-by-content",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "8f149a99e6343168f3e25bef5796d650deff5eab28c97afdb26dc99e93304ff5",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "DIRTY_TREE_IDENTIFIED_BY_CONTENT_DIGEST"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The same dirty tree, but the record carries a digest of the actual file contents and the evaluator declared that very digest as the identity of the assessed source. The identity then rests on content, not on the commit: ESTABLISHED (exact), with the dirty state disclosed.",
+   "subject": {
+    "source_content_hash": "sha256-worktree:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+   },
+   "run": "runs/synthetic_dirty_identified_by_content.run.json"
+  },
+  {
+   "id": "N07-record-source-changed-during-run",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "4dcf3c9accc530282ecb51d480315e5df74c6a6d1f699c8284def442162e11c8",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_IMPOSSIBLE:SOURCE_CHANGED_DURING_RUN"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "impossible",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "SOURCE_CHANGED_DURING_RUN"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The runner observed the analysed directory change between start and end: no single source identity covers the run. IMPOSSIBLE; BIND Unknown.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_source_changed_during_run.run.json"
+  },
+  {
+   "id": "N08-record-submodules-present",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "3aca383e627d0032d75d28dd7b58de7ff28fd0d10da787c7a69d367f94be29b9",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_AMBIGUOUS:SUBMODULE_CONTENT_NOT_IDENTIFIED"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "ambiguous",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "SUBMODULE_CONTENT_NOT_IDENTIFIED"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A submodule is pinned by commit in the tree, but what was checked out inside it is not identified by this record: ambiguous source identity.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_submodule.run.json"
+  },
+  {
+   "id": "N09-record-tree-digest-mismatch",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "9a251546541959bd1b3de1361b3ef882872890b3c929a4616e689572a03b4386",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_CONTRADICTED:TREE_DIGEST_MISMATCH"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "TREE_DIGEST_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "Same commit text, different tree digest than the identity the evaluator declared: contradicted.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_tree_digest_mismatch.run.json"
+  },
+  {
+   "id": "N10-record-unobserved-state",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "c8787604f7d941a918282b68acb600792ce27e49235b360af578536267891a79",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_MISSING:SOURCE_STABILITY_NOT_OBSERVED",
+     "RUN_BINDING_MISSING:WORKTREE_STATE_NOT_RECORDED",
+     "RUN_BINDING_MISSING:UNTRACKED_FILES_NOT_RECORDED",
+     "RUN_BINDING_MISSING:SUBMODULES_NOT_RECORDED"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "missing",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "SOURCE_STABILITY_NOT_OBSERVED",
+      "WORKTREE_STATE_NOT_RECORDED",
+      "UNTRACKED_FILES_NOT_RECORDED",
+      "SUBMODULES_NOT_RECORDED"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "Cleanliness, untracked files, submodules and stability were not observed (null). Missing is not negative: unobserved is not 'clean', so the binding is MISSING, not established.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_unobserved_state.run.json"
+  },
+  {
+   "id": "N11-record-tool-differs-from-artifact",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "5668fbe6f9210726e6b3de7704e790422c70f9dae05a9c1f9b503a67f2c256da",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_CONTRADICTED:RUN_TOOL_MISMATCH:#/runs/0"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "RUN_TOOL_MISMATCH:#/runs/0"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record names Joern but the artifact is a CodeQL log: the record does not describe this artifact's run.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_tool_mismatch.run.json"
+  },
+  {
+   "id": "N12-record-target-differs",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "bce4a6b58ff47c2d97fb2b51980f100a548232d558f47eb4f449c3c984c9c750",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_CONTRADICTED:TARGET_MISMATCH"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "TARGET_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record concerns another component (purl) than the finding's target: contradicted.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_target_mismatch.run.json"
+  },
+  {
+   "id": "N13-record-target-source-root-differs",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "c814bcd8ced4f2f445daf901389236cf81b480d7cd16643f09d9d10818c8f273",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_CONTRADICTED:TARGET_SOURCE_ROOT_MISMATCH"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "TARGET_SOURCE_ROOT_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record places the target at vendor/lib-b, the evaluator at node_modules/lib-b: two statements of one fact differ.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_target_root_mismatch.run.json"
+  },
+  {
+   "id": "N14-record-output-hash-altered",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "42357b96bf0436b8a381edff309b36614b8d0d85048af18ff969e3775c9e4cb4",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_CONTRADICTED:RUN_OUTPUT_HASH_MISMATCH"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "RUN_OUTPUT_HASH_MISMATCH"
+     ],
+     "coverage": {
+      "binding_established": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record's output SHA-256 is not the SHA-256 of the artifact file: the record does not describe these bytes (altered or forged hash, or a record of another file). Safely downgraded: the observed path is kept, nothing in the record is trusted, BIND Unknown.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_output_hash_altered.run.json"
+  },
+  {
+   "id": "N15-record-output-hash-altered-no-path",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "f7c0a3cafc9aa49023394746e3a85fbb4560ae42b99d2c38e9c1de0253a262ff",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "RUN_OUTPUT_HASH_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [
+      "binding_established"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A record with a complete coverage claim whose output hash is altered, next to an artifact with no path: nothing links the record to these bytes, so no negative document is derived; REACH Unknown (R2) - the forged record cannot manufacture an absence.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_output_hash_altered_no_path.run.json"
+  },
+  {
+   "id": "N16-record-output-not-listed",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "ed5384f1e1e0f08f4647fe20ae887c1da065d11516b6ce04538d3889df84d4c7",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_MISSING:RUN_OUTPUT_NOT_LISTED"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "missing",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "RUN_OUTPUT_NOT_LISTED"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record lists no output, so it is not linked to the artifact at all: MISSING.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_output_not_listed.run.json"
+  },
+  {
+   "id": "N17-bound-path-with-failed-analysis-stage",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "ac0fdaec7d68c8563db3b5fa99e5038629cb210477b5ff36e7c8873cef2071c1",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "failed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "process_completed": "not_established",
+      "query_suite_completed": "not_established"
+     },
+     "preventing_include": [
+      "process_completed",
+      "path_recorded"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The analysis stage failed (exit 2) yet the partial output records a path. A recorded path is a positive observation however incomplete the run: incomplete analysis cannot hide it (\u00a75.1 step 1). The failure is disclosed in the assessment; it can only matter for an absence.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_analysis_stage_failed_with_path.run.json"
+  },
+  {
+   "id": "N18-failed-analysis-stage-no-path-claims-coverage",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "060e40744ef94def8f45a7a8fcb21238b5e287ce07b40fd430346ab4fb9176f4",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "failed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [
+      "process_completed",
+      "query_suite_completed"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record declares the full coverage claim but its analysis stage failed: the 'successful' artifact is partial. No absence may be derived (\u00a75.1 step 2 needs a declared full-coverage claim of an analysis that ran); REACH stays Unknown (R2).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_analysis_stage_failed.run.json"
+  },
+  {
+   "id": "N19-analysis-stage-timed-out",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "8ebb5e6ff57bcad34af685d380fde363693a73147c0542bacad3842a5eca9544",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "failed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [
+      "process_completed"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A timed-out analysis stage is a failure to complete: no negative derivation.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_analysis_timed_out.run.json"
+  },
+  {
+   "id": "N20-no-extraction-stage-recorded",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "3c93de4180f9841920fbbc3ed395e54aa41a25f9a4b47c0ed50a1a7e5a9aa0bc",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "process_completed": "established",
+      "extraction_completed": "not_established"
+     },
+     "preventing_include": [
+      "extraction_completed"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "Database/graph construction is not recorded: it cannot be assumed to have completed. A successful process is not complete coverage.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_no_extraction_stage.run.json"
+  },
+  {
+   "id": "N21-partial-analysis-indicator",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "b062650a933d05ab4505e27518c610ca68d047fdc3a169f77c04225a93eb6074",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "partial",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "no_partial_indicators": "not_established"
+     },
+     "preventing_include": [
+      "no_partial_indicators"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "All stages exited 0 but the record lists a partial-analysis indicator (skipped files): the run is partial.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_partial_indicator.run.json"
+  },
+  {
+   "id": "N22-run-error-diagnostic",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "c266be0d7cd24e3e01b1ff919b804d1d19be60c9eadb6a75154690cba9748761",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "no_partial_indicators": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "An error-level diagnostic in the record is a partial-analysis indicator even with exit status 0.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_error_diagnostic.run.json"
+  },
+  {
+   "id": "N23-record-completed-artifact-reports-failure",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_failed.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "f0616e79ab59f99489b537390e68fdefeeb8fe233300dd454e697b315cdd385e",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "56486584e649b92e975ae3aa1a57753bcfe70809ac3b3a3d612f13dff0db75c1",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "RUN_REPORTS_UNSUCCESSFUL_EXECUTION"
+    ],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "failed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "process_completed": "contradicted"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record says every stage completed; the artifact itself says executionSuccessful=false with an error notification. Contradictory statements about one run: coverage 'process completed' is contradicted, execution is reported as failed, no absence.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_record_ok_artifact_failed.run.json"
+  },
+  {
+   "id": "N24-artifact-error-notification",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_error_notification.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "a0c21ab41a016c5c34d7e5858aaef47196c7f399ab0c6afb68ed4160381d4502",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "1b94f27e344b8d6875ea36623af323bd63823126913ef48d226c451246ca5fd3",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "no_partial_indicators": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "An error notification in the artifact is a partial-analysis indicator even when the record shows success.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_record_ok_artifact_errors.run.json"
+  },
+  {
+   "id": "N25-query-pack-version-mismatch",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "86a794af41dd194d39b0ce948910d3b41119d16757ee7adcff3b3c0df26dddc2",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "query_suite_completed": "contradicted"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record says query pack 2.4.9 ran; the artifact lists 2.4.8: the stated query configuration is contradicted, so what the run could detect is unknown. No absence.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_query_pack_version.run.json"
+  },
+  {
+   "id": "N26-artifact-lists-older-query-pack",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_pack_older.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "5801c6ed468182200383ee4705dbbd73432ee63bcab0a8fb64db782e91df2742",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "8dde0ae7599ba5111d5e9e7bd2c1a46d6f7543d0471e4abd6fd88c1ca13666c4",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "query_suite_completed": "contradicted"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The reverse: the artifact lists an older pack (2.4.7) than the record (2.4.8).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_query_pack_artifact_older.run.json"
+  },
+  {
+   "id": "N27-query-pack-name-mismatch",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "138890e6e8b1e02f31068327ce30421d4a12ac6a3bea1d0a7fc7e7dc6f35e96e",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "query_suite_completed": "contradicted"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A different pack name (java vs javascript queries) than the artifact's extensions.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_query_pack_name.run.json"
+  },
+  {
+   "id": "N28-query-id-not-among-artifact-rules",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "5cd112d04cb31a0f3f20c9fb059ef0a1f23740ce8e5a868da53d366663a0d980",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "query_suite_completed": "contradicted"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record's claim rests on a query the artifact does not list among the rules that ran.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_query_id_not_run.run.json"
+  },
+  {
+   "id": "N29-stock-taint-query-is-not-a-locus-reachability-analysis",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "4980a785d6056d52506cc94293c73bfc9bb26a7116e800a176a3978c5064f257",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "claim_semantics": "not_established"
+     },
+     "preventing_include": [
+      "claim_semantics"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The query is declared a taint path query: it reports source-to-sink flows, not whether the locus is reachable from entry points. Absence of its findings says nothing about reachability, however complete the run (CE-R2/CE-R6: soundness of the analysis for the claim is what is missing).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_taint_query_semantics.run.json"
+  },
+  {
+   "id": "N30-no-claim-semantics-recorded",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "36daaf6a9a512f89dc1966dccd986a14fa29dff01d2fe06dac5e04f1d34037b3",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "claim_semantics": "not_recorded"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "What the query establishes is not stated: not recorded, not assumed.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_no_claim_semantics.run.json"
+  },
+  {
+   "id": "N31-no-query-identity-recorded",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "1ff911ecc4a6942bd6767f0bf07ad99161630c75d581c00ed34730cd12ef581c",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "query_suite_completed": "not_recorded"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "No query ids are recorded: which queries completed is unknown.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_no_query_ids.run.json"
+  },
+  {
+   "id": "N32-entry-points-declared-incomplete",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "f086791e80f32b9cafbf8e8beb36778ed7382f8d58bf1114df42e17e2e171995",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "entry_points_enumerated": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "entry_points_known": false
+    }
+   },
+   "why": "The inventory says the entry-point set is incomplete (CE-R2 entry-point omission): absence relative to it proves nothing.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_entry_points_incomplete.run.json"
+  },
+  {
+   "id": "N33-entry-points-unknown",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "e0ef5e7492a2fc25724251a8ac6efd2a055c66217aa43890ca59325b3c364034",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "entry_points_enumerated": "not_recorded"
+     },
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "entry_points_known": false
+    }
+   },
+   "why": "No entry-point inventory at all: unknown, not 'none needed'.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_entry_points_unknown.run.json"
+  },
+  {
+   "id": "N34-entry-points-contradict-the-evaluators",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "4e9e4f946db6fb90e8f7c890c87c5c49f6ec24c45b4cc6f32d4c8bac059c0a42",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "entry_points_enumerated": "contradicted"
+     },
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "entry_points_known": false
+    }
+   },
+   "why": "The record's inventory lists other entry methods than the evaluator declared for the assessed artifact: contradictory.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_entry_points_differ_from_subject.run.json"
+  },
+  {
+   "id": "N35-claim-covers-another-locus",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "62116271593338253dc3f17e10d4ce1c008bda1ad4c072f47e492425cb4dbff3",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "coverage_claim_declared": "contradicted"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The declared coverage claim is about src/other.js, not the evaluated locus src/parse.js: it does not cover the claim being assessed.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_claim_covers_other_locus.run.json"
+  },
+  {
+   "id": "N36-claim-entries-differ-from-inventory",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "b1363cbfccacf1721f77bce53b7811818f154f3045c1ef51d67b3b52e908e4fe",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "coverage_claim_declared": "contradicted"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The claim and the inventory name different entry methods: self-contradictory declaration.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_claim_entries_differ_from_inventory.run.json"
+  },
+  {
+   "id": "N37-successful-run-no-paths-no-claim",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "aa2c457c8fce444c0f43d8520d02994806949bedc5d13b68260debca39715bc7",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "coverage_claim_declared": "not_recorded",
+      "process_completed": "established"
+     },
+     "preventing_include": [
+      "coverage_claim_declared"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A successful, fully recorded run that reports no path, but declares no coverage claim: an empty result is not a coverage claim over LOCUS and ENTRY (\u00a75.1 step 2); P-2: Unknown, never Absent.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_no_coverage_claim.run.json"
+  },
+  {
+   "id": "N38-locus-file-excluded-from-scope",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "e01c7958335325f53441a423a27a507b8b3e13f6fd2bd2331d4090cc496ed716",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "exclusions_accounted": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record excludes node_modules/lib-b from the analysed files: the locus was not analysed.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_locus_file_excluded.run.json"
+  },
+  {
+   "id": "N39-no-tool-version",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "9fa800740901128beaa3792e9a27d23fbee367f4dd5b7daea720088f44fa8839",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "tool_declared": "not_recorded"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "K1 requires a declared tool (\u00a75.1); a record without the tool's version leaves it undeclared.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_no_tool_version.run.json"
+  },
+  {
+   "id": "N40-no-language-recorded",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "b183c5046d10036095ba4d2ef86e7cfb6b920bc78bdd7ececb637ac0d5120e0e",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "language_scope": "not_recorded"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The analysed language scope is not recorded.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_no_languages.run.json"
+  },
+  {
+   "id": "N41-locus-not-among-extracted-files",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_locus_not_extracted.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "3c2a0e735db58f1a60f986088820c1c1ed4031751750c979d1e11f3d4f2a00b7",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "7a96d63472f9004a99bf2dec869db5e334ba5fe4ff0c3bd6d57dc432061cd0aa",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "locus_included": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The artifact's own expected-extracted-files notifications do not list node_modules/lib-b/src/parse.js: the locus file was not part of the extraction scope, so 'no finding' says nothing about it.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_locus_not_extracted.run.json"
+  },
+  {
+   "id": "N42-locus-not-in-record-inventory",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_file_scope.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "f9876b3d2dd3e5d6e35787b319526ad009b033bda3052ac77dc96185fc22d822",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "0ced5da93280c333f29ef82495b236b79edab6da8a06531c2e65f200b18a9408",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "locus_included": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The artifact states no file scope; the record's own inventory (an assertion) omits the locus file.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_locus_not_in_inventory.run.json"
+  },
+  {
+   "id": "N43-no-file-scope-anywhere",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_file_scope.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "f9876b3d2dd3e5d6e35787b319526ad009b033bda3052ac77dc96185fc22d822",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "923f20a85b5dcb0fede374bf87a45b5120172aab9f9f6033812d7f3c42c6cbbb",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "locus_included": "not_recorded"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "Neither the artifact nor the record states which files were in scope.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_no_file_scope_anywhere.run.json"
+  },
+  {
+   "id": "N44-suppressed-result-cannot-be-accounted-for",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_suppressed_no_flow.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "303393929261a1e792879c34d879164247df42042c1c85ab3a80e9ea6975a7b5",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "185c97687357f7cc205f71a532b264c2769d9f354d67ef624d838d60f600dba4",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "RESULTS_WITHOUT_CODE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "suppressions_accounted": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A suppressed finding exists whose flows (if any) are not in the artifact: the analysis may have found something that was hidden. Suppressions are not accounted for, so no absence.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_suppressed_result.run.json"
+  },
+  {
+   "id": "N45-complete-run-declared-coverage-gives-a-weak-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "da64f7206f455df1a9c8cdd2f04df76ddefce9150e9c60997170ab86a64f105d",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Weak",
+    "rules": [
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "ABSENCE_RESTS_ON_DECLARED_COVERAGE_CLAIM",
+     "RUN_RECORD_UNAUTHENTICATED"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": true,
+     "reasons_include": [],
+     "coverage": {
+      "binding_established": "established",
+      "tool_declared": "established",
+      "process_completed": "established",
+      "extraction_completed": "established",
+      "language_scope": "established",
+      "locus_included": "established",
+      "query_suite_completed": "established",
+      "claim_semantics": "established",
+      "entry_points_enumerated": "established",
+      "exclusions_accounted": "established",
+      "suppressions_accounted": "established",
+      "no_partial_indicators": "established",
+      "no_undecidable_evidence": "established",
+      "coverage_claim_declared": "established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "entry_points_known": true
+    }
+   },
+   "why": "Every coverage fact is established (exact binding, completed stages, extraction scope containing the locus file, query identity corroborated by the artifact, locus-reachability semantics declared, consistent entry inventory, nothing excluded or suppressed, no partial indicator, no undecidable evidence) and the record declares the full-coverage claim: a K1 negative document with a declared full-coverage claim -> REACH Absent (\u00a75.1 step 2). Provenance stays P1 (never P2/P3 from a record): R13, and the derived report models no hazards and no configuration beyond the base: R11, R12. The verdict is Weak. The claim is forwarded as claimed (A6), not verified.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_good_no_path.run.json"
+  },
+  {
+   "id": "N46-a-verified-detached-result-cannot-lift-a-record-derived-absence-to-p3",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c19b8a13d69451c3664870a7046c427f68c56c703276bd1ddd89658435789cee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "58d7cc08ebb42591c9c6466523ae8416e8cfd5f46d531bedd47de7d0ca0a8616",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Weak",
+    "rules": [
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": true,
+     "reasons_include": [],
+     "coverage": {
+      "binding_established": "established",
+      "tool_declared": "established",
+      "process_completed": "established",
+      "extraction_completed": "established",
+      "language_scope": "established",
+      "locus_included": "established",
+      "query_suite_completed": "established",
+      "claim_semantics": "established",
+      "entry_points_enumerated": "established",
+      "exclusions_accounted": "established",
+      "suppressions_accounted": "established",
+      "no_partial_indicators": "established",
+      "no_undecidable_evidence": "established",
+      "coverage_claim_declared": "established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "entry_points_known": true
+    }
+   },
+   "why": "As N45 with every other requirement of \u00a75.5 met: the record declares the analysed configuration (prod), every other hazard class is excluded by evidence in the base, and a trusted detached verification result covers the artifact. The only rule left is R13: P3 needs P2 first (\u00a71.2), and P2 needs the document to declare a digest equal to S's, which a log and an unauthenticated record cannot do (AI-D5). A record-derived absence therefore tops out at Weak by the existing provenance ladder; nothing was changed to make it more decisive.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_all_hazards_no_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "artifact",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_good_no_path_configs.run.json"
+  },
+  {
+   "id": "N45b-file-scope-only-from-the-record-is-an-assertion",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_no_file_scope.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "f9876b3d2dd3e5d6e35787b319526ad009b033bda3052ac77dc96185fc22d822",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "2f7ebe3697df39d30ce673017ad2aed76218830f3b657b4658d61e2f271a8fc8",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Weak",
+    "rules": [
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "ABSENCE_RESTS_ON_DECLARED_COVERAGE_CLAIM"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": true,
+     "reasons_include": [],
+     "coverage": {
+      "binding_established": "established",
+      "tool_declared": "established",
+      "process_completed": "established",
+      "extraction_completed": "established",
+      "language_scope": "established",
+      "locus_included": "established",
+      "query_suite_completed": "established",
+      "claim_semantics": "established",
+      "entry_points_enumerated": "established",
+      "exclusions_accounted": "established",
+      "suppressions_accounted": "established",
+      "no_partial_indicators": "established",
+      "no_undecidable_evidence": "established",
+      "coverage_claim_declared": "established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "entry_points_known": true
+    }
+   },
+   "why": "The artifact states no file scope; the record's own complete file inventory lists the locus file. That is the author's assertion (like the coverage claim itself), accepted as such: the same Weak absence as N45, with the weaker basis for the file scope disclosed in the assessment notes.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_file_inventory_record_only.run.json"
+  },
+  {
+   "id": "N47-complete-run-cannot-hide-an-unresolved-relevant-path",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "975a4d9292efb1f9fa81fcbb51aef4f1d10b9378476828c7817744d7baa8de4a",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "7c28d9f30c6dedb63ccbdb6092ed804663789fb3c7433216c68c8d8450443de1",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "no_undecidable_evidence": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "Everything about the run is in order but an absolute-URI flow cannot be mapped (no root is declared): it may touch the locus, so the run is not shown to be free of paths. No negative document is derived (undecidable evidence).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_abs_no_roots.run.json"
+  },
+  {
+   "id": "N48-positive-path-beside-complete-coverage-claim",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "27cba1ddee53f0622e7e5e21b314cafdb26d86c5c965b6bb99a8f61bfe9aaa57",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [
+      "path_recorded"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A properly bound positive path with a fully declared record and a base that supplies everything but the K1 report: the path decides (R1); the declared coverage claim cannot turn it into an absence. The positive report declares no entry-point set, hence R5, as in N01.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_good_path.run.json"
+  },
+  {
+   "id": "N49-caller-k1-absence-and-bound-path-conflict",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "27cba1ddee53f0622e7e5e21b314cafdb26d86c5c965b6bb99a8f61bfe9aaa57",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Contradictory",
+    "verdict": "Insufficient",
+    "rules": [
+     "R3",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [
+      "path_recorded"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The supplied K1 absence (verified, Supported on its own) and a bound recorded path: positive + K1 Absent = Contradictory (R3). The caller's absence does not outrank an observation, and the run record adds nothing to the absence.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_good_path.run.json"
+  },
+  {
+   "id": "U01-absolute-uri-mapped-through-the-primary-root",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "975a4d9292efb1f9fa81fcbb51aef4f1d10b9378476828c7817744d7baa8de4a",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "8ab085540a6baedc9b138217b34381d1148c3d72eeca8f23f36738080cd8110d",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [
+     "URI_MAPPED_BY_RUN_ROOT"
+    ],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 2,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "The flow's locations are file:///ci/work/app/...; the record declares /ci/work/app as the primary root and its binding to the assessed source is ESTABLISHED. The URI path is under the root by whole segments, has no dot segments, no encoded separators and no remote host: mapped to node_modules/lib-b/src/parse.js -> a recorded path touching the locus -> Present (R1). The mapping uses the declared root, not a file name or a suffix.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_root_declared.run.json"
+  },
+  {
+   "id": "U02-absolute-uri-mapped-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "975a4d9292efb1f9fa81fcbb51aef4f1d10b9378476828c7817744d7baa8de4a",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "8ab085540a6baedc9b138217b34381d1148c3d72eeca8f23f36738080cd8110d",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Contradictory",
+    "verdict": "Insufficient",
+    "rules": [
+     "R3",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [
+     "URI_MAPPED_BY_RUN_ROOT"
+    ],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 2,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "The mapped path contradicts a supplied K1 absence (R3) - what the unmapped URI would have been refused for is now decided.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_root_declared.run.json"
+  },
+  {
+   "id": "U03-absolute-uri-without-declared-roots",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "975a4d9292efb1f9fa81fcbb51aef4f1d10b9378476828c7817744d7baa8de4a",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "7c28d9f30c6dedb63ccbdb6092ed804663789fb3c7433216c68c8d8450443de1",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [
+     "UNDECIDABLE_EVIDENCE_DID_NOT_CHANGE_THE_VERDICT"
+    ],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "No root is declared, so nothing relates the URI to the assessed source. Its path ends with the locus path, so it might be the locus: undecidable, kept. Without a K1 absence the verdict is Insufficient either way.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_no_roots.run.json"
+  },
+  {
+   "id": "U04-absolute-uri-without-roots-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "975a4d9292efb1f9fa81fcbb51aef4f1d10b9378476828c7817744d7baa8de4a",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "7c28d9f30c6dedb63ccbdb6092ed804663789fb3c7433216c68c8d8450443de1",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "The same unmappable URI next to a supplied K1 absence: counting it as a path would change Supported into Contradictory, so no verdict is justified: structured refusal (the repaired hazard of the previous milestone, unchanged).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_no_roots.run.json"
+  },
+  {
+   "id": "U05-absolute-uri-under-a-different-checkout",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "975a4d9292efb1f9fa81fcbb51aef4f1d10b9378476828c7817744d7baa8de4a",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "dd5a82d6cc07dcb688910bae5ffee56b06309f87e7bfeb325ac273c4cbbb648d",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "The declared primary root is /ci/work/other-checkout; the URI lies under /ci/work/app: not under any declared root.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_other_root_path.run.json"
+  },
+  {
+   "id": "U06-root-prefix-is-not-a-path-prefix",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "975a4d9292efb1f9fa81fcbb51aef4f1d10b9378476828c7817744d7baa8de4a",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "b2ee39d2c4e0a20f62078d8e0238a96bbdbf1f9bd7b10d85d22ce7a6b449f58e",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "The root /ci/work/ap is a string prefix of /ci/work/app/... but not a path-segment prefix: not mapped.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_root_prefix_not_segment.run.json"
+  },
+  {
+   "id": "U07-mapping-needs-an-established-binding",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "975a4d9292efb1f9fa81fcbb51aef4f1d10b9378476828c7817744d7baa8de4a",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "e0dbbfed5cccc55069c763853ff7c95edb280ff02247c106f5c56071f86bc9ec",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [
+     "RUN_BINDING_CONTRADICTED:REVISION_MISMATCH"
+    ],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW",
+     "RUN_BINDING_NOT_ESTABLISHED"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "REVISION_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "The record declares the right root, but it was written for another revision: its relation to the assessed source is contradicted, so its root cannot be used to place locations in the assessed tree. Unmapped, hence undecidable (not a path, not discarded).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_root_declared_other_revision.run.json"
+  },
+  {
+   "id": "U08-absolute-uri-into-a-declared-vendored-root",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_vendored.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "63403d50724cabdff39d3dfaf901769833a78fe503120c85e3ef46863d87c1ac",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "44d962ab5fe9455c59cd7ac05f93cc8e72809dc02fa9cc2fcf074c7253f9c7b4",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 1
+     }
+    }
+   },
+   "why": "The location is src/parse.js inside /ci/work/lib-b-ext, a declared vendored root with its own repository and revision - not the assessed tree. Whether it is (a copy of) the target component cannot be decided from the assessed source identity: it ends with the locus file, so it is undecidable, not matched and not dismissed.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_vendored_root.run.json"
+  },
+  {
+   "id": "U09-vendored-root-file-that-cannot-be-the-locus",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_vendored_irrelevant.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "f4eedb64fd01f3c05ff74632356fdd3f099aa4cab38e51508a0ee9a9fa03aae2",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "a82d948142c5e908a3b03c60a66dc53d599476c95fb3da9f4b93e515c97954c9",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Weak",
+    "rules": [
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [
+     "UNRESOLVED_LOCATIONS_EXCLUDED"
+    ],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": true,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 1,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "A file of the vendored root whose path does not end with any locus file cannot be the locus: irrelevant (reported, not silently dropped), so the run is still free of undecidable evidence. The record is complete and declares the coverage claim: the same Weak absence as N45 (R11, R12, R13).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_abs_vendored_root_irrelevant.run.json"
+  },
+  {
+   "id": "U10-vendored-root-not-declared",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_vendored.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "63403d50724cabdff39d3dfaf901769833a78fe503120c85e3ef46863d87c1ac",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "d4c4fbae7d8368a3c434f539b7d45537e6974a7ad679c787a3585e803cd3cdbe",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "The same location without a declared vendored root: its path still ends with the locus file, so it cannot be excluded.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_vendored_undeclared.run.json"
+  },
+  {
+   "id": "U11-mapped-location-in-another-file",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_irrelevant.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "9e8838f4a78c5bae210d00f879d4f4f7e4e8e24c64018ed896fffeaeadceb3ad",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "4f71b9950127c164b27930504760eb72fab57e1997395ab1060fb4570d24dc57",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "coverage_claim_declared": "not_recorded"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "Mapped through the declared root to lib/more.js: resolved, and not the locus: not a path. (Without a coverage claim in the record it is not an absence either.)",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_irrelevant_mapped_no_claim.run.json"
+  },
+  {
+   "id": "U12-mapped-irrelevant-location-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_irrelevant.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "9e8838f4a78c5bae210d00f879d4f4f7e4e8e24c64018ed896fffeaeadceb3ad",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "4f71b9950127c164b27930504760eb72fab57e1997395ab1060fb4570d24dc57",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Supported",
+    "rules": [],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P3",
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A resolved flow elsewhere leaves the supplied (verified) K1 absence untouched. The record makes no coverage claim, so it contributes no document (see U12b for a record that does).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_irrelevant_mapped_no_claim.run.json"
+  },
+  {
+   "id": "U12b-record-with-a-claim-adds-a-lower-provenance-k1-report",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_irrelevant.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "9e8838f4a78c5bae210d00f879d4f4f7e4e8e24c64018ed896fffeaeadceb3ad",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "3f15925baf8648fc64774fa92c589996c7072641014288acbc97b9bbefefbfeb",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Weak",
+    "rules": [
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": true,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "With a declared claim the run yields its own K1 absence (P1). Two K1 absences jointly support the conclusion, so PROV_REACH is the minimum, P1 (\u00a71.2 step 5): the Supported verdict of the verified report alone drops to Weak (P-3: added evidence can only lower), and the derived report declares no analysed configuration (R12).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_irrelevant_mapped.run.json"
+  },
+  {
+   "id": "U13-dot-dot-escaping-the-root",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_escape.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "124a648205103ba789063204c53a5cd3d3b222cbf01d097280980ba4ed947fe7",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "c567896808f9ff8f84f6777ea94b4c8b70c09f6680417a1e8fbdd658f521f7d1",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "A '..' segment: no lexical normalization is trusted without canonical paths (symlinks could change the meaning). The location is not mapped; its path (normalized) ends with the locus path, so it is undecidable. Without a K1 absence the verdict is Insufficient either way.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_escape.run.json"
+  },
+  {
+   "id": "U13-dot-dot-escaping-the-root-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_escape.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "124a648205103ba789063204c53a5cd3d3b222cbf01d097280980ba4ed947fe7",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "c567896808f9ff8f84f6777ea94b4c8b70c09f6680417a1e8fbdd658f521f7d1",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "A '..' segment: no lexical normalization is trusted without canonical paths (symlinks could change the meaning). The location is not mapped; its path (normalized) ends with the locus path, so it is undecidable. Beside a K1 absence it could change the verdict: refusal.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_escape.run.json"
+  },
+  {
+   "id": "U14-percent-encoded-dot-dot",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_encoded_dots.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "cc4eaf9e42d9680bb0358a1952b841d3a44306f7316decf9ebbaaa5d0aa024c0",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "0545bc33f2cd3251e260f8ba905aa9e5a4ab50d611f7c10d7ebd3c51d913adef",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "%2e%2e decodes to '..': the same traversal in disguise; not mapped, undecidable. Without a K1 absence the verdict is Insufficient either way.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_encoded_dots.run.json"
+  },
+  {
+   "id": "U14-percent-encoded-dot-dot-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_encoded_dots.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "cc4eaf9e42d9680bb0358a1952b841d3a44306f7316decf9ebbaaa5d0aa024c0",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "0545bc33f2cd3251e260f8ba905aa9e5a4ab50d611f7c10d7ebd3c51d913adef",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "%2e%2e decodes to '..': the same traversal in disguise; not mapped, undecidable. Beside a K1 absence it could change the verdict: refusal.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_encoded_dots.run.json"
+  },
+  {
+   "id": "U15-percent-encoded-separator",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_encoded_slash.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "39918d30b3c184e08e2ebe5447718c7ecdb12e8f1dac64a6cbd936e73ffc04f1",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "3dacd67d9c60b1d2700d165f6b413f9bdf1b709d1038ded73594cc1cabe6b3bc",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "%2F inside a path segment would let one segment name two: refused for mapping, undecidable. Without a K1 absence the verdict is Insufficient either way.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_encoded_slash.run.json"
+  },
+  {
+   "id": "U15-percent-encoded-separator-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_encoded_slash.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "39918d30b3c184e08e2ebe5447718c7ecdb12e8f1dac64a6cbd936e73ffc04f1",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "3dacd67d9c60b1d2700d165f6b413f9bdf1b709d1038ded73594cc1cabe6b3bc",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "%2F inside a path segment would let one segment name two: refused for mapping, undecidable. Beside a K1 absence it could change the verdict: refusal.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_encoded_slash.run.json"
+  },
+  {
+   "id": "U16-file-uri-with-a-remote-host",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_remote_host.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c31ebdb14d27d283748356e39ac380c9517171bfa49122088f6109140d424bee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "ca2a8b4410ef235cdd287070397e1a35db72d18e47f15f05f6c24d3849b9e83b",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "file://build-host/... names a file on another machine; the local root says nothing about it. Without a K1 absence the verdict is Insufficient either way.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_remote_host.run.json"
+  },
+  {
+   "id": "U16-file-uri-with-a-remote-host-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_remote_host.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "c31ebdb14d27d283748356e39ac380c9517171bfa49122088f6109140d424bee",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "ca2a8b4410ef235cdd287070397e1a35db72d18e47f15f05f6c24d3849b9e83b",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "file://build-host/... names a file on another machine; the local root says nothing about it. Beside a K1 absence it could change the verdict: refusal.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_remote_host.run.json"
+  },
+  {
+   "id": "U17-uri-scheme-that-cannot-be-mapped",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_https.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "6ef4fe4316bc4ebccf37cddbaa2d77a1e79b5e3438ed14cfbf37176969016e96",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "9e82a4c0a8b4c7f4955b804e788e64a8f76351ab05c01e4d64a8285654f10be3",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "An https URI is not a local source file. Without a K1 absence the verdict is Insufficient either way.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_https.run.json"
+  },
+  {
+   "id": "U17-uri-scheme-that-cannot-be-mapped-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_https.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "6ef4fe4316bc4ebccf37cddbaa2d77a1e79b5e3438ed14cfbf37176969016e96",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "9e82a4c0a8b4c7f4955b804e788e64a8f76351ab05c01e4d64a8285654f10be3",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "An https URI is not a local source file. Beside a K1 absence it could change the verdict: refusal.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_https.run.json"
+  },
+  {
+   "id": "U18-absolute-uri-outside-every-root",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_outside_every_root.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "bfceecdbd3ca184db6d7e0d2f8944c466d394aa686f8f8a31ccd05e3eecb441b",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "11640c278fcf9316a683748d77f830c911fe4a857eb5b064c73930fd6807089d",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_FLOW"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "uri_mapping": {
+      "mapped": 0,
+      "not_mapped_irrelevant": 0,
+      "external_undecidable": 0
+     }
+    }
+   },
+   "why": "Under no declared root, though its tail looks like the locus path. Without a K1 absence the verdict is Insufficient either way.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_abs_outside_every_root.run.json"
+  },
+  {
+   "id": "U18-absolute-uri-outside-every-root-beside-k1-absence",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_abs_outside_every_root.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "bfceecdbd3ca184db6d7e0d2f8944c466d394aa686f8f8a31ccd05e3eecb441b",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "11640c278fcf9316a683748d77f830c911fe4a857eb5b064c73930fd6807089d",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "Under no declared root, though its tail looks like the locus path. Beside a K1 absence it could change the verdict: refusal.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_abs_outside_every_root.run.json"
+  },
+  {
+   "id": "Q01-graph-record-exact-binding-path",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_rec_path_bound.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "537f89f42eec279c8ebab6f8b09cdf691a7385cc7aef4f40aeddca5d9912cb0a",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)",
+    "run_sha256": "411648c96c857d19c03d6ec2ddd76453cde34c567abd292aa50b0bec697f5e5e",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "RUN_RECORD_UNAUTHENTICATED"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "locus_included": "established",
+      "claim_semantics": "established"
+     },
+     "preventing_include": [
+      "path_recorded"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A call path main -> run -> parse from the declared entry method to the locus method, bound by the graph's HASH, the record's tree digest, the root (/work/app = META_DATA ROOT) and the output hash. The export names no tool, so the document stays unattributed: P0 (the record cannot attribute it).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab",
+    "target_source_root": "node_modules/lib-b"
+   },
+   "run": "runs/synthetic_graph_path.run.json"
+  },
+  {
+   "id": "Q02-graph-complete-record-declared-coverage-weak-absence",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_rec_no_path.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "ddc1941a91e015f5241a9d6048d26b0172001a19a7d9cd331f80cc1692f9fa37",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)",
+    "run_sha256": "59fa778802ad20ef70b0faaf42cf03ec7024a06363027cc39abf39cadb87cad2",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Weak",
+    "rules": [
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P0",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "ABSENCE_RESTS_ON_DECLARED_COVERAGE_CLAIM"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": true,
+     "reasons_include": [],
+     "coverage": {
+      "binding_established": "established",
+      "tool_declared": "established",
+      "process_completed": "established",
+      "extraction_completed": "established",
+      "language_scope": "established",
+      "locus_included": "established",
+      "query_suite_completed": "established",
+      "claim_semantics": "established",
+      "entry_points_enumerated": "established",
+      "exclusions_accounted": "established",
+      "suppressions_accounted": "established",
+      "no_partial_indicators": "established",
+      "no_undecidable_evidence": "established",
+      "coverage_claim_declared": "established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "entry_points_known": true
+    }
+   },
+   "why": "A call graph with the entry method and the locus method but no path, a complete record, the inventory equal to the evaluator's entry set and present in the export, and a declared full-coverage claim: K1 negative with the declared claim -> Absent (\u00a75.1 step 2), P0 (no tool named), so R13, R11 and R12 hold the verdict at Weak. The limitation CALL_GRAPH_COMPLETENESS_UNKNOWN (dynamic dispatch, reflection) remains attached.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab",
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_graph_no_path.run.json"
+  },
+  {
+   "id": "Q03-graph-record-other-tree-digest",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_rec_no_path.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "ddc1941a91e015f5241a9d6048d26b0172001a19a7d9cd331f80cc1692f9fa37",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)",
+    "run_sha256": "984b42ffe085dd7e4e00cd75c901902d4f482a183008a7c9446be21e252d2ef6",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "TREE_DIGEST_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The record's tree digest differs from the identity the evaluator declared: contradicted, no absence.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab",
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_graph_no_path_other_tree.run.json"
+  },
+  {
+   "id": "Q04-graph-record-root-differs-from-the-exports",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_rec_no_path.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "ddc1941a91e015f5241a9d6048d26b0172001a19a7d9cd331f80cc1692f9fa37",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)",
+    "run_sha256": "e09e26c3dd7906cbf88f966e9967ac730526a73f7f8e2c32d54a6334de995f59",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "ANALYSIS_ROOT_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The export's META_DATA ROOT is /work/app; the record's primary root is /ci/work/app: the two descriptions of the analysed checkout disagree.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab",
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_graph_analysis_root_mismatch.run.json"
+  },
+  {
+   "id": "Q05-graph-entry-method-not-in-the-export",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_rec_entry_not_in_export.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "af75284332230a01a57994d76d8db8cee9f67bae0bfbea334efc165ee3882750",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)",
+    "run_sha256": "f7e94605db1904ca4bda02dbb203e2dca56fc4a0542a559a2a91327ed65aae6d",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "ENTRY_METHOD_NOT_IN_GRAPH"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "entry_points_enumerated": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": [],
+     "entry_points_known": false
+    }
+   },
+   "why": "The inventoried entry method is not a METHOD of the export: 'no path from it' is vacuous, not an absence. Entry-point completeness is not established.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab",
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_graph_entry_not_in_export.run.json"
+  },
+  {
+   "id": "Q06-graph-unknown-caller-edge-prevents-absence",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_rec_uncontained.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "26e8439b12f933e4e46cbb7b9fcd78c272b45a66a5c0b6f7e97c80b5f04d8814",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)",
+    "run_sha256": "ffe382d8bf1db51a9f1c9fca2e640ac7fe375109ad2f942811a3f9996e3579fb",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "UNDECIDABLE_CALL_EDGE"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "no_undecidable_evidence": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A call edge into the locus method whose caller is unknown might be reachable from the entry method: undecidable, so no absence is derived.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab",
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_graph_uncontained.run.json"
+  },
+  {
+   "id": "Q07-graph-record-uncontained-beside-k1-absence",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_rec_uncontained.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "26e8439b12f933e4e46cbb7b9fcd78c272b45a66a5c0b6f7e97c80b5f04d8814",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)",
+    "run_sha256": "ffe382d8bf1db51a9f1c9fca2e640ac7fe375109ad2f942811a3f9996e3579fb",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_EVIDENCE_UNDECIDABLE",
+    "cause": "UNRESOLVED_RELEVANT_EVIDENCE"
+   },
+   "why": "As Q06 next to a supplied K1 absence: refusal.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab",
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "runs/synthetic_graph_uncontained.run.json"
+  },
+  {
+   "id": "Q08-graph-record-declares-the-wrong-semantics",
+   "format": "joern-graphml",
+   "category": "B",
+   "file": "joern-graphml/synthetic_rec_no_path.graphml",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "ddc1941a91e015f5241a9d6048d26b0172001a19a7d9cd331f80cc1692f9fa37",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "flatgraph GraphMLExporter output structure (joernio/flatgraph 45d3b703) and CPG schema (ShiftLeftSecurity/codepropertygraph d02d76ea)",
+    "run_sha256": "739256bcb7e9ee0e97d416939599d732a4d677d9a7709582fb8858f1431886e6",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "claim_semantics": "not_established"
+     },
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A graph export is a call-graph model, not a locus-reachability query; the record's declaration does not fit the format.",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab",
+    "target_source_root": "node_modules/lib-b"
+   },
+   "base": "baseline_no_k1",
+   "run": "runs/synthetic_graph_wrong_semantics.run.json"
+  },
+  {
+   "id": "V01-record-with-a-verdict",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "2da9b1ec9295c295f7502172549c7d15ebe629acba2e012758a4fae3fd11706a",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "A record may never carry a verdict (or a state, a level, a BIND result): refused. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_forbidden_field.run.json"
+  },
+  {
+   "id": "V02-record-with-a-nested-bind-state",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "e467c009b9c362fe09b887341fb7b7136f38750cfce6b4618e257bc54075520f",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "The same prohibition applies at any depth. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_forbidden_nested_field.run.json"
+  },
+  {
+   "id": "V03-record-schema-version-unsupported",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "28b156bc581dd4d769c21185c5e827e83e663b97ad9d9b636d0f800ff84ec157",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "analysis-run/2 is not a schema this version reads. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_schema_version.run.json"
+  },
+  {
+   "id": "V04-record-with-an-unknown-field",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "b037b7aa3437fc5d69f998ab83892305a3b4276785b335adbbb4d41c573d2aff",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "Unknown fields are errors, not ignored data. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_unknown_field.run.json"
+  },
+  {
+   "id": "V05-completed-stage-with-non-zero-exit",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "2ee771b072ceaa2c372acde6b73e4f90c8037caf1676d52a1da315a3754c234e",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "A stage claimed completed but with exit code 2 contradicts itself. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_completed_with_nonzero_exit.run.json"
+  },
+  {
+   "id": "V06-overlapping-source-roots",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "849a79403c1acddab00f2c55a4f2612b4ee98d84c781b5fe6c7acb1c9866a866",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "Nested roots would give one file two identities. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_overlapping_roots.run.json"
+  },
+  {
+   "id": "V07-credential-in-the-command",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "12950e0917f940118a56f91c5a40e4314c99f7eadde360016e408a38e5f975a4",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "An unredacted credential-looking argument must never be carried. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_secret_in_command.run.json"
+  },
+  {
+   "id": "V08-record-claims-its-own-verification",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "efe30c8883924a7f9753850ad2705b97f3837028ba3c3d3f0cbc96565ba5f3ba",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "Only a consumed detached verification result can establish a field; a record cannot say so about itself. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_self_verified_source.run.json"
+  },
+  {
+   "id": "V09-caller-record-claims-runner-observation",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "b2144d5a696e9da7daeea76cd64f31d35870789af1e098afa0bfadacb3241b83",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "A caller-authored record cannot claim to be observed by the runner. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_caller_claims_runner_observation.run.json"
+  },
+  {
+   "id": "V10-malformed-output-hash",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "dd402aa343f7c9b6a50d0883e8bfe74820bec250051a1b0142f897418c3214b7",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "A SHA-256 must be 64 lowercase hex characters. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_hash_form.run.json"
+  },
+  {
+   "id": "V11-truncated-record",
+   "format": "sarif",
+   "category": "B",
+   "file": "sarif/synthetic_cq_path.sarif",
+   "source": {
+    "synthetic": true,
+    "handwritten_here": true,
+    "live_run": false,
+    "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+    "nature": "Synthetic controlled fixture authored for this repository to the documented format; not the output of any analyzer.",
+    "format_basis": "SARIF 2.1.0 (OASIS schema, vendored third_party/sarif-schema-2.1.0.json); CodeQL-style path-problem codeFlows",
+    "run_sha256": "3397b50d62de10bb362d58c011610d38422cd4830743458094e314fd4511b223",
+    "run_record_origin": "caller-authored synthetic record"
+   },
+   "expected": {
+    "outcome": "refused",
+    "refusal_code": "EVAL_ANALYSIS_ARTIFACT_INVALID",
+    "cause": "ANALYSIS_RUN_RECORD_INVALID"
+   },
+   "why": "Truncated JSON. A record that cannot be trusted structurally is a refusal, not 'no record' (which would hide a failed run behind the artifact alone).",
+   "subject": {
+    "source_content_hash": "git-tree:abababababababababababababababababababab"
+   },
+   "run": "runs/synthetic_invalid_truncated.run.json"
+  },
+  {
+   "id": "LR01-live-codeql-run-with-exact-revision-and-flow",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/recorded/codeql-2.27.3__recorded__flow-via-vendor-lib.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-078/CommandInjection.ql (@kind path-problem)",
+    "project": "fixtures/analysis/authentic/codeql/project@941e384",
+    "sha256": "ba236e082dc572629dd0ce4ed47997d4217349e74d553971d7e450ea06b94513",
+    "run_sha256": "f1df8a01c4dcf1fa7125a40d41e1a04e5f6850bdfaaaacbb8490c47d7d4e7da2",
+    "run_record_origin": "written by analysis_runner during the live run",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run executed by `python -m analysis_runner` on a clean checkout of commit 941e384 of this repository; the run record is the runner's own, unedited. One js/command-line-injection result whose code flow enters vendor/lib-b/src/parse.js."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [
+     "RUN_RECORD_UNAUTHENTICATED"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "binding_established": "established",
+      "tool_declared": "established",
+      "process_completed": "established",
+      "extraction_completed": "established",
+      "language_scope": "established",
+      "locus_included": "established",
+      "query_suite_completed": "established",
+      "claim_semantics": "not_established",
+      "entry_points_enumerated": "not_recorded",
+      "exclusions_accounted": "not_recorded",
+      "suppressions_accounted": "established",
+      "no_partial_indicators": "established",
+      "no_undecidable_evidence": "established",
+      "coverage_claim_declared": "not_recorded"
+     },
+     "preventing_include": [
+      "claim_semantics",
+      "entry_points_enumerated",
+      "exclusions_accounted",
+      "coverage_claim_declared",
+      "path_recorded"
+     ],
+     "preventing_exclude": [],
+     "entry_points_known": false
+    }
+   },
+   "why": "Real CodeQL 2.27.3 output, run by the recorder on a clean checkout: the record gives the exact commit, the git tree id of the analysed directory, a clean tree and the output hash; the artifact's own tool, version, query pack and rule id agree with it, and its expected-extracted-files notifications list vendor/lib-b/src/parse.js. Binding is ESTABLISHED (exact), so BIND Present (no R6) where the log alone (L01) was unbound. The code flow enters the locus file: Present (R1). P1 attribution (the time comes from the record because tool and version are corroborated), never P2/P3.",
+   "subject": {
+    "source_repository": "https://github.com/aryanchougule12/SBOM.git",
+    "source_revision": "941e384b4a75820cb0f11fe879f2d9ce1384a626",
+    "source_content_hash": "git-tree:0114c001fcd79f7e7dbb0bc791766d5c5a971a53",
+    "target_source_root": "vendor/lib-b"
+   },
+   "base": "locus_only",
+   "run": "authentic/codeql/recorded/codeql-2.27.3__recorded__flow-via-vendor-lib.run.json"
+  },
+  {
+   "id": "LR02-live-codeql-run-no-results-is-not-an-absence",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/recorded/codeql-2.27.3__recorded__no-results.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-022/TaintedPath.ql",
+    "project": "fixtures/analysis/authentic/codeql/project@941e384",
+    "sha256": "fb505b7e7546f5d42c56e03761be41dde20afc468b622c2320b1f3d299896649",
+    "run_sha256": "65cb5ac59e5bb8b61ae2628068d2b5614aaf1f32f5a29313cba8e4dbc1f7d00d",
+    "run_record_origin": "written by analysis_runner during the live run",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run executed by `python -m analysis_runner` on a clean checkout of commit 941e384 of this repository; the run record is the runner's own, unedited. A successful run with results: []."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {
+      "binding_established": "established",
+      "tool_declared": "established",
+      "process_completed": "established",
+      "extraction_completed": "established",
+      "language_scope": "established",
+      "locus_included": "established",
+      "query_suite_completed": "established",
+      "claim_semantics": "not_established",
+      "entry_points_enumerated": "not_recorded",
+      "exclusions_accounted": "not_recorded",
+      "suppressions_accounted": "established",
+      "no_partial_indicators": "established",
+      "no_undecidable_evidence": "established",
+      "coverage_claim_declared": "not_recorded"
+     },
+     "preventing_include": [
+      "claim_semantics",
+      "entry_points_enumerated",
+      "exclusions_accounted",
+      "coverage_claim_declared"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A successful, completely recorded live run with an empty result list, and the locus file among the extracted files: still Unknown. The query is a stock taint query (not a locus-reachability analysis), no entry-point inventory exists and no coverage claim is declared. Process success and an empty results array are not coverage (\u00a75.1 step 2; P-2).",
+   "subject": {
+    "source_repository": "https://github.com/aryanchougule12/SBOM.git",
+    "source_revision": "941e384b4a75820cb0f11fe879f2d9ce1384a626",
+    "source_content_hash": "git-tree:0114c001fcd79f7e7dbb0bc791766d5c5a971a53",
+    "target_source_root": "vendor/lib-b"
+   },
+   "base": "locus_only",
+   "run": "authentic/codeql/recorded/codeql-2.27.3__recorded__no-results.run.json"
+  },
+  {
+   "id": "LR03-live-codeql-run-no-results-beside-k1-absence-keeps-the-absence",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/recorded/codeql-2.27.3__recorded__no-results.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-022/TaintedPath.ql",
+    "project": "fixtures/analysis/authentic/codeql/project@941e384",
+    "sha256": "fb505b7e7546f5d42c56e03761be41dde20afc468b622c2320b1f3d299896649",
+    "run_sha256": "65cb5ac59e5bb8b61ae2628068d2b5614aaf1f32f5a29313cba8e4dbc1f7d00d",
+    "run_record_origin": "written by analysis_runner during the live run",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run executed by `python -m analysis_runner` on a clean checkout of commit 941e384 of this repository; the run record is the runner's own, unedited. A successful run with results: []."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Absent",
+    "verdict": "Supported",
+    "rules": [],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": "P3",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The same live run next to a verified K1 absence: it adds nothing (no path, nothing undecidable), so the supplied absence stands.",
+   "subject": {
+    "source_repository": "https://github.com/aryanchougule12/SBOM.git",
+    "source_revision": "941e384b4a75820cb0f11fe879f2d9ce1384a626",
+    "source_content_hash": "git-tree:0114c001fcd79f7e7dbb0bc791766d5c5a971a53",
+    "target_source_root": "vendor/lib-b"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "authentic/codeql/recorded/codeql-2.27.3__recorded__no-results.run.json"
+  },
+  {
+   "id": "LR04-live-codeql-flow-not-touching-the-locus",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/recorded/codeql-2.27.3__recorded__flow-app-only.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-078/CommandInjection.ql (@kind path-problem)",
+    "project": "fixtures/analysis/authentic/codeql/project-app-only@941e384",
+    "sha256": "68a112438244e8611524d3549286a8e003bea9962483fe8195161c95b2b7191d",
+    "run_sha256": "d1ad36a6d9ed9d930e8996efd1b7a04ffcf31f2df3fa4d0043cdc4d0d81f7df7",
+    "run_record_origin": "written by analysis_runner during the live run",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run executed by `python -m analysis_runner` on a clean checkout of commit 941e384 of this repository; the run record is the runner's own, unedited. One result whose code flow stays inside src/app.js."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [
+     "FLOWS_NOT_TOUCHING_LOCUS"
+    ],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "A genuine flow of another part of the program (src/app.js only): neither a path to the locus nor an absence.",
+   "subject": {
+    "source_repository": "https://github.com/aryanchougule12/SBOM.git",
+    "source_revision": "941e384b4a75820cb0f11fe879f2d9ce1384a626",
+    "source_content_hash": "git-tree:428b3b9cc1821dd900c5cf52f049c5b7677d200b",
+    "target_source_root": "vendor/lib-b"
+   },
+   "base": "locus_only",
+   "run": "authentic/codeql/recorded/codeql-2.27.3__recorded__flow-app-only.run.json"
+  },
+  {
+   "id": "LR05-live-codeql-flow-beside-k1-absence",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/recorded/codeql-2.27.3__recorded__flow-via-vendor-lib.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-078/CommandInjection.ql (@kind path-problem)",
+    "project": "fixtures/analysis/authentic/codeql/project@941e384",
+    "sha256": "ba236e082dc572629dd0ce4ed47997d4217349e74d553971d7e450ea06b94513",
+    "run_sha256": "f1df8a01c4dcf1fa7125a40d41e1a04e5f6850bdfaaaacbb8490c47d7d4e7da2",
+    "run_record_origin": "written by analysis_runner during the live run",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run executed by `python -m analysis_runner` on a clean checkout of commit 941e384 of this repository; the run record is the runner's own, unedited. One js/command-line-injection result whose code flow enters vendor/lib-b/src/parse.js."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Contradictory",
+    "verdict": "Insufficient",
+    "rules": [
+     "R3",
+     "R12",
+     "R13"
+    ],
+    "bind": "matched",
+    "observations": 1,
+    "prov_reach": "P1",
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "established",
+     "source_identity": "exact",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [],
+     "coverage": {},
+     "preventing_include": [
+      "path_recorded"
+     ],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The bound live path next to a verified K1 absence: R3.",
+   "subject": {
+    "source_repository": "https://github.com/aryanchougule12/SBOM.git",
+    "source_revision": "941e384b4a75820cb0f11fe879f2d9ce1384a626",
+    "source_content_hash": "git-tree:0114c001fcd79f7e7dbb0bc791766d5c5a971a53",
+    "target_source_root": "vendor/lib-b"
+   },
+   "base": "supported_k1",
+   "verification": {
+    "results": [
+     {
+      "doc": "k1-analysis",
+      "verified": true,
+      "anchor": "anchor-1",
+      "coverage": [
+       "#"
+      ]
+     }
+    ],
+    "trust": [
+     "anchor-1"
+    ]
+   },
+   "run": "authentic/codeql/recorded/codeql-2.27.3__recorded__flow-via-vendor-lib.run.json"
+  },
+  {
+   "id": "LR06-live-run-for-another-revision-is-unbound",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/recorded/codeql-2.27.3__recorded__flow-via-vendor-lib.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-078/CommandInjection.ql (@kind path-problem)",
+    "project": "fixtures/analysis/authentic/codeql/project@941e384",
+    "sha256": "ba236e082dc572629dd0ce4ed47997d4217349e74d553971d7e450ea06b94513",
+    "run_sha256": "f1df8a01c4dcf1fa7125a40d41e1a04e5f6850bdfaaaacbb8490c47d7d4e7da2",
+    "run_record_origin": "written by analysis_runner during the live run",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run executed by `python -m analysis_runner` on a clean checkout of commit 941e384 of this repository; the run record is the runner's own, unedited. One js/command-line-injection result whose code flow enters vendor/lib-b/src/parse.js."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Present",
+    "verdict": "Insufficient",
+    "rules": [
+     "R1",
+     "R5",
+     "R6",
+     "R11",
+     "R12",
+     "R13"
+    ],
+    "bind": "unknown",
+    "observations": 1,
+    "prov_reach": "P0",
+    "blockers": [
+     "RUN_BINDING_CONTRADICTED:REVISION_MISMATCH"
+    ],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "REVISION_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The evaluator assesses another full commit than the one the record says was analysed (and the tree digest the evaluator declared is the same text): contradicted -> BIND Unknown (R6); the live path is kept.",
+   "subject": {
+    "source_repository": "https://github.com/aryanchougule12/SBOM.git",
+    "source_revision": "0123456789abcdef0123456789abcdef01234567",
+    "source_content_hash": "git-tree:0114c001fcd79f7e7dbb0bc791766d5c5a971a53",
+    "target_source_root": "vendor/lib-b"
+   },
+   "base": "locus_only",
+   "run": "authentic/codeql/recorded/codeql-2.27.3__recorded__flow-via-vendor-lib.run.json"
+  },
+  {
+   "id": "LR07-record-of-another-artifact-is-not-reused",
+   "format": "sarif",
+   "category": "L",
+   "file": "authentic/codeql/recorded/codeql-2.27.3__recorded__no-results.sarif",
+   "source": {
+    "tool": "CodeQL command-line toolchain 2.27.3 (live run)",
+    "tool_version": "2.27.3",
+    "bundle_sha256": "64518dc413c8e7b5733fee2489e830a899bb1e3f28c8873b5869d5cc90164c5c",
+    "bundle_url": "https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.3/codeql-bundle-linux64.tar.gz",
+    "query_pack": "codeql/javascript-queries 2.4.8",
+    "retrieved_or_run": "2026-10-28",
+    "license": "MIT (project sources written for this repository); the SARIF is tool output",
+    "query": "Security/CWE-022/TaintedPath.ql",
+    "project": "fixtures/analysis/authentic/codeql/project@941e384",
+    "sha256": "fb505b7e7546f5d42c56e03761be41dde20afc468b622c2320b1f3d299896649",
+    "run_sha256": "f1df8a01c4dcf1fa7125a40d41e1a04e5f6850bdfaaaacbb8490c47d7d4e7da2",
+    "run_record_origin": "written by analysis_runner during the live run",
+    "handwritten_here": false,
+    "synthetic": false,
+    "live_run": true,
+    "nature": "Output of a live CodeQL run executed by `python -m analysis_runner` on a clean checkout of commit 941e384 of this repository; the run record is the runner's own, unedited. A successful run with results: []."
+   },
+   "expected": {
+    "outcome": "evaluated",
+    "reach": "Unknown",
+    "verdict": "Insufficient",
+    "rules": [
+     "R2",
+     "R5",
+     "R11"
+    ],
+    "bind": "matched",
+    "observations": 0,
+    "prov_reach": null,
+    "blockers": [],
+    "diagnostics_include": [],
+    "limitations_include": [],
+    "result_limitations": [
+     "CFG=not_compared"
+    ],
+    "assessment": {
+     "binding": "contradicted",
+     "source_identity": "not_established",
+     "execution": "completed",
+     "negative_derived": false,
+     "reasons_include": [
+      "RUN_OUTPUT_HASH_MISMATCH"
+     ],
+     "coverage": {},
+     "preventing_include": [],
+     "preventing_exclude": []
+    }
+   },
+   "why": "The runner's record of the flow run supplied with the no-results log: its output hash is the other file's. The record does not describe these bytes: contradicted; no fact of it is used.",
+   "subject": {
+    "source_repository": "https://github.com/aryanchougule12/SBOM.git",
+    "source_revision": "941e384b4a75820cb0f11fe879f2d9ce1384a626",
+    "source_content_hash": "git-tree:0114c001fcd79f7e7dbb0bc791766d5c5a971a53",
+    "target_source_root": "vendor/lib-b"
+   },
+   "base": "locus_only",
+   "run": "authentic/codeql/recorded/codeql-2.27.3__recorded__flow-via-vendor-lib.run.json",
+   "record_matches_artifact": false
   }
  ]
 }

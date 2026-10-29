@@ -47,3 +47,34 @@ platform string differ per run, so the bytes do not.
 * `invocations[0].executionSuccessful` is true and the `cli/file-coverage-baseline` /
   `js/baseline/expected-extracted-files` notifications exist, but they report extraction telemetry,
   not a coverage claim over the locus and entry points (§5.1 step 2).
+
+
+## Recorded runs (`recorded/`)
+
+Three further runs of the same CodeQL 2.27.3 bundle, executed through the recorder (`python -m analysis_runner run PLAN.json --out RUN.json`) on a clean
+`git worktree` of commit `941e384b4a75820cb0f11fe879f2d9ce1384a626` of this repository, with the database and the output outside the analysed
+directory. For each run the directory contains the SARIF (unedited CodeQL output) and `*.run.json` (the runner's record, unedited, canonical form).
+
+| Run | Analysed directory (git tree id) | Query |
+|---|---|---|
+| `flow-via-vendor-lib` | `fixtures/analysis/authentic/codeql/project` (`0114c001fcd79f7e7dbb0bc791766d5c5a971a53`) | `Security/CWE-078/CommandInjection.ql` |
+| `no-results` | the same | `Security/CWE-022/TaintedPath.ql` |
+| `flow-app-only` | `fixtures/analysis/authentic/codeql/project-app-only` (`428b3b9cc1821dd900c5cf52f049c5b7677d200b`) | `Security/CWE-078/CommandInjection.ql` |
+
+A plan has this shape (paths are those of the machine that ran it; the records keep them in `source.roots` and `configuration.command`):
+
+```json
+{"run_id": "codeql-2.27.3-flow-via-vendor-lib", "repository": "https://github.com/aryanchougule12/SBOM.git", "repo_dir": "<clean checkout>",
+ "analysis_subpath": "fixtures/analysis/authentic/codeql/project",
+ "tool": {"name": "CodeQL", "version_command": ["<bundle>/codeql/codeql", "version", "--format=terse"], "output_format_version": "sarif-latest"},
+ "languages": ["javascript"],
+ "query": {"pack": "codeql/javascript-queries", "pack_version": "2.4.8", "query_ids": ["js/command-line-injection"], "claim_semantics": "taint_path_query"},
+ "stages": [{"name": "database-create", "role": "extraction", "argv": ["<bundle>/codeql/codeql", "database", "create", "db", "--language=javascript", "--source-root=<analysed directory>", "--overwrite"]},
+            {"name": "database-analyze", "role": "analysis", "argv": ["<bundle>/codeql/codeql", "database", "analyze", "db", "<query.ql>", "--format=sarif-latest", "--no-sarif-minify", "--output=out/flow-via-vendor-lib.sarif", "--rerun"]}],
+ "outputs": ["out/flow-via-vendor-lib.sarif"], "target": {"purl": "pkg:npm/lib-b@2.0", "source_root": "vendor/lib-b"},
+ "roots": [{"id": "analysis-root", "path": "<absolute analysed directory>", "role": "primary", "repository": "...", "revision": "..."}]}
+```
+
+What the records do and do not say: `claim_semantics` is `taint_path_query` (these are stock taint queries, not locus-reachability analyses), there is no entry-point
+inventory and no coverage claim, so no absence can be derived from them (corpus LR01-LR07). Timestamps and the database differ per run; the git identity and the
+query results reproduce. The tree id of an analysed directory can be recomputed with `git rev-parse <revision>:<directory>` (checked by `tests/test_analysis_live.py`).

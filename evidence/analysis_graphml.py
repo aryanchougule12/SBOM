@@ -165,12 +165,13 @@ def parse_joern_graphml(raw: bytes) -> NormalizedAnalysis:
     if len(meta) > 1:
         raise AnalysisArtifactError(E.CONTRADICTORY, "more than one META_DATA node", _node_locator(meta[1][0]))
     spec_version: Optional[str] = None
-    content_hash = language = None
+    content_hash = language = root = None
     if meta:
         props = meta[0][1]
         spec_version = props.get("VERSION") or None
         content_hash = props.get("HASH") or None
         language = props.get("LANGUAGE") or None
+        root = props.get("ROOT") or None
         if spec_version is not None and spec_version not in SUPPORTED_CPG_SPEC_VERSIONS:
             raise AnalysisArtifactError(E.FORMAT_VERSION_UNSUPPORTED,
                                         f"CPG specification version {spec_version!r} is not supported", _node_locator(meta[0][0]))
@@ -232,7 +233,7 @@ def parse_joern_graphml(raw: bytes) -> NormalizedAnalysis:
     diagnostics.append(AnalysisDiagnostic("LIST_PROPERTIES_NOT_EXPORTED",
                                           "the GraphML exporter drops list properties (for example OVERLAYS): which passes ran is unknown"))
     run = RunFacts(locator="#/graphml", tool=ToolIdentity(None, None, None), content_hash=content_hash, language=language,
-                   result_count=len(call_edges))
+                   result_count=len(call_edges), analysis_root=root)
     return NormalizedAnalysis(
         source=SourceArtifactIdentity(document_id("joern-graphml", raw), AnalysisFormat.JOERN_GRAPHML,
                                       f"cpg-spec:{spec_version}" if spec_version else None, len(raw)),

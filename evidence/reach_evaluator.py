@@ -70,7 +70,7 @@ from evidence.reach_derivation import (
     derive_reach,
     prov_reach,
 )
-from evidence.reach_inputs import ReachabilityEvidence, ReachKind
+from evidence.reach_inputs import ReachFinding, ReachabilityEvidence, ReachKind
 from evidence.reach_items import build_reach_items, validate_reach_items
 from evidence.reach_rules import ReachEvaluation, ReachInputs, evaluate_reach
 from evidence.rule_core import jsonable
@@ -254,7 +254,8 @@ def _evaluate_once(
     items = build_reach_items(evidence, assessments, doc_id, graph)
     try:
         validate_reach_items(finding, doc_id, items, {d.doc_id: frozenset(d.source.observation_locators)
-                                                      for d in evidence.documents if d.source is not None})
+                                                      for d in evidence.documents
+                                                      if d.source is not None and d.finding is ReachFinding.POSITIVE})
     except ItemIntegrityError as error:
         return _refuse(RefusalCode.ITEM_INTEGRITY_FAILED, str(error), error.code)
 

@@ -1,0 +1,113 @@
+{
+  "configuration": {
+    "command": [
+      "codeql",
+      "database",
+      "analyze"
+    ],
+    "languages": [
+      "javascript"
+    ],
+    "query": {
+      "claim_semantics": "locus_reachability_query",
+      "pack": "codeql/javascript-queries",
+      "pack_digest": null,
+      "pack_version": "2.4.8",
+      "query_ids": [
+        "js/locus-reach"
+      ],
+      "suite": null
+    }
+  },
+  "coverage_claim": {
+    "declared_by": "corpus-reviewer",
+    "entry_methods": [
+      "app.Main.main:void(java.lang.String[])"
+    ],
+    "kind": "locus_unreachable_from_declared_entry_points",
+    "locus_files": [
+      "src/parse.js"
+    ],
+    "locus_symbols": [
+      "lib.b.Parser.parse:java.lang.Object(java.lang.String)"
+    ]
+  },
+  "diagnostics": [],
+  "field_sources": {},
+  "origin": "caller",
+  "outputs": [
+    {
+      "path": "synthetic_cq_path.sarif",
+      "sha256": "81f567a660120d765fac37d10dd66be1f7e769477b51f4c31a62cf338db239b8",
+      "size": 4116
+    }
+  ],
+  "run_id": "synthetic-synthetic_cq_path",
+  "schema": "analysis-run/1",
+  "scope": {
+    "analyzed_configurations": [],
+    "entry_points": {
+      "complete": true,
+      "methods": [
+        "app.Main.main:void(java.lang.String[])"
+      ],
+      "source": "caller_declared"
+    },
+    "files": {
+      "complete": true,
+      "excluded": [],
+      "included": [
+        "node_modules/lib-b/src/parse.js",
+        "src/app.js"
+      ]
+    },
+    "partial_indicators": []
+  },
+  "source": {
+    "analysis_subpath": ".",
+    "changed_during_run": false,
+    "repository": "https://example.org/git/app.git",
+    "revision": "0123456",
+    "roots": [
+      {
+        "id": "analysis-root",
+        "path": "/ci/work/app",
+        "repository": "https://example.org/git/app.git",
+        "revision": "0123456789abcdef0123456789abcdef01234567",
+        "role": "primary"
+      }
+    ],
+    "submodules": [],
+    "tree_digest": "git-tree:abababababababababababababababababababab",
+    "untracked_files": 0,
+    "worktree_clean": true
+  },
+  "stages": [
+    {
+      "exit_code": 0,
+      "finished": "2026-01-16T08:59:00Z",
+      "name": "extract",
+      "role": "extraction",
+      "started": "2026-01-16T08:55:00Z",
+      "status": "completed"
+    },
+    {
+      "exit_code": 0,
+      "finished": "2026-01-16T09:05:00Z",
+      "name": "analyze",
+      "role": "analysis",
+      "started": "2026-01-16T09:00:00Z",
+      "status": "completed"
+    }
+  ],
+  "target": {
+    "purl": "pkg:npm/lib-b@2.0",
+    "source_root": "node_modules/lib-b"
+  },
+  "tool": {
+    "executable_sha256": null,
+    "name": "CodeQL",
+    "output_format_version": "sarif-latest",
+    "version": "2.15.5"
+  }
+}

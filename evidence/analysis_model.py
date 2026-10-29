@@ -46,6 +46,7 @@ class AnalysisArtifactErrorCode(str, Enum):
     REFERENCE_UNRESOLVED = "ANALYSIS_REFERENCE_UNRESOLVED"
     CONTRADICTORY = "ANALYSIS_ARTIFACT_CONTRADICTORY"
     UNSAFE_CONSTRUCT = "ANALYSIS_UNSAFE_CONSTRUCT"
+    RUN_RECORD_INVALID = "ANALYSIS_RUN_RECORD_INVALID"
 
 
 class AnalysisArtifactError(ValueError):
@@ -111,6 +112,13 @@ class RunFacts:
     language: Optional[str] = None
     result_count: int = 0
     results_present: bool = True   # SARIF: the `results` array exists (it "must be present ... if a log file represents an actual scan")
+    # Scope facts the artifact itself states (None / empty: not stated; never read as "nothing was analysed").
+    analysis_root: Optional[str] = None                 # GraphML META_DATA ROOT
+    extracted_files: Optional[tuple[str, ...]] = None   # SARIF `*/baseline/expected-extracted-files` notifications (resolved paths); None: no such notification
+    extracted_files_unresolved: int = 0                 # ... notifications whose location could not be resolved against the analysis root
+    query_packs: tuple[tuple[str, str], ...] = ()       # SARIF tool.extensions[].(name, semanticVersion)
+    rule_ids: tuple[str, ...] = ()                      # SARIF tool.driver.rules[].id
+    suppressed_results: int = 0                         # results carrying a suppression
 
 
 @dataclass(frozen=True)
@@ -128,6 +136,7 @@ class PathStep:
     # usable URI at all (then its relevance cannot be excluded).
     loose_path: Optional[str] = None
     kinds: tuple[str, ...] = ()   # threadFlowLocation.kinds, verbatim ('unreachable' matters)
+    raw_uri: Optional[str] = None  # the location's URI as recorded (after resolving `index`), for the root-mapping policy
 
 
 @dataclass(frozen=True)
@@ -238,6 +247,37 @@ class UndecidableObservation:
     step_locators: tuple[str, ...]
 
 
+class BindingStatus(str, Enum):
+    """The five outcomes of relating an analysis run to the assessed source. Only ESTABLISHED lets a
+    derived document carry the assessed artifact (BIND); every other status keeps the observation and
+    leaves BIND Unknown (R6). None of them is an evidence state or a verdict."""
+
+    ESTABLISHED = "established"
+    MISSING = "missing"            # a required identity fact is not stated by one side
+    CONTRADICTED = "contradicted"  # two statements about the same fact differ
+    AMBIGUOUS = "ambiguous"        # an abbreviated or conflicting statement matches more than one source
+    IMPOSSIBLE = "impossible"      # the stated identity cannot identify the analysed bytes (dirty or changed tree, unpinned submodule)
+
+
+@dataclass(frozen=True)
+class RunAssessment:
+    """What was established about one artifact's analysis run (derived, immutable, explanatory).
+    ``coverage`` lists separate facts, each ``established`` / ``not_established`` / ``contradicted`` /
+    ``not_recorded``: they are not interchangeable and none of them is an evidence state."""
+
+    record_id: Optional[str]
+    binding: Optional[BindingStatus]
+    binding_reasons: tuple[str, ...]
+    source_identity: str                           # exact | commit_only | not_established | not_assessed
+    uri_mapping: tuple[tuple[str, int], ...]       # mapped | not_mapped_irrelevant | undecidable
+    execution: str                                 # completed | failed | partial | unknown | not_recorded
+    coverage: tuple[tuple[str, str], ...]
+    entry_points_known: bool
+    negative_derived: bool
+    preventing: tuple[str, ...]                    # the conditions that stop a stronger (negative) conclusion
+    field_sources: tuple[tuple[str, str], ...] = ()
+
+
 @dataclass(frozen=True)
 class SourceRef:
     """Where a derived ``ReachDocument`` came from. Python-level only: the strict JSON input of
@@ -252,3 +292,4 @@ class SourceRef:
     diagnostics: tuple[AnalysisDiagnostic, ...]
     subject_label: str = ""
     undecidable: tuple[UndecidableObservation, ...] = ()
+    assessment: Optional[RunAssessment] = None

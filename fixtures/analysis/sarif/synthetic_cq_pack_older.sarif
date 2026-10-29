@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "organization": "GitHub",
+          "semanticVersion": "2.15.5",
+          "rules": [
+            {
+              "id": "js/locus-reach"
+            }
+          ],
+          "notifications": [
+            {
+              "id": "js/baseline/expected-extracted-files"
+            }
+          ]
+        },
+        "extensions": [
+          {
+            "name": "codeql/javascript-queries",
+            "semanticVersion": "2.4.7"
+          }
+        ]
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "level": "none",
+              "message": {
+                "text": ""
+              },
+              "descriptor": {
+                "id": "js/baseline/expected-extracted-files"
+              },
+              "locations": [
+                {
+                  "physicalLocation": {
+                    "artifactLocation": {
+                      "uri": "node_modules/lib-b/src/parse.js",
+                      "uriBaseId": "%SRCROOT%"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "level": "none",
+              "message": {
+                "text": ""
+              },
+              "descriptor": {
+                "id": "js/baseline/expected-extracted-files"
+              },
+              "locations": [
+                {
+                  "physicalLocation": {
+                    "artifactLocation": {
+                      "uri": "src/app.js",
+                      "uriBaseId": "%SRCROOT%"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "results": [],
+      "columnKind": "utf16CodeUnits"
+    }
+  ]
+}
