@@ -15,7 +15,8 @@ USAGE = """usage:
       completed; 1 the record was written but a stage failed/timed out or an output is missing (the record says so); 2 the plan
       or arguments are unusable (nothing is written).
   python -m analysis_runner check RUN.json FILE [FILE...]
-      Re-hash FILE(s) and compare with the record's outputs. Exit status: 0 every file matches an output; 1 a mismatch; 2 unusable input.
+      Re-hash FILE(s) and compare with the record's outputs, and report any stage that did not complete, partial-analysis
+      indicator or missing output. Exit status: 0 consistent and complete; 1 a mismatch or an incomplete run; 2 unusable input.
 
 The record is execution metadata. A completed run is not proof of complete analysis coverage, and a matching hash is not proof
 that the analyzer ran."""
@@ -38,6 +39,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         if command == "check" and len(args) >= 3:
             record = parse_analysis_run(Path(args[1]))
             problems = verify_record(record, [Path(a) for a in args[2:]])
+            problems += [f"stage {t.name!r}: {t.status.value}" for t in record.stages if t.status.value != "completed"]
+            problems += [f"partial-analysis indicator: {p}" for p in record.partial_indicators]
+            problems += [f"output {o.path!r} was not present when the run ended" for o in record.outputs if o.sha256 is None]
             for problem in problems:
                 print(problem)
             return 1 if problems else 0

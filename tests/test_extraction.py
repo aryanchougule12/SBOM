@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 
-from evidence import extraction
 from evidence import stage1_records as s1
 from evidence.aggregation import aggregate_state
 from evidence.extraction import Diagnostic, extract, extract_evidence
@@ -270,11 +269,28 @@ def test_no_extracted_item_is_ever_present_or_absent():
             assert {i.state for i in items} <= {EvidenceState.UNKNOWN}
 
 
-@pytest.mark.skip(
-    reason="pending for the legacy extract() API only: MATCH with a resolved C, full-list INV, DECL selection, BIND and "
-    "GEN beyond 'method absent' are computed by the integrated CNP pipeline (evidence.evaluator), and LOCUS/ENTRY/HAZ/CFG "
-    "and K1-K3 by the reachability pipeline (evidence.reach_evaluator), not by extract() "
-    "(see docs/open_issues_register.md)"
-)
-def test_remaining_evidence_dimensions():
-    raise AssertionError("placeholder")
+def test_the_dimensions_the_legacy_extract_never_computed_are_computed_by_the_supported_pipelines():
+    """The old placeholder named MATCH (resolved C), INV, DECL, BIND and GEN (CNP) and LOCUS/ENTRY/HAZ/CFG and K1-K3 (reachability).
+    The legacy ``extract()`` deliberately yields only Unknown placeholders (test above); the supported interface is
+    ``evaluate_finding``, whose outcome exposes every one of these dimensions with a derived state. Their rules are exercised by the
+    conformance harness and the pipeline tests; this test pins that the public outcomes carry them."""
+    from evidence.sufficiency import evaluate_finding
+    from evidence.reach_evaluator import ReachOutcome
+    from evidence.evaluator import EvaluationOutcome
+    from tests.pipeline_support import equivalent, make_profile, vex_findings
+    from tests.reach_support import baseline_data
+    from evidence.reach_inputs import parse_reachability
+
+    record = equivalent("cdx")
+    cnp = evaluate_finding(make_profile(record.doc_id), vex_findings("component_not_present.json"), s1.Stage1Index([record]))
+    assert isinstance(cnp, EvaluationOutcome)
+    states = {d: getattr(cnp, d) for d in ("match", "inv", "decl", "bind", "gen")}
+    assert all(v is not None for v in states.values())
+    assert {item.dimension for item in cnp.items} == {"MATCH", "INV", "DECL", "GEN"}    # BIND is a separate evaluation (``cnp.bind``)
+
+    reach = evaluate_finding(make_profile(record.doc_id), vex_findings("reachability_equivalent.json"), s1.Stage1Index([record]),
+                             reachability=parse_reachability(baseline_data()))
+    assert isinstance(reach, ReachOutcome)
+    assert set(reach.dimension_states) == {"BIND", "CFG", "ENTRY", "LOCUS", "REACH"}
+    assert reach.hazards and {a.hazard_class.name for a in reach.hazards} >= {"REFLECTION"}
+    assert {i.value_or_ref.kind for i in reach.items if i.dimension == "REACH"} >= {"K1"}

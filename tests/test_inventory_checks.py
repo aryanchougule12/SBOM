@@ -16,7 +16,6 @@ from evidence.bind import BindBasis, BindCode, BindEvaluation
 from evidence.cnp_rules import BindState
 from evidence.inv import CheckOutcome, Emptiness, Interpretability, Relevance
 from evidence.inventory_checks import EndpointClass as EC, EndpointReason as ER
-from evidence.stage1_records import ReferenceStatus
 from sbom_parser import cyclonedx as cdx_parser
 from tests.pipeline_support import FIXTURES, cdx, spdx
 
@@ -316,7 +315,7 @@ def test_a_resolved_or_bom_link_dependencies_ref_is_classified_like_any_endpoint
 def test_a_dangling_node_ref_makes_inv_contradictory_end_to_end():
     from evidence.evaluator import evaluate
     from evidence.stage1_records import Stage1Index
-    from tests.pipeline_support import ABSENT, X, make_profile, vex_findings
+    from tests.pipeline_support import ABSENT, make_profile, vex_findings
     data = json.loads((FIXTURES / "equivalent" / "app.cdx.json").read_text())
     data["dependencies"] = [{"ref": "ghost", "dependsOn": []}]
     record = s1.load_cyclonedx(json.dumps(data).encode())

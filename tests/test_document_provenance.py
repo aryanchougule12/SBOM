@@ -11,7 +11,6 @@ import pytest
 from evidence.bind import BindBasis, BindCode, BindEvaluation, evaluate_bind
 from evidence.cnp_rules import BindState
 from evidence.document_provenance import (
-    DocumentProvenance,
     P2Status,
     VerificationUse,
     document_provenance,

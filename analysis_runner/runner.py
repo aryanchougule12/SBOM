@@ -257,6 +257,7 @@ def run_plan(plan: Plan, record_path: Optional[Path] = None, clock: Clock = lamb
     exclude = list(plan.outputs) + ([record_path] if record_path else [])
     before = git_identity(plan.repo_dir, plan.analysis_subpath, exclude)
     digest_before = tree_fingerprint(analysed, exclude)
+    outputs_before = {path: ((_sha256_file(path), path.stat().st_mtime_ns) if path.is_file() else None) for path in plan.outputs}   # a stale output must not pass as this run's
     version, executable_sha, diagnostics = _tool_version(plan)
 
     stage_records: list[dict[str, Any]] = []
@@ -283,6 +284,11 @@ def run_plan(plan: Plan, record_path: Optional[Path] = None, clock: Clock = lamb
     outputs, partial = [], []
     for path in plan.outputs:
         if path.is_file():
+            if outputs_before.get(path) is not None and outputs_before[path] == (_sha256_file(path), path.stat().st_mtime_ns):
+                label = os.path.relpath(path, plan.repo_dir) if str(path).startswith(str(plan.repo_dir)) else str(path)
+                partial.append(f"OUTPUT_NOT_REWRITTEN:{label}")
+                diagnostics.append({"level": "warning", "code": "OUTPUT_NOT_REWRITTEN",
+                                    "message": f"output {label!r} existed before the run and is untouched by it (same bytes, same modification time): it may be stale"})
             outputs.append({"path": os.path.relpath(path, plan.repo_dir) if str(path).startswith(str(plan.repo_dir)) else str(path),
                             "sha256": _sha256_file(path), "size": path.stat().st_size})
         else:

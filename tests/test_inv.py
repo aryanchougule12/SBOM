@@ -336,7 +336,6 @@ def test_a_foreign_assessment_cannot_hide_behind_or_replace_the_right_one():
 
 
 def test_identity_check_works_end_to_end_with_a_real_bind_result():
-    import json
     from pathlib import Path
 
     from evidence.bind import evaluate_bind_for_profile

@@ -54,5 +54,8 @@ class VerdictResult:
 
 
 def render_verdict(result: VerdictResult) -> str:
-    """Render a ``VerdictResult`` as report text. Not implemented at Stage 0."""
-    raise NotImplementedError("Stage 0 stub: verdict rendering is not implemented.")
+    """Unsupported by design. The specification fixes the rationale grammar (``VerdictResult.rationale``, §3) but defines no report text
+    format, and no supported workflow calls this function: ``python -m evidence evaluate`` prints the evaluator's own fields as JSON.
+    A format is not invented here; see docs/research_readiness.md."""
+    raise NotImplementedError("verdict rendering is unsupported: the specification defines no report text format; "
+                              "use `python -m evidence evaluate` (JSON of the evaluator's own fields)")

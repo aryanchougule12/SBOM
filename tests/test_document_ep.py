@@ -16,7 +16,6 @@ import pytest
 from evidence.provenance import (
     AttributionGap as G,
     DeclaredIntegrity,
-    DocumentEP,
     EpLimitation as L,
     document_level_ep,
     document_levels,

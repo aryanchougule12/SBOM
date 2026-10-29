@@ -1,0 +1,17 @@
+{
+ "artifact": {
+  "purl": "pkg:oci/example-app@sha256%3Aabc",
+  "version": "2.0.0"
+ },
+ "target": {
+  "purl": "pkg:npm/lib-b@2.0"
+ },
+ "entered_by": "corpus-reviewer",
+ "source_repository": "https://example.org/git/app.git",
+ "source_revision": "0123456789abcdef0123456789abcdef01234567",
+ "source_content_hash": "git-tree:abababababababababababababababababababab",
+ "target_source_root": "node_modules/lib-b",
+ "entry_methods": [
+  "app.Main.main:void(java.lang.String[])"
+ ]
+}

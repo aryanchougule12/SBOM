@@ -3,7 +3,7 @@ integrated evaluator. The ``@PRIMARY@`` placeholder is replaced by the primary d
 
 import pytest
 
-from evidence.evaluator import EvaluationOutcome, RefusalCode, evaluate
+from evidence.evaluator import EvaluationOutcome, evaluate
 from evidence.profile import ProfileError, ProfileErrorCode as PE, parse_profile
 from evidence.stage1_records import Stage1Index
 from tests.pipeline_support import equivalent, load_profile_fixture, vex_findings, verification_for

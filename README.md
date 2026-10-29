@@ -50,8 +50,50 @@ ground truth, and every fixture is synthetic.
   verification=None, reachability=None)`, routes by the finding's justification. A run evaluates one
   predicate; no combined-predicate verdict exists.
 * Not implemented: cryptographic verification (a trusted external `VerificationResult` is consumed),
-  GEN assertions, corroborating documents, C3 duplicate classification, parsing of real analyser
-  output formats, rendering (`render_verdict`).
+  GEN assertions, corroborating documents, C3 duplicate classification, report-text rendering
+  (`render_verdict` is unsupported by design: the specification defines no report text format; the supported
+  workflow prints the evaluator's own fields as JSON).
+
+## Setup and the supported workflow
+
+Requires Python 3.13 (the version everything here was verified with) and `git` on the PATH (the recorder and some tests use it). From the repository root:
+
+```
+python -m venv .venv && . .venv/bin/activate        # optional
+python -m pip install -r requirements.txt            # cyclonedx-python-lib, spdx-tools, jsonschema, pytest, pyflakes
+```
+
+**1. Record an analysis run** (optional; wraps your analyzer commands, see `docs/analysis_ingestion.md`):
+
+```
+python -m analysis_runner run PLAN.json --out RUN.json     # exit 0 complete; 1 written but a stage failed/timed out, an output is missing or stale; 2 unusable plan
+python -m analysis_runner check RUN.json ARTIFACT          # exit 0 consistent and complete; 1 hash mismatch or incomplete run; 2 unusable input
+```
+
+**2. Evaluate** (a CycloneDX/SPDX SBOM, an OpenVEX document, an evaluator profile; optionally reachability evidence, a verification result,
+and analyzer artifacts with an analysis subject):
+
+```
+python -m evidence evaluate --sbom fixtures/equivalent/app.cdx.json --vex fixtures/openvex/reachability_equivalent.json \
+    --profile examples/quickstart/profile.json --reachability examples/quickstart/reachability.json \
+    --subject examples/quickstart/subject.json \
+    --artifact fixtures/analysis/sarif/synthetic_cq_path.sarif::fixtures/analysis/runs/synthetic_good_path.run.json --out result.json
+# wrote result.json (evaluated, verdict Insufficient)       exit 0
+```
+
+`result.json` holds `{"summary": {outcome, verdict, codes, rationale, limitations, dimension_states}, "evaluation": <the full outcome>}` with sorted keys;
+the same inputs give byte-identical output. `@PRIMARY@` in a profile is replaced by the primary SBOM's content-derived document id. `--artifact A::RUN`
+attaches an analysis-run record to artifact `A`. Without `--subject/--artifact` the same command evaluates a `component_not_present` finding (or a
+reachability finding from `--reachability` alone). **Exit status:** `0` evaluated (any verdict; Insufficient is a result, not an error); `1` a structured
+refusal (no verdict; the JSON says why, e.g. an unusable artifact or run record, or an unresolved relevant record next to a K1 absence); `2` unusable
+arguments or unreadable/invalid input (message on stderr, nothing on stdout). A failed or incomplete analysis is never reported as a successful one: its
+record says `failed`/partial, the assessment reports the execution state, and no absence is derived.
+
+**3. Validate everything** (the one command CI runs, `.github/workflows/validate.yml`):
+
+```
+python -m tests.validate_all        # pytest -q -rs, conformance, analysis_eval --check, research_report --check, compileall, pyflakes; exit 0 only if all pass
+```
 
 ## Module structure
 
@@ -72,16 +114,19 @@ ground truth, and every fixture is synthetic.
 From the repository root:
 
 ```
-python -m pytest -v -rs
+python -m pytest -q -rs
 python -m tests.conformance
 python -m tests.analysis_eval --check
+python -m tests.research_report --check
 ```
+
+(or all mandatory checks at once: `python -m tests.validate_all`). Regenerate the committed reports with `python -m tests.analysis_eval` and
+`python -m tests.research_report`; the `--check` forms fail if they are stale.
 
 `python -m` is used so the repository root is on the import path. Install the dependencies first
 with `pip install -r requirements.txt`. `python -m tests.conformance` prints the rule-conformance
 summary for both predicates (synthetic cases only) and exits non-zero on any gap or failure; it also
-runs under pytest. Skipped tests are placeholders for functionality that does not exist yet, and `-rs`
-prints their reasons.
+runs under pytest. `-rs` prints the reason of every skipped test (there is currently none).
 
 ## Mapping to FR-01–FR-09
 

@@ -1,0 +1,17 @@
+{
+ "schema_version": "1",
+ "locus": {
+  "symbols": [
+   "lib.b.Parser.parse:java.lang.Object(java.lang.String)"
+  ],
+  "files": [
+   "src/parse.js"
+  ],
+  "granularity": "function",
+  "approximation": "over_approximation",
+  "entered_by": "corpus-reviewer"
+ },
+ "configuration": {
+  "deployment_config_id": "prod"
+ }
+}

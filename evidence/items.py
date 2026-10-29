@@ -37,7 +37,7 @@ items (the attested list), which bounds its provenance by theirs.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Iterable, Mapping, Optional, Sequence
 
 from evidence.cnp_rules import BindState

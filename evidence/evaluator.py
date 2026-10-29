@@ -39,7 +39,7 @@ specification (section 3 Step 4, addendum v0.2.2); there is no second, conflicti
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping, Optional, Sequence, Union
 
@@ -60,15 +60,12 @@ from evidence.inventory_checks import ReferenceCheckResult, build_assessment
 from evidence.inventory_members import inventory_members
 from evidence.inventory_observations import InventoryObservations, observe_inventory
 from evidence.items import (
-    DIM_DECL,
-    DIM_INV,
     ItemIntegrityError,
     build_items,
-    items_of,
     validate_items,
 )
 from evidence.match import MatchDerivation, derive_match
-from evidence.pipeline_inputs import AssemblyDiagnostic, AssemblyError, assemble
+from evidence.pipeline_inputs import AssemblyError, assemble
 from evidence.profile import ProfileError, ValidatedProfile
 from evidence.rule_core import jsonable as _jsonable
 from evidence.stage1_records import Stage1Index

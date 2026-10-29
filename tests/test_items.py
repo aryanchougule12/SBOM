@@ -9,7 +9,7 @@ import pytest
 
 from evidence import cnp_adapter as CA
 from evidence import items as IT
-from evidence.bind import BindBasis, BindCode, BindEvaluation
+from evidence.bind import BindCode, BindEvaluation
 from evidence.cnp_rules import BindState, GenState
 from evidence.evaluator import evaluate
 from evidence.generation import GEN_LIMITATION, GenDerivation, derive_gen

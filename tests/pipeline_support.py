@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 from evidence.profile import parse_profile
-from evidence.stage1_records import Stage1Index, load_cyclonedx, load_openvex, load_spdx
+from evidence.stage1_records import load_cyclonedx, load_openvex, load_spdx
 from evidence.verification import VerificationConfig, VerificationResult
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"

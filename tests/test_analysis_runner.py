@@ -228,3 +228,13 @@ def test_an_unknown_plan_field_is_an_error(tmp_path):
     plan.write_text(json.dumps({"verdict": "Supported"}))
     with pytest.raises(PlanError):
         load_plan(plan)
+
+
+def test_a_stale_output_that_the_run_did_not_rewrite_is_flagged(project):
+    plan, out = make_plan(project, "fail")
+    out.write_text("left over from an earlier run")
+    record = run_plan(plan, clock=Clock())
+    assert record.stages[-1].status.value == "failed" and any(p.startswith("OUTPUT_NOT_REWRITTEN") for p in record.partial_indicators)
+    assert record.outputs[0].sha256 is not None      # the file is hashed (it exists) but the record says it may not be this run's
+    fresh, out2 = make_plan(project, "ok")
+    assert not any(p.startswith("OUTPUT_NOT_REWRITTEN") for p in run_plan(fresh, clock=Clock()).partial_indicators)
